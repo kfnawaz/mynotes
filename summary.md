@@ -1,120 +1,74 @@
-Here’s the **latest update on the Tableau workflow**, based strictly on the transcript.
+# 📝 Meeting Minutes — Tableau Lineage Discussion
+
+## Objective
+Clarify Tableau lineage capabilities and address gaps, especially for file-based sources (Hyper files).
 
 ---
 
-## 1️⃣ Tableau Ingestion – Current Failure
+## Key Points Discussed
 
-### 🔎 Root Cause Identified
+- Lineage is currently supported for:
+  - Snowflake  
+  - Databricks  
+- Lineage works **only for direct connections** from Tableau to these sources.
+- Lineage is **auto-generated from metadata** (no separate mining required).
 
-> **“etcd server request is too large”**
+- **Major Limitation:**
+  - File-based sources (CSV, Excel, Hyper files) are **not captured in lineage**.
+  - Hyper file support is **unclear and currently missing**.
 
-- Extracted metadata file size: **1.6 MB**
-- Current system limit: **~1.5 MB**
-- So it’s failing because it’s **slightly over the request size limit**
+- **Current Reality:**
+  - ~95% of dashboards rely on Hyper files.
+  - Direct connections represent only ~10–20% of use cases.
 
-This is happening during the **AWS polling/ingestion step** after extraction completes successfully.
-
-Important:
-- The extraction itself succeeds.
-- Failure occurs when pushing the metadata payload back.
-
----
-
-## 2️⃣ Incremental Extraction Status
-
-There is **no incremental extraction for Tableau** currently.
-
-That means:
-- Every run is a **full extract**
-- It may take long each time
-- Large metadata payloads are expected
-
-This is a design limitation right now.
+- Result:
+  - Lineage coverage is **limited and incomplete** for real-world usage.
 
 ---
 
-## 3️⃣ Immediate Mitigation Strategy
+## Proposed Approaches
 
-Two approaches discussed:
-
-### Option A (Quickest)
-
-Reduce scope temporarily:
-- Instead of pulling 54 projects
-- Test with 1–2 projects only
-- Validate end-to-end success
-
-This is a **temporary workaround** just to confirm pipeline behavior.
+- Explore OpenLineage for partial lineage via file tracking.
+- Investigate feasibility of enhancing connectors to support Hyper files.
+- Consider leveraging ETL tools (e.g., Alteryx) for upstream lineage.
 
 ---
 
-### Option B (Proper Fix)
+## Decisions / Agreements
 
-Increase the request size limit on the polling step.
-
-Open questions:
-- Is this limit **generic for all connectors**, or Tableau-specific?
-- If generic, it could affect future large Databricks ingestions too.
-
-Engineering is investigating where the limit is set.
+- No immediate solution committed.
+- Need to validate:
+  - Hyper file lineage feasibility
+  - Real-world usage patterns (file vs direct connections)
 
 ---
 
-## 4️⃣ Performance Optimization Applied
+## Action Items
 
-They enabled a **beta feature**:
+- **Engineering (Avinash):**
+  - Investigate Hyper file structure and lineage feasibility
+  - Explore OpenLineage-based workaround
 
-> “Enable Source Level Filtering”
+- **Team:**
+  - Provide sample dashboards (direct + file-based)
+  - Validate % distribution of dashboard types
 
-Purpose:
-- Improves filtering efficiency
-- Reduces extraction time
-- Prevents scanning everything before filtering
-
-However:
-- This improves performance
-- It does NOT fix the request-size failure
-
-Still useful for future runs.
+- **Product Team:**
+  - Review roadmap and feasibility
+  - Provide direction on potential enhancements
 
 ---
 
-## 5️⃣ Image Version Check
+## Next Steps
 
-There was concern that this might again be an **image/version issue** (like previous Snowflake OAuth problems).
+- Reconvene in a few days with:
+  - Feasibility assessment
+  - Initial findings / possible approaches
 
-They verified in UAT:
-
-- Connector image: **12.16**
-- Extractor image: **1.0.5**
-- Argo Exec: **3.4.14**
-
-Conclusion:
-- Images appear up-to-date.
-- Not currently believed to be an image mismatch issue.
+- No ETA committed yet; direction expected first.
 
 ---
 
-## 6️⃣ Current Status
+## Key Risk
 
-- Small test run initiated (2 projects)
-- Engineering reviewing request size limit
-- Snowflake run was also triggered separately (likely image fix applied)
-- Waiting for confirmation on increasing payload limit
-
----
-
-# 🔵 Bottom Line
-
-The Tableau workflow issue is **not a connector logic problem**.
-
-It is:
-
-> A metadata payload size limit issue during ingestion.
-
-Next decisive action:
-- Increase request size limit
-- Or reduce ingestion scope temporarily
-
-If I were advising execution:
-Don’t keep slicing projects manually. Fix the limit properly. Tableau metadata can grow — this will keep coming back otherwise.
+- Without Hyper file support, Tableau lineage will **not meet user expectations** or provide full value.
