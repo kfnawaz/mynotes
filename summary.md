@@ -1,185 +1,127 @@
-# Conversation Summary — Topics, Problems, Causes, Resolutions
+# 🔑 Discussion Summary: Atlan + Snowflake Integration Constraints
 
 ---
 
-## 1. Communication & Ownership Confusion
+## 🧩 Key Discussion Points
 
-### 🔴 Problem
-- Confusion on **who to reach out to** (Epic owner vs local POC)
-- Incorrect assumption that Emmanuel didn’t follow process
-- Resulted in blame and tension during the meeting
-
-### 🧠 Causes
-- Roles not clearly understood:
-  - Epic Owner (Sarika) vs Local POC (Sinduri)
-- No clear escalation path when no response
-- Lack of visibility into communication attempts
-
-### ✅ Resolutions Discussed
-- Clarify responsibilities:
-  - **Epic Owner → story direction**
-  - **Local POC → domain/technical help**
-- If no response:
-  - Escalate to team members / POC
-- Improve communication:
-  - Tag individuals explicitly
-  - Validate before assuming
+### 1. Core Problem
+- Atlan requires access to:
+  - Snowflake **metadata (account usage)**
+  - **Query history** for lineage reconstruction
+- Query history may contain **sensitive / PII data**
+- Unsanitized exposure is **not allowed**
 
 ---
 
-## 2. Handling Idle Time / Work Completion
-
-### 🔴 Problem
-- Developer finished task early but **could not get next work**
-- Idle time due to waiting for response
-
-### 🧠 Causes
-- Over-dependence on Epic owner
-- No defined “next step” protocol
-- Hesitation to take initiative
-
-### ✅ Resolutions Discussed
-- Standard approach:
-  1. Ask Epic owner  
-  2. If no response → help teammates  
-  3. Then pick from backlog (aligned)
-- Encourage proactive contribution
+### 2. Existing Baseline Approach
+- A **sanitized Snowflake account usage layer** already exists
+- DataHub approach:
+  - Does **not use query history**
+  - Uses **sanitized metadata only**
+  - Still provides **usable lineage (non-ideal but functional)**
 
 ---
 
-## 3. Backlog Readiness & Sprint Planning
+### 3. Key Constraints
 
-### 🔴 Problem
-- Backlog items are **not consistently ready**
-- Developers cannot confidently pick new tasks
+#### 🔐 Security Constraints
+- No access to **unsanitized query history**
+- No reliance on **vendor-side masking**
+- All data must be **pre-sanitized**
 
-### 🧠 Causes
-- Poor backlog grooming
-- Stories lack clarity or completeness
-- No strict enforcement of “ready state”
+#### ⚙️ Atlan Product Limitations
+- Cannot:
+  - Disable query history ingestion
+  - Selectively pull from tables/views
+- Can only:
+  - Switch **entire schema (not partial sources)**
 
-### ✅ Resolutions Discussed
-- Maintain **at least one sprint-ready backlog**
-- Ensure stories are:
-  - Well-defined
-  - Independent
-- Align with Epic/Stream leads before picking work
-
----
-
-## 4. Team Collaboration & Work Distribution
-
-### 🔴 Problem
-- Difficulty distributing work when someone finishes early
-- Some work cannot be easily split
-
-### 🧠 Causes
-- Lack of modular task design
-- Limited collaboration practices
-- Strong individual ownership mindset
-
-### ✅ Resolutions Discussed
-- Introduce:
-  - **Pair programming / working sessions**
-- Encourage helping teammates
-- Story owner decides task splitting
+#### 🏗️ Infrastructure Constraints
+- Team will **NOT clone or duplicate full Snowflake account usage**
+  - High cost and overhead
+  - Not justified for non-primary catalog
 
 ---
 
-## 5. Communication Practices (Operational)
+## ⚖️ Options Evaluated
 
-### 🔴 Problem
-- Messages and PRs not noticed or responded to
-- Lack of accountability in communication
-
-### 🧠 Causes
-- Passive communication (no tagging)
-- No follow-up discipline
-- Assumption that messages are seen
-
-### ✅ Resolutions Discussed
-- Always:
-  - Tag specific individuals
-  - Share PR links directly
-- Follow up until acknowledged
-- Create clear asks (subtasks if needed)
+| Option | Status | Reason |
+|------|--------|--------|
+| Expose raw Snowflake data | ❌ Rejected | Security risk (PII exposure) |
+| Let Atlan mask data internally | ❌ Rejected | Data still exposed pre-masking |
+| Clone full sanitized schema | ❌ Rejected | High overhead, not strategic |
+| Use sanitized views only | ⚠️ Limited | Blocked by Atlan limitations |
+| Provide query history in separate schema | ⚠️ TBD | Needs vendor validation |
+| Disable query history usage | ⚠️ Preferred | Depends on Atlan capability |
+| Follow DataHub model | ✅ Recommended | Proven workaround |
 
 ---
 
-## 6. Retrospective Behavior & Team Culture
-
-### 🔴 Problem
-- Defensive behavior during retrospectives
-- Blame before validation
-- Escalation of minor issues
-
-### 🧠 Causes
-- Immediate negation of feedback
-- Lack of open-minded discussion
-- Use of dismissive language
-
-### ✅ Resolutions Discussed
-- Encourage:
-  - Open, fact-based discussion
-  - Listening before responding
-- Avoid:
-  - Defensive or authoritative tone
-- Focus on solutions, not blame
+## 🧠 Strategic Insight
+- This is a **product limitation + governance issue**, not just technical
+- Organization stance:
+  - ❌ No infra duplication
+  - ❌ No security compromise
+- Atlan lacks flexibility compared to DataHub
 
 ---
 
-## 7. Development Workflow & Feedback Timing
+## 🚀 Next Steps
 
-### 🔴 Problem
-- Feedback only at end of sprint → rework
-- Misalignment with expectations
+1. **Engage Atlan Vendor**
+   - Can query history ingestion be disabled?
+   - Can extractor be customized (table-level control)?
+   - Can query history be isolated in a separate schema?
 
-### 🧠 Causes
-- No early validation checkpoints
-- Limited interaction with Epic owner during development
+2. **Validate Partial Workaround**
+   - Test if isolated query history schema works
 
-### ✅ Resolutions Discussed
-- Perform **frequent early demos**
-- Validate with:
-  - Epic owner
-  - Peers
-- Share progress incrementally
+3. **Explore DataHub Approach**
+   - Connect with DataHub team (Ram Gupta)
+   - Understand how lineage works without query history
 
----
-
-## 8. Productivity & Velocity Mindset
-
-### 🔴 Problem
-- Team not maximizing velocity
-- Idle capacity not utilized
-
-### 🧠 Causes
-- Working only within assigned scope
-- Lack of proactive ownership
-- No push for higher output
-
-### ✅ Resolutions Discussed
-- Encourage:
-  - Picking additional stories
-  - Breaking work into smaller tasks
-  - Collaborative execution
-- Showcase productivity improvements
+4. **Assess Alternative Integration**
+   - Evaluate using DataHub design patterns (not data reuse)
 
 ---
 
-# ⚡ Final Summary
+## 📌 Action Items
 
-### Core Issues
-- Communication gaps  
-- Unclear ownership boundaries  
-- Weak backlog readiness  
-- Defensive team behavior  
-
-### Core Solutions
-- Clear ownership model  
-- Strong backlog discipline  
-- Explicit communication practices  
-- Early and continuous validation  
-- Proactive, high-ownership mindset  
+### 👤 Team (Nawaz / Engineering)
+- Share DataHub contact (Ram Gupta)
+- Coordinate with Atlan vendor
+- Document Atlan limitations clearly
 
 ---
+
+### 🏢 Atlan Vendor
+- Clarify:
+  - Query history toggle capability
+  - Extractor customization support
+  - Schema vs table-level flexibility
+
+---
+
+### 🛡️ Architecture / Security
+- Reconfirm:
+  - No unsanitized data exposure
+  - No approval for schema duplication
+
+---
+
+### ⚙️ Engineering
+- Evaluate:
+  - Feasibility of isolated query history schema
+  - Lightweight alternatives to full schema cloning
+
+---
+
+## ⚠️ Bottom Line
+
+- Security stance: **Non-negotiable**
+- Infra stance: **No duplication**
+- Limitation: **Atlan product capability**
+
+👉 Path forward:
+- Either proceed **without query history (DataHub model)**
+- Or accept **limited functionality unless Atlan adapts**
