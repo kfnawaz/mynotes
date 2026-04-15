@@ -1,127 +1,120 @@
-# 🔑 Discussion Summary: Atlan + Snowflake Integration Constraints
+# Metadata Change Approval & Sync Workflow — Use Case
+
+## Objective
+Enable a structured approval workflow for **metadata changes in Data Compass**, ensuring governance, auditability, and synchronization with **Fusion**.
 
 ---
 
-## 🧩 Key Discussion Points
-
-### 1. Core Problem
-- Atlan requires access to:
-  - Snowflake **metadata (account usage)**
-  - **Query history** for lineage reconstruction
-- Query history may contain **sensitive / PII data**
-- Unsanitized exposure is **not allowed**
-
----
-
-### 2. Existing Baseline Approach
-- A **sanitized Snowflake account usage layer** already exists
-- DataHub approach:
-  - Does **not use query history**
-  - Uses **sanitized metadata only**
-  - Still provides **usable lineage (non-ideal but functional)**
+## Core Problem
+- Metadata updates (e.g., reports, designations, classifications) require controlled approvals.
+- Users should not be forced to approve changes داخل Data Compass UI.
+- System must:
+  - Capture **who changed what**
+  - Capture **who approved/rejected**
+  - Maintain a **complete audit trail**
+  - Sync approved changes to **Fusion**
 
 ---
 
-### 3. Key Constraints
+## Proposed Solution
 
-#### 🔐 Security Constraints
-- No access to **unsanitized query history**
-- No reliance on **vendor-side masking**
-- All data must be **pre-sanitized**
-
-#### ⚙️ Atlan Product Limitations
-- Cannot:
-  - Disable query history ingestion
-  - Selectively pull from tables/views
-- Can only:
-  - Switch **entire schema (not partial sources)**
-
-#### 🏗️ Infrastructure Constraints
-- Team will **NOT clone or duplicate full Snowflake account usage**
-  - High cost and overhead
-  - Not justified for non-primary catalog
+### 1. Approval Workflow Integration
+- Metadata changes in **Data Compass UI** trigger approval workflows.
+- Approval requests are routed via **Smart Approval system**.
+- Routing is based on **roles and domain (e.g., Finance CDL)**.
 
 ---
 
-## ⚖️ Options Evaluated
-
-| Option | Status | Reason |
-|------|--------|--------|
-| Expose raw Snowflake data | ❌ Rejected | Security risk (PII exposure) |
-| Let Atlan mask data internally | ❌ Rejected | Data still exposed pre-masking |
-| Clone full sanitized schema | ❌ Rejected | High overhead, not strategic |
-| Use sanitized views only | ⚠️ Limited | Blocked by Atlan limitations |
-| Provide query history in separate schema | ⚠️ TBD | Needs vendor validation |
-| Disable query history usage | ⚠️ Preferred | Depends on Atlan capability |
-| Follow DataHub model | ✅ Recommended | Proven workaround |
+### 2. Approval Handling
+- Approvers:
+  - Receive requests in **Smart Approval queue**
+  - Can **approve/reject externally**
+- No need to log into Data Compass for approvals.
 
 ---
 
-## 🧠 Strategic Insight
-- This is a **product limitation + governance issue**, not just technical
-- Organization stance:
-  - ❌ No infra duplication
-  - ❌ No security compromise
-- Atlan lacks flexibility compared to DataHub
+### 3. Audit Trail Capture
+- Data Compass captures:
+  - Change event
+  - Approver identity
+  - Timestamp
+- Maintains **full audit trail for governance and compliance**
 
 ---
 
-## 🚀 Next Steps
-
-1. **Engage Atlan Vendor**
-   - Can query history ingestion be disabled?
-   - Can extractor be customized (table-level control)?
-   - Can query history be isolated in a separate schema?
-
-2. **Validate Partial Workaround**
-   - Test if isolated query history schema works
-
-3. **Explore DataHub Approach**
-   - Connect with DataHub team (Ram Gupta)
-   - Understand how lineage works without query history
-
-4. **Assess Alternative Integration**
-   - Evaluate using DataHub design patterns (not data reuse)
+### 4. Provisioning & Sync
+- After approval:
+  - Changes are committed in **Data Compass**
+  - Approval metadata is stored
+  - Data is synced to **Fusion**, including audit details
 
 ---
 
-## 📌 Action Items
+## Scope Clarification (Key Decision)
 
-### 👤 Team (Nawaz / Engineering)
-- Share DataHub contact (Ram Gupta)
-- Coordinate with Atlan vendor
-- Document Atlan limitations clearly
-
----
-
-### 🏢 Atlan Vendor
-- Clarify:
-  - Query history toggle capability
-  - Extractor customization support
-  - Schema vs table-level flexibility
+### Option A: Approval Only (Preferred)
+- Smart Approval handles **approval routing only**
+- Data Compass handles:
+  - State changes
+  - Audit trail
+  - Sync to Fusion
 
 ---
 
-### 🛡️ Architecture / Security
-- Reconfirm:
-  - No unsanitized data exposure
-  - No approval for schema duplication
+### Option B: Approval + Provisioning
+- Smart Approval also handles provisioning
+- Adds complexity and tighter coupling
 
 ---
 
-### ⚙️ Engineering
-- Evaluate:
-  - Feasibility of isolated query history schema
-  - Lightweight alternatives to full schema cloning
+## Workflow Types
+
+### Primary (In Scope)
+- **Quality Control (QC) Workflows**
+  - Triggered on every metadata change
+  - Requires approval before persistence
 
 ---
 
-## ⚠️ Bottom Line
+### Secondary (Partially / Out of Scope)
+- **Annual Certification / Recertification**
+  - Periodic validation workflows
+  - May not require Smart Approval integration
 
-- Security stance: **Non-negotiable**
-- Infra stance: **No duplication**
-- Limitation: **Atlan product capability**
+---
 
-👉 Path forward:
-- Either proceed **without query history (DataHub model)**
-- Or accept **limited functionality unless Atlan adapts**
+## Access & Role Model
+- Roles are defined in **Data Compass**
+- Roles determine:
+  - Who can modify metadata
+  - Who receives approval requests
+- No changes to roles in external systems (Atlan / Fusion)
+
+---
+
+## Key Design Principles
+- Decouple **Data Compass UI** from approval system
+- Use Smart Approval only for:
+  - Routing
+  - Decision capture (approve/reject)
+- Keep:
+  - Change context
+  - Audit trail
+  within Data Compass
+- Ensure Fusion receives **approved and audited data only**
+
+---
+
+## Open Questions
+- Should we use **Smart Approval vs Smart Flow**?
+- Where should provisioning responsibility lie?
+- Final workflow definitions for stakeholder alignment
+
+---
+
+## Summary
+A governed metadata workflow where:
+- Users update metadata in Data Compass  
+- Approvals are handled externally via Smart Approval  
+- Data Compass remains the **system of record**  
+- Approved changes are synced to Fusion with full audit trace  
