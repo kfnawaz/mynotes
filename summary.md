@@ -1,41 +1,67 @@
-## Meeting Minutes (Brief)
+# Meeting Summary
 
-- Two approaches tested:
-  - **PCI:** Browse access via Data Compass FID → enabled metadata crawling  
-  - **Non-PCI:** Catalog sharing → worked for crawling but failed for lineage mining  
+## Key Discussions
 
-- Decision:
-  - De-prioritize **lineage mining**
-  - Focus on **asset crawling**
+### Workflow Configuration Enhancements
+- Reviewed workflow configuration UI enhancements including:
+  - Workflow duplication capability for reusing approval flows across reports/business processes.
+  - Support for configurable sequential and parallel approval workflows.
+  - Workflow visualization showing approval paths and notifications.
 
-- Key Outcomes:
-  - **Browse access approach** confirmed as simpler and preferred (PCI & Non-PCI)
-  - Current setup is a **mixed approach** → needs standardization
-  - **Catalog sharing to be phased out**
-  - Need **direct connection/workflow for Non-PCI**
-  - Each catalog requires **explicit browse access grant to FID**
-  - “All data browse role” disabled → may require **custom role**
+### Smart Approval Integration
+- Discussed Smart Approval integration design:
+  - DataCompass generates internal workflow instance IDs and sends them to Smart Approval.
+  - Smart Approval manages approvals/rejections and retains long-term audit history.
+  - Users will navigate to Smart Approval through linked request IDs instead of approving directly within DataCompass.
+
+### Workflow Governance & Tracking
+- Workflow history and governance tracking will be maintained per entity:
+  - Reports
+  - Business Processes
+  - Future entity types (Data Domains, Data Products, etc.)
+
+- Approval routing will dynamically resolve approvers based on:
+  - Report Owner
+  - Report Owner Delegate
+  - CDO
+  - CDO Delegate
+  - Entity ownership metadata
+
+### Configurability Strategy
+- Team aligned that future approval flow changes should primarily be configuration-driven rather than requiring new development work/code changes.
 
 ---
 
-## Action Items
+# Current Status
 
-### Nawaz
-- Create **direct connection/workflow for Non-PCI**
-- Configure **catalog filters (if exclusions needed)**
+## Workflow Capability
+- Workflow UI and configuration capabilities are mostly complete.
+- Smart Approval API connectivity and integration testing are still pending.
+- UAT rollout planned after internal validation/testing.
 
-### All Product Teams
-- Grant **browse access to Data Compass FID** for each catalog
-- Provide **catalog names, workspace details, and request IDs**
+## Metadata Enhancements
+- Reviewed support for:
+  - Extended/custom metadata fields
+  - Configurable metadata families
+  - Dynamic metadata capture for Data Products and related entities
 
-### Raja / Sugandi
-- Identify **test catalog (lower/UAT environment)**
-- Validate **browse-only crawling approach**
+---
 
-### Team (General)
-- **Phase out catalog sharing** after validation
-- Test in lower environment → **standardize approach across teams**
+# Production Rollout Concerns
 
-### Pending
-- Create **custom browse role** (since global role disabled)
-- Schedule **follow-up meeting next week**
+- Role-based UI restrictions and entitlement enforcement are still incomplete in Production.
+- Report Owner / CDO Delegate UI restrictions require additional testing and validation.
+- Wider production communication will be delayed until workflows and entitlement controls are fully validated.
+
+---
+
+# Action Items
+
+| Action Item | Owner | Status |
+|---|---|---|
+| Complete Smart Approval API integration/connectivity validation | Engineering Team | Pending |
+| Perform end-to-end workflow testing in Dev/UAT | Team | Pending |
+| Validate role-based UI restrictions and entitlements | Hari / Team | Pending |
+| Demo workflows and Data Product UI to Sheriff and Sunil | Team | Planned |
+| Coordinate milestone/deliverable tracking with Jaya and DBI Q3 planning | Team | In Progress |
+| Schedule Smart Approval follow-up session for endpoint/workflow review | Team | Pending |
