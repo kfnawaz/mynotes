@@ -1,55 +1,118 @@
 # Meeting Summary
 
-## 1. Production Snowflake / LRI Workflow Issue
+## 1. k3s Startup Issue
 
-The team compared the failing newer **LRI Snowflake workflow** with the older **CCB Snowflake workflow** that is working successfully.
-
-### Key Findings
-
-- The issue does **not appear to be related to S3, Snowflake connectivity, or the JPMC Edge/agent side**.
-- The newer LRI workflow is taking a **different execution path** than the older working workflow.
-- The older workflow appears to run correctly through the expected **secure agent / self-deployed runtime path**.
-- The newer workflow, even though configured similarly, appears to pick up a **credential GUID** and routes through a different template path.
-- A newly created workflow using custom OAuth still followed the same unexpected path.
-- This ruled out the theory that the first workflow was misconfigured only because of an earlier key-pair selection.
-- Owen will investigate how to make the credential GUID blank, or how to make the workflow template treat the credential as blank so it uses the expected agent path.
-
----
-
-## 2. UAT Agent / k3s Instability Issue
-
-The team investigated why the **UAT agent** had been offline or unstable for over a week.
+The team found that the long k3s startup time is likely caused by the **k3s SQLite/Kine state database** growing too large.
 
 ### Key Findings
 
-- Offline cron jobs were taking much longer than expected, sometimes over an hour.
-- This delay likely caused health check failures because the agent was not reporting back within the expected window.
-- The team noticed a large number of `fuse-overlayfs` defunct/zombie processes.
-- The parent process appeared to be related to the `k3s server`.
-- CPU, memory, and disk availability looked acceptable.
-- The concern shifted toward process buildup, k3s/rootless behavior, or stale/zombie process handling.
-- The team restarted the k3s service and planned to monitor whether the zombie `fuse-overlayfs` processes reappear.
-- If k3s does not recover cleanly, the next step is to reboot the UAT VSI/server.
-- Rebooting is considered a temporary workaround; the real root cause still needs to be identified if the processes continue accumulating.
+- k3s is using **SQLite/Kine** instead of an external etcd database.
+- The k3s state database has grown to approximately **232 GB**.
+- The database contains around **13.3 million object revision records**.
+- These revision records track changes to Kubernetes objects such as:
+  - Pods
+  - Secrets
+  - Jobs
+  - Cron jobs
+  - Custom resources
+- A cleanup, pruning, or vacuum process may not be running correctly.
+- Slow SQL messages were observed, indicating that database operations are taking too long.
+- The large state database is likely contributing to the long startup time and instability.
 
 ---
 
-## Action Items
+## 2. Recovery Options Discussed
 
-| Owner | Action Item |
-|---|---|
-| Owen | Investigate why the LRI workflow is picking up a credential GUID and taking a different template path. |
-| Owen | Determine whether the workflow can be forced to use a blank credential/default path. |
-| Team | Monitor whether k3s restarts cleanly in UAT. |
-| Team | If k3s does not recover, reboot the UAT server. |
-| Team | Track whether `fuse-overlayfs` zombie processes reappear after restart/reboot. |
-| Team | Review successful offline cron logs to understand why processing is taking so long. |
-| Team | Reduce unnecessary cron/job history if it is contributing to clutter or slow startup. |
+### Option 1: Move the Large State DB to Backup
+
+This option involves stopping k3s, moving the large database files to a backup location, and allowing k3s to recreate a fresh state database.
+
+#### Steps
+
+1. Stop k3s.
+2. Move `state.db` and related files to a safe backup location.
+3. Restart k3s.
+4. Allow k3s to recreate a new state database.
+5. Recreate any missing secrets if required.
+
+#### Risk
+
+- Some manually created secrets may not be restored automatically.
+- The team may need to recreate secrets for each namespace.
+
+---
+
+### Option 2: Vacuum / Clean Up the Existing Database
+
+This option involves running a cleanup or vacuum operation on the existing database.
+
+#### Considerations
+
+- This is a more surgical approach.
+- The team was hesitant because `sqlite3` was not installed.
+- The database is already very large, making this option riskier and potentially slower.
+
+---
+
+### Option 3: Reinstall / Redeploy
+
+This option involves reinstalling or redeploying the environment.
+
+#### Considerations
+
+- A redeploy may not resolve the issue if the same large state database is reused.
+- Some separate components, such as the token generator jobs, may need to be redeployed separately.
+- The standard secure agent redeploy process may not recreate all manually created secrets.
+
+---
+
+## 3. Production Snowflake / LRI Workflow Update
+
+The team also discussed the production Snowflake workflow issue.
+
+### Key Findings
+
+- The LRI workflow issue was partly resolved.
+- Owen made an **Atlan-side workflow template update**.
+- After the template update, the workflow reached the expected **run-on-agent** path.
+- The workflow is now failing due to a **Snowflake warehouse permission issue**.
+- The likely fix is to grant the role permission to use and operate the configured Snowflake warehouse.
+
+### Important Note
+
+Future new Snowflake workflows may hit the same Atlan-side template issue until engineering provides a permanent fix.
+
+---
+
+## 4. Decision Made
+
+The team decided not to wait for k3s to recover on its own.
+
+### Agreed Approach
+
+The team chose to:
+
+1. Stop k3s.
+2. Move the large `state.db` and related files to a backup location.
+3. Restart k3s.
+4. Let k3s recreate a smaller fresh database.
+5. Recreate any missing secrets if needed.
+
+---
+
+## 5. Current Status
+
+After moving the database:
+
+- A new database was created.
+- The new database appeared significantly smaller.
+- k3s started rebuilding resources.
+- The team continued monitoring the rebuild and recovery process.
 
 ---
 
 ## Overall Conclusion
 
-The production issue appears to be a **workflow-template / credential-routing problem**.
+The UAT issue appears to be caused by a **bloated k3s SQLite/Kine state database**, likely due to object revision records not being cleaned up correctly.
 
-The UAT issue appears to be an **agent infrastructure stability problem**, likely tied to **k3s/rootless process buildup and slow offline cron health checks**.
+The production LRI Snowflake workflow issue has moved past the earlier workflow-template routing problem and is now blocked by a **Snowflake warehouse permission issue**.
