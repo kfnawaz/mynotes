@@ -139,13 +139,20 @@ Every platform connector implements the `MetadataConnector` Protocol. The pipeli
 @dataclass
 class ConnectorConfig:
     """
-    Platform-agnostic connection configuration.
-    Platform-specific values go in `extra` — the connector reads what it needs.
+    Platform-agnostic connection configuration. One ConnectorConfig
+    per crawlable INSTANCE — a Databricks workspace, a Snowflake
+    instance, or a Tableau Online account. Populated per instance from
+    the instance registry. The same connector code serves every
+    instance of a platform; only this config differs.
+
+    Platform-specific values go in `extra` — the connector reads what it needs
+    (e.g. Databricks SQL warehouse id, Snowflake role + warehouse, Tableau site).
     """
     platform:         Platform
-    workspace_name:   str           # becomes connectionName in catalog
-    environment:      str           # PROD / UAT / DEV — resolved before connector init
-    extra:            dict          # platform-specific: host, warehouse_id, account, etc.
+    workspace_name:   str           # instance identifier; becomes connectionName in catalog
+    environment:      str           # PROD / UAT / DEV — resolved per instance before connector init
+    secret_name:      str           # Kubernetes Secret name holding this instance's credentials
+    extra:            dict          # platform-specific: host, warehouse_id, account, role, site, etc.
     scope:            "CrawlScope"
 
 
