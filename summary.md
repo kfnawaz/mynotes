@@ -27,3 +27,9 @@ These are the two things blocking the load layer from being fully specified. Her
 | **MongoDB indexes on `atlan.*`** — are there indexes on `atlan.guid` or other `atlan.*` paths? | Indexes must be recreated on `source.*` before readers migrate; this is a coordination item with whoever owns the DB. |
 | **Transition exit criteria** — what defines "all readers migrated, drop `atlan.*`"? Who signs off? | Without an explicit exit criterion the dual-write window never closes and the technical debt is permanent. |
 | **Write semantics** — during dual-write, are `atlan.*` and `source.*` always identical values, or can they diverge? | They should be identical (same Databricks-sourced values). Confirming this rules out a class of subtle bug. |
+
+
+
+## What still needs your platform team: 
+
+the actual Jules pipeline registration, the Managed Repos / Artifactory PyPI repository provisioning, builder-node setup, and the Kubernetes-vs-ECS deployment target (still unresolved, still E0.4).
