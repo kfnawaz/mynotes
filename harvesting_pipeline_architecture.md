@@ -84,11 +84,38 @@ Six layers, each a distinct concern, wired by the orchestrator. The boundaries m
 - Two-tier extraction: cheap inventory queries (FQN + timestamp) feed the delta engine; full detail queries run only for changed objects.
 - Each connector run is a discrete container task — a Databricks crawl and a Snowflake crawl are separate pods/tasks with no shared process.
 
+**Internal structure — two sub-roles.** Every connector is composed of two named sub-roles. This split is what makes the layer swappable (§2.1.1):
+- **Acquisition** — talks to the source platform. Greenfield: direct SQL/API calls. OSS-backed: an OSS framework's ingestion `Source`. This is the part that gets replaced.
+- **Raw mapping** — converts whatever acquisition produced into the `Raw*` models (`RawDistribution`, `RawAttribute`, `RawLineageEvent`). Greenfield: a trivial mapping from SQL rows. OSS-backed: an adapter translating the framework's entity/event output into the same `Raw*` models.
+
+Acquisition + raw mapping together satisfy the `MetadataConnector` Protocol. Downstream layers see only the Protocol and the `Raw*` models — never the acquisition implementation.
+
 **Tech:**
 - **Databricks:** `databricks-sql-connector` (Python) against an owned SQL warehouse — executes the `information_schema` / `system.*` queries from the extraction query plan.
 - **Snowflake:** `snowflake-connector-python`.
 - **Tableau:** `tableau-api-lib` or direct Metadata API (GraphQL) calls via `requests`.
-- If the Phase 0 spike adopts an OSS framework, the framework's `Source` is wrapped to satisfy `MetadataConnector` — the wrapper lives in the extraction layer.
+- If a platform adopts an OSS framework, the framework's `Source` becomes the acquisition sub-role, wrapped by a raw-mapping adapter — both inside the extraction layer.
+
+#### 2.1.1 Extraction Layer Replaceability
+
+The extraction layer is **deliberately and per-platform swappable**. This is a guaranteed architectural property, not an incidental one.
+
+**The contract.** Downstream layers (normalization, lineage resolution, load, orchestration, observability) depend on exactly two things: the `MetadataConnector` Protocol and the `Raw*` model shapes. They have no knowledge of how extraction is implemented. Any extraction implementation that satisfies the Protocol and emits valid `Raw*` models is interchangeable with any other.
+
+**Two valid implementations of the same connector:**
+- **Greenfield** — acquisition is direct platform SQL/API calls; raw mapping is a thin SQL-row-to-`Raw*` transform.
+- **OSS-backed (e.g. DataHub)** — acquisition is the OSS framework's ingestion `Source`; raw mapping is an adapter translating the framework's output into `Raw*` models.
+
+**Swappable per platform, independently.** Because each connector independently satisfies `MetadataConnector`, the implementation choice is made per platform. A valid runtime state is: greenfield Databricks extraction running alongside a DataHub-backed Snowflake connector — both emit `Raw*` models, downstream cannot tell the difference.
+
+**Intended path.** Build greenfield now. If a later decision adopts DataHub (or another framework) for extraction, replace the acquisition sub-role per platform and write the raw-mapping adapter. Nothing downstream changes. This is the easy direction — the `Raw*` models are already stable from the greenfield build, so adoption is purely adapter work.
+
+**The stability contract — `Raw*` models.** The `MetadataConnector` methods are trivially swappable; the load-bearing contract is the **`Raw*` model shape**. To keep the layer swappable, the `Raw*` models must stay tool-neutral and stable:
+- They describe domain objects — *a table, a column, a lineage edge* — never "what Databricks SQL returns" or "what DataHub emits".
+- New fields are added as **optional**; the catch-all `properties: dict` on each `Raw*` model absorbs implementation-specific extras without a schema change.
+- A change that adds a *required* `Raw*` field is breaking (per the interface contract versioning rules) and must be treated as a deliberate, versioned contract change — not an incidental consequence of swapping an extraction implementation.
+
+As long as the `Raw*` models hold, the extraction layer is replaceable indefinitely.
 
 ### 2.2 Raw Payload Staging
 
@@ -267,7 +294,7 @@ Each platform has **multiple instances** to crawl — multiple Databricks worksp
 - **Per-instance credentials.** Each instance has its own Kubernetes Secret, named per the established convention extended with an instance discriminator (e.g. `dbx-idx-auth-<workspace>`). No credential is shared across instances — preserves isolation and per-instance audit.
 - **Per-instance scheduling and isolation.** The orchestrator runs one DAG (or DAG run) per instance. A failure crawling one Databricks workspace does not block another workspace, another Snowflake instance, or Tableau. Watermarks are tracked per instance.
 - **Per-instance environment resolution.** The workspace-to-environment lookup keys on instance identifier; `environment` (`PROD`/`UAT`/`DEV`) and `connectionName` are resolved per instance, so assets from different instances are correctly labeled and never collide.
-- **Identity scope.** Where one corporate IDAnywhere registration covers multiple Databricks workspaces, the same `client_id`/`resource` may be reused across those instances — but each instance still has its own secret entry and its own connector config. Confirm per-platform whether one identity spans instances or each instance needs a distinct one (Phase 1 inventory).
+- **Identity scope.** **Databricks:** one corporate IDAnywhere registration (`client_id`/`resource`) is reused across workspaces; each workspace still has its own secret entry and connector config. **Snowflake and Tableau:** each instance has its own distinct identity — a dedicated Snowflake service user + role per instance, a dedicated Tableau connected-app identity per account — and its own Kubernetes Secret. No identity is shared across Snowflake or Tableau instances, preserving per-instance isolation, least privilege, and independent rotation.
 
 **Scale implication:** the orchestration layer fans out across the full instance set. Total crawl concurrency = (instances × per-instance partitioning). The instance registry plus per-instance DAGs make this horizontal scaling a configuration concern, not a code concern.
 
@@ -333,7 +360,7 @@ The architecture is the runtime realization of the contracts — every layer abo
 2. **One image vs. per-connector images** — decide packaging granularity.
 3. **`sqlglot` vs. `sqllineage`** — bench both on real Databricks/Snowflake query text in Phase 2.
 4. **Watermark store** — Airflow metadata DB vs. a dedicated MongoDB collection. Watermarks are tracked **per instance** (§3.7).
-5. **Identity scope per platform** — confirm whether one IDAnywhere registration / Snowflake identity / Tableau identity spans multiple instances or each instance needs a distinct one (Phase 1 inventory). Databricks: existing IDAnywhere registrations are reused.
+5. **Identity scope per platform** — **resolved.** Databricks: the existing IDAnywhere registrations are reused across workspaces. Snowflake and Tableau: **each instance has its own distinct identity** (its own service user/role for Snowflake, its own connected-app identity for Tableau) and its own Kubernetes Secret. No identity is shared across Snowflake or Tableau instances.
 6. **OSS framework decision** — Phase 0 spike result determines whether the extraction layer wraps a framework or calls platform SQL/APIs directly.
 7. **Log/metrics platform** — confirm and match the company's existing observability stack rather than introducing parallel tooling.
 8. **JRN minting service auth** — confirm the service-to-service mechanism with the JRN service owner.

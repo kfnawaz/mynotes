@@ -174,6 +174,8 @@ class CrawlScope:
 
 ### 3.2 `MetadataConnector` Protocol
 
+> **Swappability — acquisition vs. raw mapping.** A connector implementation has two internal sub-roles: **acquisition** (talks to the platform — greenfield SQL/API calls, or an OSS framework's ingestion `Source`) and **raw mapping** (converts acquired data into the `Raw*` models below). Together they satisfy this Protocol. The acquisition sub-role is replaceable per platform — a greenfield connector and an OSS-framework-backed connector (e.g. DataHub) are interchangeable as long as both satisfy `MetadataConnector` and emit valid `Raw*` models. Downstream layers depend only on this Protocol and the `Raw*` shapes — never on the acquisition implementation. See the architecture document §2.1.1.
+
 ```python
 from typing import Protocol, runtime_checkable
 
@@ -299,6 +301,8 @@ class ConnectorQueryError(ConnectorError):
 ## 4. Raw Platform Models
 
 The typed output of each connector method. These are platform-agnostic shapes that the normalization layer consumes. Connectors map their platform-specific API/SQL responses into these models.
+
+> **These models are the stability contract for extraction-layer swappability.** The `MetadataConnector` methods are easy to swap; the `Raw*` model *shape* is the load-bearing contract. To keep the extraction layer replaceable (greenfield ↔ OSS-framework-backed, per platform): keep these models **tool-neutral** — they describe a table, a column, a lineage edge, never "what Databricks SQL returns" or "what DataHub emits"; add new fields as **optional**; route implementation-specific extras through the `properties: dict` catch-all rather than adding fields. Adding a *required* field here is a breaking change (§10) and must be a deliberate, versioned decision — never an incidental result of swapping an extraction implementation.
 
 ### 4.1 Distribution (Table / View)
 
