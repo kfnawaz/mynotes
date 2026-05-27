@@ -33,3 +33,15 @@ These are the two things blocking the load layer from being fully specified. Her
 ## What still needs your platform team: 
 
 the actual Jules pipeline registration, the Managed Repos / Artifactory PyPI repository provisioning, builder-node setup, and the Kubernetes-vs-ECS deployment target (still unresolved, still E0.4).
+
+1. Interface — Is the JRN minting service exposed as a REST API, an importable library/SDK, or a message-based service? What is the call signature for minting a Distribution (table/view) JRN and an Attribute (column) JRN?
+
+2. Idempotency — If we call the minting service twice with the same inputs (platform + catalog + schema + object name), will we always get the same JRN back? This is critical — non-idempotent minting would cause duplicate catalog entries on every re-crawl.
+
+3. Input contract — What inputs does the service require to mint a Distribution JRN? We expect something like: platform (DATABRICKS), workspace name, catalog name, schema name, and object name. Please confirm the exact required fields.
+
+4. Parent/child relationship — For minting an Attribute (column) JRN, does the service handle the parent-child hierarchy internally, or does the caller pass the parent Distribution JRN as an input? We need to know whether to mint the parent first and pass it in, or whether the service derives it.
+
+5. Rename behavior — If a Databricks table is renamed at source, should we mint a new JRN for the renamed object, or does the service return the existing JRN for that asset? This determines whether a rename is treated as "same asset, new name" or "delete + create new" in the catalog.
+
+6. Authentication and availability — How does a service call authenticate to the JRN minting service? And what is the expected behavior when the service is temporarily unavailable mid-crawl — should we fail the crawl run and retry, or is there a fallback?
