@@ -1,0 +1,82 @@
+h1. AI Document and Chunk Builder
+
+h2. Purpose
+
+Convert structured Data Compass metadata into AI-readable, relationship-aware text chunks.
+
+h2. Why This Matters
+
+Raw JSON embeddings will produce weak search results. Chunks must describe the meaning of metadata in clear language and include enough relationship context to be useful.
+
+h2. Chunk Types
+
+|| Chunk Type || Purpose ||
+| asset_summary | Summary of an asset |
+| attribute_summary | Attribute/column-level search |
+| lineage_summary | Provider/consumer and upstream/downstream relationships |
+| service_summary | How an asset is exposed or consumed |
+| classification_summary | PII/SPI/confidentiality/retention context |
+| process_transformation_summary | Process and transformation logic |
+| business_mapping_summary | Glossary/concept/data element mapping |
+
+h2. Standard Chunk Schema
+
+{code:language=json}
+{
+  "chunk_id": "",
+  "chunk_type": "",
+  "text": "",
+  "source": {
+    "guid": "",
+    "jrn": "",
+    "collection": "",
+    "entity_type": "",
+    "version": "",
+    "lifecycleStatus": ""
+  },
+  "metadata": {
+    "nodeId": "",
+    "nodeType": "",
+    "owners": [],
+    "databaseType": "",
+    "entityPhysicalType": "",
+    "classification": "",
+    "hasPII": false,
+    "hasSPI": false
+  },
+  "relationships": {
+    "datasetJrn": "",
+    "distributionJrns": [],
+    "upstreamJrns": [],
+    "downstreamJrns": []
+  }
+}
+{code}
+
+h2. Primary Requirements
+
+|| ID || Requirement || Priority ||
+| CHK-001 | Generate deterministic chunk IDs | P0 |
+| CHK-002 | Include source GUID and JRN | P0 |
+| CHK-003 | Generate Distribution summary chunks | P0 |
+| CHK-004 | Generate Dataset summary chunks | P0 |
+| CHK-005 | Generate Attribute chunks | P0 |
+| CHK-006 | Generate DataService chunks | P1 |
+| CHK-007 | Generate DataFlow lineage chunks | P1 |
+| CHK-008 | Generate DataProcess transformation chunks | P1 |
+| CHK-009 | Generate Report summary chunks | P1 |
+
+h2. Sample Distribution Chunk Text
+
+{code}
+Distribution trade_exposure is a physical Databricks table in catalog risk and schema capital. It implements Dataset trade_exposure_dataset. It contains attributes including trade_id, book, and exposure_amount. It is owned by SID123 and SID456. Lifecycle status is PUBLISHED. Downstream consumers include DataProcess daily_risk_aggregation and Report capital_exposure_report.
+{code}
+
+h2. Pitfalls
+
+|| Pitfall || Impact || Mitigation ||
+| Raw JSON chunks | Poor semantic search | Use text templates |
+| Overly large chunks | Low precision | Chunk by entity and purpose |
+| Tiny chunks | No context | Include parent and relationship context |
+| Missing source references | No traceability | Require GUID/JRN in every chunk |
+| Missing lifecycle metadata | Stale records can be retrieved | Store lifecycleStatus in every chunk |

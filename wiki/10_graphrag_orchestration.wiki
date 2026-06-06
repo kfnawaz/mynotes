@@ -1,0 +1,54 @@
+h1. GraphRAG Orchestration
+
+h2. Purpose
+
+Combine exact lookup, semantic search, graph traversal, reranking, and answer composition into a grounded AI answer flow.
+
+h2. Retrieval Strategies
+
+|| Strategy || Use Case ||
+| Exact-first | User gives table, JRN, GUID, report ID |
+| Semantic-first | User asks business-language discovery question |
+| Graph-first | User asks upstream/downstream/impact question |
+| Hybrid | User asks broad question requiring multiple retrieval modes |
+
+h2. Example Flow: Downstream Impact
+
+{code}
+User asks: What downstream reports depend on customer_transactions?
+
+1. Resolve customer_transactions to canonical entity/JRN.
+2. Use Neo4j to traverse downstream relationships.
+3. Fetch related source records from MongoDB.
+4. Retrieve relevant AI chunks.
+5. Assemble context.
+6. Generate answer with source references.
+{code}
+
+h2. Requirements
+
+|| ID || Requirement || Priority ||
+| RAG-001 | Classify question intent | P0 |
+| RAG-002 | Resolve mentioned entities | P0 |
+| RAG-003 | Choose retrieval strategy | P0 |
+| RAG-004 | Expand graph relationships | P1 |
+| RAG-005 | Assemble bounded context | P1 |
+| RAG-006 | Generate grounded answers | P1 |
+| RAG-007 | Return source references | P1 |
+| RAG-008 | Ask clarification when ambiguous | P1 |
+
+h2. Success Criteria
+
+* GraphRAG chooses the right retrieval path.
+* Ambiguous entities trigger clarification.
+* Answers are source-backed.
+* Missing metadata is stated clearly.
+* No unsupported metadata claims are generated.
+
+h2. Pitfalls / Risks
+
+|| Risk || Impact || Mitigation ||
+| Ambiguous entity resolution | Wrong answer | Clarify before answering |
+| Too much context | Slow/low-quality LLM answers | Bounded context assembly |
+| Unsupported claims | Loss of trust | Answer only from retrieved source context |
+| Graph-only answers miss semantic context | Incomplete answer | Combine graph traversal with chunk retrieval |

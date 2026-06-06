@@ -1,0 +1,50 @@
+h1. Data Compass Search Service
+
+h2. Purpose
+
+Provide controlled APIs for exact search, semantic search, graph search, and hybrid search.
+
+h2. Search Types
+
+|| Search Type || Purpose ||
+| Exact Search | Lookup by GUID, JRN, name, schema, report ID |
+| Semantic Search | Natural-language metadata discovery |
+| Graph Search | Upstream/downstream and relationship traversal |
+| Hybrid Search | Combine exact, semantic, and graph search |
+
+h2. Primary APIs
+
+* Exact Metadata Search API
+* Semantic Search API
+* Graph Search API
+* Hybrid Search API
+* Source Record Hydration API
+* Source Citation API
+
+h2. Requirements
+
+|| ID || Requirement || Priority ||
+| SRCH-001 | Search by GUID/JRN | P0 |
+| SRCH-002 | Search by name/schema/store | P0 |
+| SRCH-003 | Search by owner/node | P0 |
+| SRCH-004 | Semantic vector search | P0 |
+| SRCH-005 | Graph traversal search | P1 |
+| SRCH-006 | Hybrid search | P1 |
+| SRCH-007 | Source record hydration | P1 |
+| SRCH-008 | Result citation output | P1 |
+
+h2. Success Criteria
+
+* Users can find assets by exact identifier.
+* Users can search using business language.
+* Results include source GUID/JRN.
+* Results are deduplicated by source JRN.
+* Access-control filters are applied before results are returned.
+
+h2. Pitfalls / Risks
+
+|| Risk || Impact || Mitigation ||
+| Exact and semantic results conflict | User confusion | Hydrate source records and dedupe by JRN |
+| Results lack source references | Low trust | Require citation output |
+| Unauthorized result is returned | Critical security issue | Apply access filters before return/context assembly |
+| Search ranking is weak | Poor user adoption | Add ranking by relevance, lifecycle, ownership, certification, graph proximity |

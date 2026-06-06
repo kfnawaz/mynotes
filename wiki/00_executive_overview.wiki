@@ -1,0 +1,77 @@
+h1. Data Compass AI Modernization
+
+h2. Purpose
+
+Data Compass AI Modernization will make enterprise metadata AI-ready by transforming catalog metadata into searchable, relationship-aware, governed knowledge assets.
+
+The platform will support:
+* Semantic metadata discovery
+* Exact metadata lookup
+* Lineage and impact analysis
+* Metadata enrichment
+* Governance-aware search
+* GraphRAG-based question answering
+* Source-backed AI responses
+
+h2. Business Outcomes
+
+* Improve discovery of datasets, distributions, data products, reports, services, lineage, and governance metadata.
+* Reduce manual effort for impact analysis and metadata investigation.
+* Enable business-language search across technical metadata.
+* Provide AI-generated answers grounded in source metadata.
+* Preserve source traceability using *guid* and *jrn*.
+* Support future metadata enrichment workflows.
+
+h2. Architecture Summary
+
+The platform will use:
+* MongoDB as the authoritative source of Data Compass metadata.
+* A canonical / normalized Data Compass metadata model as the contract.
+* AI-ready document chunks for semantic search.
+* MongoDB Atlas Vector Search for vector retrieval.
+* Neo4j for graph projection, lineage, and relationship traversal.
+* A Data Compass Search Service for exact, semantic, hybrid, and graph search.
+* A Context Plane for acronyms, historical Q&A, bookmarks, feedback, and agent orchestration.
+* GraphRAG to combine vector search and graph traversal.
+
+h2. Primary Design Principle
+
+{quote}
+MongoDB remains the system of record. Vector indexes and Neo4j are derived, rebuildable projections.
+{quote}
+
+h2. MVP Scope
+
+MVP will focus on:
+* Distribution
+* Dataset
+* DataModelEntity
+* DataModelAttribute
+* DataService
+* DataFlow
+* DataProcess
+* Node
+* Report
+
+h2. Out of Scope for MVP
+
+* Full event-level embedding of all runtime events
+* Automated metadata updates without human approval
+* Full governance/retention automation
+* All 34 entity types in the first release
+* Production-grade autonomous agents
+* Full self-healing metadata correction
+
+h2. Success Criteria
+
+|| Category || Success Criteria ||
+| Discovery | Users can find assets by exact name, JRN, GUID, schema, table, report, and owner. |
+| Semantic Search | Users can find assets using business-language search. |
+| Lineage | Users can ask upstream/downstream lineage questions. |
+| Traceability | Answers include source references. |
+| Security | Unauthorized or deprecated assets are filtered before LLM context assembly. |
+| Operations | Reindexing can be performed deterministically by asset or entity type. |
+
+h2. Reference Model Notes
+
+The Data Compass model defines 34 entity types across physical/logical assets, semantic layer, lineage, events, governance/classification, and foundational entities. The model uses *jrn* as the cross-entity relationship key and *guid* as the internal uniqueness key.

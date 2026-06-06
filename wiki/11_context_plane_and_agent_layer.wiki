@@ -1,0 +1,53 @@
+h1. Context Plane and Agent Layer
+
+h2. Purpose
+
+Provide enterprise context and orchestration to improve search planning, interpretation, answer quality, and metadata enrichment.
+
+h2. Context Components
+
+* Acronyms Loader
+* Business Alias Manager
+* Historical Q&A
+* User Bookmarks
+* Human Feedback
+* Self Evaluation
+* Context Plane MCP
+
+h2. Agents
+
+|| Agent || Responsibility ||
+| Supervisor Agent | Routes question to correct retrieval flow |
+| Structured Discovery Agent | Converts vague user requests into structured search plans |
+| Metadata Enrichment Agent | Suggests descriptions, tags, mappings, or relationship improvements |
+| Lineage Analysis Agent | Handles impact and dependency questions |
+| Governance Agent | Handles classification, ownership, and policy questions |
+| Answer Evaluation Agent | Checks answer grounding and quality |
+
+h2. Requirements
+
+|| ID || Requirement || Priority ||
+| CTX-001 | Load acronyms | P1 |
+| CTX-002 | Store historical Q&A | P1 |
+| CTX-003 | Support user bookmarks | P2 |
+| CTX-004 | Capture human feedback | P1 |
+| CTX-005 | Build Supervisor Agent | P1 |
+| CTX-006 | Build Structured Discovery Agent | P1 |
+| CTX-007 | Build Metadata Enrichment Agent | P2 |
+| CTX-008 | Add self-evaluation | P2 |
+
+h2. Success Criteria
+
+* Acronyms improve search interpretation.
+* Historical Q&A is available but does not override source metadata.
+* Bookmarks can influence ranking.
+* Feedback is captured and reviewable.
+* Agents choose the correct retrieval strategy.
+
+h2. Pitfalls / Risks
+
+|| Risk || Impact || Mitigation ||
+| Context plane overrides authoritative metadata | Incorrect answers | Treat context as assistive only |
+| Feedback is not reviewed | Ranking quality stagnates | Create feedback review process |
+| Agents become too complex too early | Delivery risk | Build search service first; agents thinly orchestrate |
+| Metadata enrichment updates source directly | Governance risk | Require human approval workflow |

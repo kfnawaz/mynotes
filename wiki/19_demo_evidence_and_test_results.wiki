@@ -1,0 +1,42 @@
+h1. Demo Evidence and Test Results
+
+h2. Purpose
+
+Track evidence that Jira stories and platform capabilities are working.
+
+h2. Evidence Types
+
+* API response examples
+* Search screenshots
+* Vector search results
+* Neo4j query results
+* Lineage traversal examples
+* Reindex job logs
+* Access-control test results
+* Golden question test results
+* User feedback examples
+
+h2. Demo Log
+
+|| Date || Capability || Jira Items || Evidence Link || Demo Result || Notes ||
+|  |  |  |  |  |  |
+
+h2. Test Results
+
+|| Test Set || Date || Pass Rate || Failures || Owner || Notes ||
+| Exact Search |  |  |  |  |  |
+| Semantic Search |  |  |  |  |  |
+| Graph Lineage |  |  |  |  |  |
+| Access Control |  |  |  |  |  |
+| Answer Quality |  |  |  |  |  |
+
+h2. Evidence Checklist Per Story
+
+* Jira story key
+* Component name
+* Acceptance criteria tested
+* Test data used
+* API response or screenshot attached
+* Issues/defects found
+* Demo notes
+* Link to Confluence component page

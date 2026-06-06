@@ -1,0 +1,61 @@
+h1. Embedding and Vector Indexing
+
+h2. Purpose
+
+Generate embeddings for AI chunks and store them in a vector-searchable index.
+
+h2. Recommended Initial Store
+
+MongoDB Atlas Vector Search.
+
+h2. In Scope
+
+* Embedding model selection
+* Embedding generation wrapper
+* Vector index creation
+* Metadata filter design
+* Upsert handling
+* Delete/deprecate handling
+* Reindex by asset/entity type
+* Search smoke tests
+
+h2. Primary Requirements
+
+|| ID || Requirement || Priority ||
+| VEC-001 | Select embedding model | P0 |
+| VEC-002 | Generate embeddings for chunks | P0 |
+| VEC-003 | Store embeddings with chunk metadata | P0 |
+| VEC-004 | Support deterministic upsert | P0 |
+| VEC-005 | Support metadata-filtered vector search | P0 |
+| VEC-006 | Support deprecate/delete handling | P1 |
+| VEC-007 | Track embedding model version | P1 |
+| VEC-008 | Support reindexing | P1 |
+
+h2. Metadata Filters
+
+* entity_type
+* lifecycleStatus
+* owner
+* nodeId
+* nodeType
+* databaseType
+* schema/store
+* confidentiality
+* PII/SPI flags
+* source platform
+
+h2. Success Criteria
+
+* Semantic search returns relevant chunks for golden questions.
+* Search results include source GUID/JRN.
+* Deprecated assets are excluded by default.
+* Re-running the embedding job does not create duplicates.
+* Metadata filters work before LLM context assembly.
+
+h2. Pitfalls / Risks
+
+|| Risk || Impact || Mitigation ||
+| Wrong embedding model or dimensions | Index rebuild required | Capture model and dimensions in ADR |
+| Duplicate chunks | Search noise and increased cost | Use deterministic chunk IDs |
+| Missing metadata filters | Security and relevance issues | Require filterable metadata in chunk schema |
+| Deprecated records remain searchable | User trust issue | Implement deprecate/delete handling |

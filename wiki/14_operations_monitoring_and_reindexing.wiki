@@ -1,0 +1,59 @@
+h1. Operations, Monitoring, and Reindexing
+
+h2. Purpose
+
+Provide operational controls for indexing, graph sync, search quality, and troubleshooting.
+
+h2. Operational Capabilities
+
+* Indexing status dashboard
+* Failed indexing queue
+* Retry handling
+* Reindex one asset
+* Reindex by entity type
+* Rebuild graph projection
+* Count reconciliation
+* Search quality dashboard
+* Cost and latency monitoring
+* Runbooks
+
+h2. Requirements
+
+|| ID || Requirement || Priority ||
+| OPS-001 | Track indexing status | P0 |
+| OPS-002 | Track vector sync status | P0 |
+| OPS-003 | Track graph sync status | P1 |
+| OPS-004 | Provide failed record view | P1 |
+| OPS-005 | Reindex by JRN | P1 |
+| OPS-006 | Reindex by entity type | P1 |
+| OPS-007 | Reconcile source/vector/graph counts | P1 |
+| OPS-008 | Create runbooks | P1 |
+| OPS-009 | Monitor cost and latency | P1 |
+
+h2. Success Criteria
+
+* Operators can see what was indexed.
+* Failed records are visible with reason.
+* One asset can be reindexed by JRN.
+* Entity type can be reindexed in batch.
+* MongoDB, vector index, and Neo4j counts can be reconciled.
+
+h2. Operational Dashboards
+
+|| Dashboard || Purpose ||
+| Indexing Status | Shows progress by entity type and source system |
+| Failed Records | Shows failed items, error reason, retry count |
+| Vector Sync | Shows chunk and embedding counts |
+| Graph Sync | Shows node and edge counts |
+| Search Quality | Shows golden question pass/fail results |
+| Latency/Cost | Shows embedding, search, graph query, and LLM costs/latency |
+
+h2. Runbooks
+
+* Reindex by JRN
+* Reindex by entity type
+* Retry failed embedding jobs
+* Rebuild Neo4j graph projection
+* Troubleshoot bad semantic search result
+* Troubleshoot missing lineage result
+* Investigate unauthorized search result

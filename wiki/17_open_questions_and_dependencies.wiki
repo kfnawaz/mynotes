@@ -1,0 +1,25 @@
+h1. Open Questions and Dependencies
+
+h2. Open Questions
+
+|| ID || Question || Impact || Owner || Needed By || Status ||
+| OQ-001 | Does crawler mint guid and jrn, or does catalog DB assign them? | Blocks identity design | TBD | Phase 0 | Open |
+| OQ-002 | What is the deterministic JRN format for each source platform? | Blocks chunks and graph nodes | TBD | Phase 0 | Open |
+| OQ-003 | Which lifecycle statuses should be searchable by default? | Blocks retrieval filters | TBD | Phase 0 | Open |
+| OQ-004 | What user roles/entitlements control metadata visibility? | Blocks security design | TBD | Phase 1 | Open |
+| OQ-005 | Should deprecated assets be retained in vector index but filtered, or removed? | Affects reindexing | TBD | Phase 1 | Open |
+| OQ-006 | Which event entities are summarized in MVP? | Affects indexing cost | TBD | Phase 2 | Open |
+| OQ-007 | What are latency targets for search and GraphRAG? | Affects architecture | TBD | Phase 2 | Open |
+| OQ-008 | What source references must be shown in answers? | Affects UI/API | TBD | Phase 2 | Open |
+| OQ-009 | Will MongoDB Atlas Vector Search be approved for production use? | Platform dependency | TBD | Phase 1 | Open |
+| OQ-010 | Will Neo4j be hosted as SaaS, internal platform, or self-managed? | Platform dependency | TBD | Phase 2 | Open |
+
+h2. External Dependencies
+
+|| Dependency || Impact || Owner || Needed By || Status ||
+| MongoDB access | Required for ingestion and vector index | TBD | Phase 1 | Open |
+| Embedding model/API approval | Required for vector indexing | TBD | Phase 2 | Open |
+| Neo4j environment | Required for graph projection | TBD | Phase 3 | Open |
+| Entitlement source | Required for access-control filtering | TBD | Phase 1 | Open |
+| UI integration path | Required for search UX | TBD | Phase 4 | Open |
+| Logging/monitoring platform | Required for operations | TBD | Phase 2 | Open |

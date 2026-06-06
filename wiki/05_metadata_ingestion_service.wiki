@@ -1,0 +1,72 @@
+h1. Metadata Ingestion Service
+
+h2. Purpose
+
+Reads metadata from MongoDB and/or crawlers, validates records, resolves relationships, and prepares normalized records for downstream AI and graph projections.
+
+h2. In Scope
+
+* Read MVP entity collections
+* Validate required fields
+* Resolve *jrn* relationships
+* Resolve Node references
+* Normalize owner metadata
+* Track indexing status
+* Detect changed records
+* Log failures and retries
+
+h2. Out of Scope
+
+* AI answer generation
+* Vector search
+* Neo4j traversal
+* Human feedback handling
+
+h2. Inputs
+
+|| Input || Source || Notes ||
+| Distribution records | MongoDB | Physical asset metadata |
+| Dataset records | MongoDB | Logical asset metadata |
+| DataModelEntity records | MongoDB | Entity/table/view metadata |
+| DataModelAttribute records | MongoDB | Attribute/column metadata |
+| DataService records | MongoDB | Exposure/access metadata |
+| DataFlow records | MongoDB | Observed lineage |
+| DataProcess records | MongoDB | Process and transformation lineage |
+| Node records | MongoDB | Foundational relationship entity |
+| Report records | MongoDB | Report metadata |
+
+h2. Outputs
+
+|| Output || Consumer ||
+| Validated entity records | Chunk Builder |
+| Relationship-resolved records | Chunk Builder / Graph Builder |
+| Indexing candidates | Embedding Service / Graph Builder |
+| Validation failures | Operations Dashboard |
+
+h2. Primary Requirements
+
+|| ID || Requirement || Priority ||
+| ING-001 | Read selected MongoDB collections | P0 |
+| ING-002 | Validate required fields | P0 |
+| ING-003 | Resolve JRN relationships | P0 |
+| ING-004 | Resolve Node references | P0 |
+| ING-005 | Normalize owner metadata | P0 |
+| ING-006 | Track indexing status | P0 |
+| ING-007 | Detect changed records | P1 |
+| ING-008 | Support retry handling | P1 |
+
+h2. Success Criteria
+
+* MVP entities can be read in batch mode.
+* Invalid records are logged with reason.
+* Related records can be resolved by *jrn*.
+* Changed records can be identified for reindexing.
+* Ingestion status is visible by entity type.
+
+h2. Pitfalls / Risks
+
+|| Risk || Impact || Mitigation ||
+| Incomplete relationship resolution | Downstream lineage/search answers become incomplete | Build relationship resolver with failure logging |
+| Missing Node resolution | Access/security and lineage context are weak | Build Node resolver early |
+| Invalid source records are silently skipped | Data loss and low trust | Persist validation failures and report counts |
+| No indexing status | Operations team cannot debug sync issues | Build indexing status collection in Phase 1 |

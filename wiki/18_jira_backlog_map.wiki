@@ -1,0 +1,138 @@
+h1. Jira Backlog Map
+
+h2. Jira Hierarchy
+
+{code}
+Initiative: Data Compass AI Modernization
+  Epic: Architecture and Planning
+    Story: DC-AI-001 ...
+  Epic: Canonical Metadata Foundation
+    Story: DC-AI-010 ...
+{code}
+
+h2. Initiative
+
+*Initiative:* Data Compass AI Modernization
+
+*Description:* Deliver an AI-ready Data Compass metadata platform using MongoDB as the authoritative metadata source, vector search for semantic retrieval, Neo4j for graph relationship traversal, GraphRAG for grounded question answering, and a Context Plane for enterprise context and agent orchestration.
+
+h2. Jira Labels
+
+* data-compass-ai
+* metadata
+* graphrag
+* vector-search
+* mongodb
+* neo4j
+* lineage
+* context-plane
+* security
+* mvp
+
+h2. Jira Components
+
+* Canonical Model
+* Ingestion
+* Chunk Builder
+* Vector Index
+* Neo4j Graph
+* Search Service
+* GraphRAG
+* Context Plane
+* Agents
+* Security
+* Evaluation
+* Operations
+* UI
+
+h2. Epics
+
+|| Epic || Description ||
+| EPIC 1: Architecture and Planning | Define architecture, scope, decisions, risks, and delivery structure. |
+| EPIC 2: Canonical Metadata Foundation | Define normalized model, identity, relationships, lifecycle, and classification handling. |
+| EPIC 3: Metadata Ingestion Service | Read MongoDB metadata, validate, resolve relationships, and prepare for projection. |
+| EPIC 4: AI Document and Chunk Builder | Convert metadata into deterministic AI-readable chunks. |
+| EPIC 5: Embedding and Vector Indexing | Embed chunks and store them in vector-searchable index. |
+| EPIC 6: Graph Projection and Neo4j Builder | Build Neo4j graph projection for lineage and relationships. |
+| EPIC 7: Data Compass Search Service | Provide exact, semantic, graph, hybrid, hydration, and citation APIs. |
+| EPIC 8: GraphRAG Orchestration | Combine retrieval paths and generate grounded answers. |
+| EPIC 9: Context Plane and Agent Layer | Build enterprise context and thin agent orchestration. |
+| EPIC 10: Security and Access Control | Enforce retrieval-level access controls before LLM context assembly. |
+| EPIC 11: Evaluation and Quality | Measure retrieval, lineage, answer quality, and security. |
+| EPIC 12: Operations and Monitoring | Build indexing dashboards, reindexing, reconciliation, and runbooks. |
+| EPIC 13: UI / User Experience Integration | Integrate AI search and feedback into Data Compass UI. |
+
+h2. Story Template
+
+{code}
+h2. Objective
+
+Describe what this story delivers.
+
+h2. Background
+
+Explain why this work is needed.
+
+h2. Scope
+
+h3. In Scope
+
+* ...
+
+h3. Out of Scope
+
+* ...
+
+h2. Requirements
+
+* ...
+
+h2. Inputs
+
+* ...
+
+h2. Outputs
+
+* ...
+
+h2. Dependencies
+
+* ...
+
+h2. Pitfalls / Risks
+
+* ...
+
+h2. Acceptance Criteria
+
+* [ ] ...
+* [ ] ...
+
+h2. Test / Evidence
+
+* ...
+
+h2. Related Confluence
+
+* <link>
+{code}
+
+h2. Definition of Ready
+
+* Objective is clear.
+* Requirements are documented.
+* Dependencies are identified.
+* Acceptance criteria are written.
+* Related Confluence page is linked.
+* Security impact is understood.
+* Test/evidence expectation is defined.
+
+h2. Definition of Done
+
+* Work is completed.
+* Acceptance criteria are met.
+* Unit/integration tests are complete where applicable.
+* Evidence is attached to Jira.
+* Related Confluence page is updated.
+* Demo is completed where required.
+* Operational notes are added if applicable.

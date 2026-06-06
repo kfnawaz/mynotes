@@ -1,0 +1,22 @@
+h1. Risks, Pitfalls, and Mitigations
+
+|| Risk ID || Risk || Category || Impact || Mitigation || Status ||
+| R-001 | Unstable JRN breaks traceability | Identity | High | Define deterministic JRN rules before build | Open |
+| R-002 | Raw JSON embeddings produce poor search | Search Quality | High | Use AI-readable chunk templates | Open |
+| R-003 | Missing relationship resolution causes incomplete lineage | Data Quality | High | Build relationship resolver and graph validation | Open |
+| R-004 | Unauthorized metadata enters LLM context | Security | Critical | Apply filters before retrieval/context assembly | Open |
+| R-005 | Neo4j becomes competing source of truth | Architecture | High | Treat Neo4j as rebuildable projection | Open |
+| R-006 | Event volume creates cost/noise | Cost/Scale | Medium | Summarize events instead of raw embedding | Open |
+| R-007 | No reindex controls reduce trust | Operations | High | Build status and reindex controls early | Open |
+| R-008 | AI answers lack source references | User Trust | High | Require GUID/JRN and citations | Open |
+| R-009 | Chunk text lacks relationship context | Search Quality | High | Use relationship-aware templates | Open |
+| R-010 | Ambiguous asset names cause wrong answers | User Trust | High | Build entity resolver and clarification flow | Open |
+| R-011 | Graph traversal returns too many relationships | Performance/UX | Medium | Use depth limits and relationship filters | Open |
+| R-012 | Metadata enrichment updates without review | Governance | High | Require human approval workflow | Open |
+
+h2. Risk Review Cadence
+
+* Review high and critical risks weekly during build phases.
+* Add mitigation owners for all high and critical risks.
+* Link risk updates to related Jira items.
+* Move risk to closed only after evidence is attached.

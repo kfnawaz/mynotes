@@ -1,0 +1,86 @@
+h1. Scope, MVP, and Phasing
+
+h2. MVP Objective
+
+Deliver a working vertical slice that supports AI-ready metadata discovery and basic lineage-aware search.
+
+h2. MVP Entity Scope
+
+|| Entity || MVP? || Reason ||
+| Distribution | Yes | Primary physical asset |
+| Dataset | Yes | Logical data asset |
+| DataModelEntity | Yes | Table/view/entity-level structure |
+| DataModelAttribute | Yes | Column/attribute search |
+| DataService | Yes | Service exposure and access metadata |
+| DataFlow | Yes | Observed lineage |
+| DataProcess | Yes | Processing and transformation lineage |
+| Node | Yes | Foundational relationship entity |
+| Report | Yes | Downstream report dependency search |
+| DataProduct | Phase 2 | Product-level grouping |
+| DataDomain | Phase 2 | Domain-level grouping |
+| Glossary/Semantic Entities | Phase 2 | Business meaning |
+| Governance/Classification Entities | Phase 2/3 | Governance-aware search |
+| Event Entities | Phase 3 | Summarized event intelligence |
+
+h2. Phase 0 — Planning and Architecture
+
+* Define MVP scope
+* Confirm identity rules
+* Confirm *jrn* strategy
+* Define chunk schema
+* Define graph schema
+* Define access control approach
+* Create golden question set
+
+h2. Phase 1 — Metadata Foundation
+
+* MongoDB reader
+* Entity validation
+* Relationship resolver
+* Node resolver
+* Indexing status tracking
+* Change detection
+
+h2. Phase 2 — AI Chunks and Vector Search
+
+* Chunk templates
+* Embedding service
+* Vector index
+* Vector upsert
+* Semantic search API
+* Basic answer grounding
+
+h2. Phase 3 — Graph Projection
+
+* Neo4j schema
+* Graph loaders
+* Lineage traversal queries
+* Impact analysis queries
+
+h2. Phase 4 — GraphRAG Search
+
+* Intent classifier
+* Entity resolver
+* Graph expansion
+* Context assembler
+* Answer composer
+* Citation/source references
+
+h2. Phase 5 — Context Plane and Agents
+
+* Acronyms
+* Historical Q&A
+* User bookmarks
+* Feedback
+* Supervisor Agent
+* Structured Discovery Agent
+* Metadata Enrichment Agent
+
+h2. Phase 6 — Evaluation and Operations
+
+* Golden question testing
+* Retrieval quality evaluation
+* Lineage correctness evaluation
+* Access-control testing
+* Reindex dashboard
+* Runbooks

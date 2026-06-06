@@ -1,0 +1,87 @@
+h1. Jira Story Template
+
+Use this template for each Jira story.
+
+{code}
+h2. Objective
+
+Describe what this story delivers.
+
+h2. Background
+
+Explain why this work is needed.
+
+h2. Scope
+
+h3. In Scope
+
+* ...
+
+h3. Out of Scope
+
+* ...
+
+h2. Requirements
+
+* ...
+
+h2. Inputs
+
+* ...
+
+h2. Outputs
+
+* ...
+
+h2. Dependencies
+
+* ...
+
+h2. Pitfalls / Risks
+
+* ...
+
+h2. Acceptance Criteria
+
+* [ ] ...
+* [ ] ...
+* [ ] ...
+
+h2. Test / Evidence
+
+* API response
+* Screenshot
+* Unit test result
+* Integration test result
+* Demo note
+
+h2. Related Confluence
+
+* <link>
+
+h2. Notes
+
+* ...
+{code}
+
+h2. Definition of Ready
+
+A Jira story is Ready when:
+* Objective is clear.
+* Requirements are documented.
+* Dependencies are identified.
+* Acceptance criteria are written.
+* Related Confluence page is linked.
+* Security impact is understood.
+* Test/evidence expectation is defined.
+
+h2. Definition of Done
+
+A Jira story is Done when:
+* Work is completed.
+* Acceptance criteria are met.
+* Unit/integration tests are complete where applicable.
+* Evidence is attached to Jira.
+* Related Confluence page is updated.
+* Demo is completed where required.
+* Operational notes are added if applicable.

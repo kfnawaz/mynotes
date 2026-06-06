@@ -1,0 +1,78 @@
+h1. Target-State Architecture
+
+h2. Purpose
+
+This page defines the target architecture for Data Compass AI Modernization.
+
+h2. Target Architecture Principles
+
+# MongoDB remains authoritative.
+# Vector and graph stores are derived projections.
+# *jrn* is the stable relationship and retrieval identity.
+# AI chunks must be source-backed and deterministic.
+# Graph relationships must be rebuildable from canonical metadata.
+# Security filters must run before context is sent to the LLM.
+# AI enrichment suggestions require human approval.
+# Raw event records should be summarized before vectorization.
+
+h2. Target Logical Architecture
+
+{code}
+MongoDB Data Compass Collections
+        ↓
+Canonical Metadata Normalization
+        ↓
+Relationship Resolver
+        ↓
+AI Chunk Builder
+        ↓
+Embedding + Vector Indexing
+        ↓
+Semantic Search
+
+Canonical Metadata Normalization
+        ↓
+Graph Projection Builder
+        ↓
+Neo4j Graph
+        ↓
+Graph Search / Lineage Traversal
+
+Semantic Search + Graph Search
+        ↓
+GraphRAG Orchestrator
+        ↓
+Context Plane
+        ↓
+Answer Plane
+{code}
+
+h2. Store Responsibilities
+
+|| Store || Responsibility ||
+| MongoDB | Source of truth for Data Compass metadata |
+| MongoDB Vector Index | Semantic search over AI-ready chunks |
+| Neo4j | Relationship traversal, lineage, impact analysis |
+| Redis / Context Store | Session context, acronyms, bookmarks, feedback |
+| Search Service | Controlled retrieval API |
+| GraphRAG Orchestrator | Combines vector, graph, exact lookup, and answer composition |
+
+h2. Key Non-Functional Requirements
+
+* Traceability
+* Security
+* Deterministic reindexing
+* Rebuildable projections
+* Observable indexing pipeline
+* Source-backed answers
+* Low-latency retrieval
+
+h2. Major Data Flows
+
+|| Flow || Description ||
+| Metadata ingestion | Source metadata is read, normalized, validated, and persisted. |
+| AI chunk projection | Canonical metadata is rendered into relationship-aware text chunks. |
+| Vector projection | AI chunks are embedded and stored with filterable metadata. |
+| Graph projection | Canonical metadata relationships are loaded into Neo4j. |
+| Retrieval | Search Service combines exact, semantic, and graph search. |
+| GraphRAG | Orchestrator assembles grounded context and produces source-backed answers. |

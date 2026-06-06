@@ -1,0 +1,195 @@
+h1. Jira Epics and Stories — Full Backlog
+
+h2. Initiative
+
+*Data Compass AI Modernization*
+
+Deliver an AI-ready Data Compass metadata platform using MongoDB as the authoritative metadata source, vector search for semantic retrieval, Neo4j for graph relationship traversal, GraphRAG for grounded question answering, and a Context Plane for enterprise context and agent orchestration.
+
+h2. EPIC 1: Architecture and Planning
+
+*Description:* Define the architecture, scope, decisions, risks, and delivery structure for Data Compass AI Modernization.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-001 | Create Confluence Space and Page Structure | Create parent and child pages for the project package. |
+| DC-AI-002 | Document Current-State Architecture | Capture current high-level system design and component responsibilities. |
+| DC-AI-003 | Document Target-State Architecture | Define target architecture, principles, and store responsibilities. |
+| DC-AI-004 | Create Architecture Decision Log | Create ADR page and initial ADR templates. |
+| DC-AI-005 | Define MVP Scope and Phasing | Document MVP entities, deferred scope, and phase plan. |
+| DC-AI-006 | Create Risk and Pitfall Register | Capture project risks, mitigations, and owners. |
+| DC-AI-007 | Create Open Questions Register | Capture unresolved design and platform decisions. |
+| DC-AI-008 | Create Golden Question Categories | Define initial evaluation question categories. |
+
+h2. EPIC 2: Canonical Metadata Foundation
+
+*Description:* Define the normalized Data Compass metadata model, identity rules, relationship rules, lifecycle handling, and validation expectations.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-010 | Confirm MVP Entity Scope | Confirm entities included in MVP: Distribution, Dataset, Attribute, DataService, DataFlow, DataProcess, Node, Report. |
+| DC-AI-011 | Define GUID and JRN Identity Rules | Define how GUID and JRN are used across chunks, graph nodes, search, and citations. |
+| DC-AI-012 | Define Deterministic Chunk ID Format | Define stable chunk ID pattern for upsert/reindexing. |
+| DC-AI-013 | Define Canonical Field Requirements | Document required and optional fields for MVP entities. |
+| DC-AI-014 | Define Relationship Resolution Rules | Define how jrn references are resolved. |
+| DC-AI-015 | Define Lifecycle Status Handling | Define how Draft, Published, Approved, Rejected, Deprecated statuses affect indexing/search. |
+| DC-AI-016 | Define Classification Metadata Handling | Define how PII/SPI/confidentiality fields are stored and filtered. |
+
+h2. EPIC 3: Metadata Ingestion Service
+
+*Description:* Build the service that reads MongoDB metadata, validates records, resolves relationships, detects changes, and prepares records for chunking and graph projection.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-020 | Build MongoDB Reader for MVP Entities | Read selected collections from MongoDB in batch mode. |
+| DC-AI-021 | Build Entity Validator | Validate required fields and log invalid records. |
+| DC-AI-022 | Build JRN Relationship Resolver | Resolve related entities using JRN references. |
+| DC-AI-023 | Build Node Resolver | Resolve node references using nodeId and nodeType. |
+| DC-AI-024 | Build Owner Resolver | Normalize owner SID and role metadata. |
+| DC-AI-025 | Build Indexing Status Collection | Track vector and graph projection status by source entity. |
+| DC-AI-026 | Build Source Change Detection | Detect records requiring reindexing using version or updatedTimestamp. |
+| DC-AI-027 | Build Retry and Failure Handling | Capture failed records and support retry processing. |
+
+h2. EPIC 4: AI Document and Chunk Builder
+
+*Description:* Convert canonical metadata records into deterministic, source-backed, AI-readable chunks for semantic retrieval.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-030 | Define AI Chunk Schema | Define chunk_id, text, source, metadata, relationships, and embedding metadata. |
+| DC-AI-031 | Build Distribution Summary Chunk Template | Generate readable summary chunks for Distribution records. |
+| DC-AI-032 | Build Dataset Summary Chunk Template | Generate readable summary chunks for Dataset records. |
+| DC-AI-033 | Build Attribute-Level Chunk Template | Generate column/attribute-level chunks. |
+| DC-AI-034 | Build DataService Chunk Template | Generate service exposure and interface chunks. |
+| DC-AI-035 | Build DataFlow Lineage Chunk Template | Generate provider-consumer lineage chunks. |
+| DC-AI-036 | Build DataProcess Transformation Chunk Template | Generate process and transformation chunks. |
+| DC-AI-037 | Build Report Summary Chunk Template | Generate report and dependency chunks. |
+| DC-AI-038 | Build Chunk Generation Batch Job | Generate chunks by entity type or source JRN. |
+| DC-AI-039 | Build Chunk Quality Review Samples | Produce sample chunks for stakeholder review. |
+
+h2. EPIC 5: Embedding and Vector Indexing
+
+*Description:* Generate embeddings for AI chunks, store them in a vector-searchable index, and support deterministic upsert, filtering, and reindexing.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-040 | Select Embedding Model and Configuration | Confirm model, dimensions, cost, and security considerations. |
+| DC-AI-041 | Build Embedding Service Wrapper | Generate embeddings for chunk text with retry/error handling. |
+| DC-AI-042 | Create MongoDB Atlas Vector Index | Configure vector index and metadata filters. |
+| DC-AI-043 | Build Vector Upsert Service | Store embeddings and metadata using deterministic chunk IDs. |
+| DC-AI-044 | Build Vector Delete/Deprecate Handling | Remove or deactivate chunks for deleted/deprecated records. |
+| DC-AI-045 | Build Semantic Search Smoke Test | Validate search quality using initial golden questions. |
+| DC-AI-046 | Track Embedding Model Version | Store embedding model and schema version for each chunk. |
+| DC-AI-047 | Build Reindex by Source JRN | Rebuild vector records for one source asset. |
+| DC-AI-048 | Build Reindex by Entity Type | Rebuild vector records for a full entity type. |
+
+h2. EPIC 6: Graph Projection and Neo4j Builder
+
+*Description:* Build a Neo4j graph projection from canonical metadata to support lineage, relationship traversal, impact analysis, and GraphRAG.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-050 | Define Neo4j Graph Schema | Define node labels, relationship types, properties, and indexes. |
+| DC-AI-051 | Build Cypher Schema Runner | Create repeatable schema deployment for Neo4j. |
+| DC-AI-052 | Build Distribution/Dataset Graph Loader | Load Distribution and Dataset nodes and relationships. |
+| DC-AI-053 | Build Attribute Graph Loader | Load DataModelAttribute nodes and CONTAINS relationships. |
+| DC-AI-054 | Build DataService Graph Loader | Load service nodes and EXPOSES relationships. |
+| DC-AI-055 | Build DataFlow Graph Loader | Load observed lineage relationships. |
+| DC-AI-056 | Build DataProcess Graph Loader | Load process consumption, production, and transformations. |
+| DC-AI-057 | Build Report Dependency Graph Loader | Load report-to-asset dependency relationships. |
+| DC-AI-058 | Build Upstream Traversal Query | Query upstream dependencies by JRN. |
+| DC-AI-059 | Build Downstream Traversal Query | Query downstream dependencies by JRN. |
+
+h2. EPIC 7: Data Compass Search Service
+
+*Description:* Provide controlled APIs for exact search, semantic search, graph search, hybrid search, source hydration, and citation output.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-060 | Build Exact Metadata Search API | Search by GUID, JRN, name, schema, owner, and report ID. |
+| DC-AI-061 | Build Semantic Search API | Search AI chunks using natural-language queries. |
+| DC-AI-062 | Build Graph Search API | Expose upstream/downstream and related asset queries. |
+| DC-AI-063 | Build Hybrid Search API | Combine exact, semantic, and graph search results. |
+| DC-AI-064 | Build Source Record Hydration | Fetch authoritative MongoDB source records for search results. |
+| DC-AI-065 | Build Source Citation Output | Return source entity, GUID, JRN, and supporting fields. |
+| DC-AI-066 | Build Result Deduplication | Deduplicate results by source JRN. |
+| DC-AI-067 | Build Result Ranking Rules | Rank based on relevance, lifecycle, ownership, certification, and graph proximity. |
+
+h2. EPIC 8: GraphRAG Orchestration
+
+*Description:* Orchestrate exact lookup, semantic search, graph traversal, context assembly, and source-backed answer generation.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-070 | Build Question Intent Classifier | Classify questions as exact, semantic, graph, governance, or enrichment. |
+| DC-AI-071 | Build Entity Resolver | Resolve user-mentioned names to canonical entities and JRNs. |
+| DC-AI-072 | Build Ambiguity Handling Flow | Ask clarification when multiple assets match. |
+| DC-AI-073 | Build Graph Expansion Service | Expand semantic/exact results through graph relationships. |
+| DC-AI-074 | Build Context Assembler | Combine chunks, source records, and graph paths into bounded context. |
+| DC-AI-075 | Build Answer Composer | Generate grounded answers from assembled context. |
+| DC-AI-076 | Build Missing Metadata Response Behavior | Return “not enough data” instead of hallucinating. |
+| DC-AI-077 | Build Lineage Answer Template | Format upstream/downstream answers with paths and source references. |
+
+h2. EPIC 9: Context Plane and Agent Layer
+
+*Description:* Build the enterprise context layer and agents that improve query interpretation, retrieval planning, metadata enrichment, and feedback loops.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-080 | Build Acronyms Loader | Load and query enterprise acronyms. |
+| DC-AI-081 | Build Business Alias Manager | Map alternate asset/business names to canonical terms. |
+| DC-AI-082 | Build Historical Q&A Store | Store validated Q&A with sources and feedback. |
+| DC-AI-083 | Build User Bookmarks | Allow users to bookmark assets and influence ranking. |
+| DC-AI-084 | Build Feedback Capture | Capture helpful/not helpful and incorrect-source feedback. |
+| DC-AI-085 | Build Supervisor Agent | Route requests to the correct retrieval/agent flow. |
+| DC-AI-086 | Build Structured Discovery Agent | Convert vague questions into structured search plans. |
+| DC-AI-087 | Build Metadata Enrichment Agent | Suggest metadata improvements with evidence and approval workflow. |
+| DC-AI-088 | Build Answer Evaluation Agent | Evaluate groundedness, source support, and completeness. |
+
+h2. EPIC 10: Security and Access Control
+
+*Description:* Define and implement retrieval-level security controls so unauthorized metadata is filtered before LLM context assembly.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-090 | Define Retrieval Access Control Model | Define role, owner, node, lifecycle, and classification rules. |
+| DC-AI-091 | Implement Exact Search Filters | Apply access filters to exact metadata search. |
+| DC-AI-092 | Implement Semantic Search Filters | Apply access filters to vector search. |
+| DC-AI-093 | Implement Graph Search Filters | Apply access filters to graph traversal. |
+| DC-AI-094 | Prevent Restricted Context Assembly | Ensure restricted records never enter LLM context. |
+| DC-AI-095 | Implement Audit Logging | Log queries, filters, sources, and answer references. |
+| DC-AI-096 | Build Access-Control Test Suite | Validate negative cases and restricted retrieval prevention. |
+| DC-AI-097 | Define Sensitive Metadata Handling | Define logging and display rules for PII/SPI/confidential records. |
+
+h2. EPIC 11: Evaluation and Quality
+
+*Description:* Create the evaluation framework for retrieval accuracy, lineage correctness, answer quality, and security.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-100 | Create Golden Question Set | Create test questions across exact, semantic, graph, and governance scenarios. |
+| DC-AI-101 | Define Expected Answers | Document expected results and source records for each golden question. |
+| DC-AI-102 | Build Retrieval Quality Evaluation | Measure Top-1, Top-3, and Top-5 retrieval accuracy. |
+| DC-AI-103 | Build Lineage Correctness Evaluation | Validate graph traversal results against expected lineage. |
+| DC-AI-104 | Build Answer Quality Evaluation | Evaluate citations, groundedness, and usefulness. |
+| DC-AI-105 | Build Hallucination Test Cases | Test missing-data and unsupported-claim behavior. |
+| DC-AI-106 | Build Regression Test Report | Generate recurring evaluation reports. |
+| DC-AI-107 | Create Human Review Workflow | Define who reviews answer quality and failed cases. |
+
+h2. EPIC 12: Operations and Monitoring
+
+*Description:* Build operational controls for indexing, graph sync, reindexing, reconciliation, monitoring, and support.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-110 | Build Indexing Dashboard | Show indexing status by entity type and source. |
+| DC-AI-111 | Build Failed Indexing Queue | Show failed records, reasons, and retry status. |
+| DC-AI-112 | Build Reindex by JRN | Reindex one asset by source JRN. |
+| DC-AI-113 | Build Reindex by Entity Type | Reindex all records for an entity type. |
+| DC-AI-114 | Build Vector Count Reconciliation | Compare source record counts to vector chunks. |
+| DC-AI-115 | Build Graph Count Reconciliation | Compare source records to Neo4j nodes/edges. |
+| DC-AI-116 | Build Search Quality Dashboard | Track retrieval quality and failed golden questions. |
+| DC-AI-117 | Create Operational Runbooks | Document troubleshooting and support procedures. |
+| DC-AI-118 | Add Cost and Latency Monitoring | Track embedding cost, search latency, and graph query latency. |
+
+h2. EPIC 13: UI / User Experience Integration
+
+*Description:* Integrate AI-powered metadata search, lineage answers, source citations, and feedback into the Data Compass user experience.
+
+|| Story ID || Story || High-Level Description ||
+| DC-AI-120 | Define Search UI Experience | Define UX for AI search and result display. |
+| DC-AI-121 | Build Search Result Card | Show entity name, type, lifecycle, source, and snippet. |
+| DC-AI-122 | Build Source Citation Display | Show source GUID/JRN and metadata source link. |
+| DC-AI-123 | Build Lineage Answer Display | Show upstream/downstream paths and involved assets. |
+| DC-AI-124 | Build Clarification UI | Ask user to choose among ambiguous asset matches. |
+| DC-AI-125 | Build User Feedback UI | Capture helpful/not helpful and incorrect-source feedback. |
+| DC-AI-126 | Build Bookmark UI | Allow users to bookmark important assets. |
+| DC-AI-127 | Build No-Answer State | Show clear message when metadata is missing or inaccessible. |

@@ -1,0 +1,77 @@
+h1. Architecture Decision Log
+
+h2. ADR Index
+
+|| ADR || Decision || Status ||
+| ADR-001 | MongoDB remains authoritative source of metadata | Proposed |
+| ADR-002 | Vector and graph stores are derived projections | Proposed |
+| ADR-003 | JRN is the stable relationship identity key | Proposed |
+| ADR-004 | MVP entity scope | Proposed |
+| ADR-005 | MongoDB Atlas Vector Search as initial vector store | Proposed |
+| ADR-006 | Neo4j as graph projection for lineage and impact analysis | Proposed |
+| ADR-007 | AI chunks use deterministic chunk IDs | Proposed |
+| ADR-008 | Security filters are applied before LLM context assembly | Proposed |
+| ADR-009 | Raw event records are summarized before vectorization | Proposed |
+| ADR-010 | AI enrichment suggestions require human approval | Proposed |
+
+h2. ADR Template
+
+{code}
+h1. ADR-###: <Decision Title>
+
+h2. Status
+
+Proposed / Accepted / Superseded
+
+h2. Context
+
+What problem are we solving?
+
+h2. Options Considered
+
+# Option A
+# Option B
+# Option C
+
+h2. Decision
+
+What did we choose?
+
+h2. Rationale
+
+Why?
+
+h2. Consequences
+
+What tradeoffs or follow-up work does this create?
+
+h2. Related Jira
+
+* DC-AI-###
+{code}
+
+h2. Initial ADR Drafts
+
+h3. ADR-001: MongoDB remains authoritative source of metadata
+
+*Status:* Proposed
+
+*Decision:* MongoDB remains the source of truth for Data Compass metadata. Vector indexes and Neo4j are derived projections.
+
+*Rationale:* The Data Compass metadata model already resides in MongoDB and contains the authoritative entity records and relationships.
+
+h3. ADR-002: Vector and graph stores are derived projections
+
+*Status:* Proposed
+
+*Decision:* MongoDB Vector Search and Neo4j are rebuildable projections generated from canonical metadata.
+
+*Rationale:* This avoids conflicting sources of truth and enables deterministic rebuilds.
+
+h3. ADR-003: JRN is the stable relationship identity key
+
+*Status:* Proposed
+
+*Decision:* All AI chunks and graph nodes will include source JRN. Graph node uniqueness should be based on JRN where available.
+
+*Rationale:* The Data Compass model uses JRN as the cross-entity relationship key.

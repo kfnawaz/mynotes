@@ -1,0 +1,90 @@
+h1. Canonical / Normalized Metadata Model
+
+h2. Purpose
+
+Define the normalized Data Compass metadata contract used by ingestion, vector indexing, graph projection, search, GraphRAG, and context assembly.
+
+h2. Source Model
+
+The Data Compass model contains 34 entity types across:
+* Physical and logical assets
+* Business / semantic layer
+* Lineage and movement
+* Event records
+* Governance and classification
+* Foundational entities
+
+h2. Identity Rules
+
+h3. GUID
+
+*guid* is the internal Data Compass uniqueness key.
+
+Usage:
+* Source record identity
+* MongoDB document identity
+* Audit and traceability
+* Reindexing reference
+
+h3. JRN
+
+*jrn* is the stable cross-entity relationship key.
+
+Usage:
+* Relationship resolution
+* AI chunk source identity
+* Graph node identity
+* Search result source reference
+* Citation/reference output
+
+h2. Required Metadata on All AI/Graph Projections
+
+* source_guid
+* source_jrn
+* entity_type
+* source_collection
+* version
+* lifecycleStatus
+* createdTimestamp
+* updatedTimestamp
+* owners
+* node reference, where applicable
+* classification metadata, where applicable
+
+h2. Lifecycle Handling
+
+|| lifecycleStatus || Search Behavior ||
+| DRAFT | Excluded by default |
+| PUBLISHED | Searchable |
+| APPROVED | Searchable |
+| PENDING_APPROVAL | Restricted search |
+| REJECTED | Excluded |
+| DEPRECATED | Excluded by default; available for historical search if enabled |
+
+h2. Relationship Rules
+
+Relationships must be resolved using *jrn* reference fields.
+
+Examples:
+* Dataset to Distribution
+* DataProduct to Dataset
+* DataService to Distribution
+* DataFlow provider to consumer
+* DataProcess inbound to outbound assets
+* Report to underlying assets
+* Attribute to DataElement
+
+h2. Pitfalls
+
+|| Pitfall || Impact || Mitigation ||
+| Unstable JRN | Breaks traceability and graph edges | Define deterministic JRN rules |
+| Missing JRN | Cannot link records | Create fallback and exception handling |
+| Incorrect lifecycle handling | Stale assets appear in answers | Enforce lifecycle filters |
+| Missing owner/node mapping | Weak access control | Resolve ownership and node early |
+
+h2. Open Questions
+
+|| ID || Question || Impact || Owner || Status ||
+| OQ-001 | Does crawler mint guid and jrn, or does catalog DB assign them? | Blocks identity design | TBD | Open |
+| OQ-002 | What is the deterministic JRN format for each source platform? | Blocks chunks and graph nodes | TBD | Open |
+| OQ-003 | Which lifecycle statuses should be searchable by default? | Blocks retrieval filters | TBD | Open |

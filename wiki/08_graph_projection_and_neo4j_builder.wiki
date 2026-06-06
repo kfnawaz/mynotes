@@ -1,0 +1,68 @@
+h1. Graph Projection and Neo4j Builder
+
+h2. Purpose
+
+Build a Neo4j graph projection from canonical Data Compass metadata for lineage, relationship traversal, impact analysis, and GraphRAG.
+
+h2. Design Principle
+
+{quote}
+Neo4j is not the source of truth. It is a derived, rebuildable graph projection from MongoDB/canonical metadata.
+{quote}
+
+h2. Graph Nodes
+
+* Node
+* Dataset
+* Distribution
+* DataModelEntity
+* DataModelAttribute
+* DataService
+* DataProduct
+* DataFlow
+* DataProcess
+* Report
+
+h2. Graph Relationships
+
+|| Relationship || Meaning ||
+| IMPLEMENTS | Distribution implements Dataset |
+| CONTAINS | Entity contains Attribute |
+| EXPOSES | DataService exposes Distribution |
+| CONSUMES | Product/Process consumes Asset |
+| PRODUCES | Product/Process produces Asset |
+| DEPENDS_ON | Report depends on Asset |
+| UPSTREAM_OF | Lineage upstream relationship |
+| DOWNSTREAM_OF | Lineage downstream relationship |
+| OWNS | Owner relationship |
+| BELONGS_TO | Domain/product grouping |
+| MAPS_TO | Attribute maps to DataElement |
+| CLASSIFIED_AS | Asset has classification |
+
+h2. Primary Requirements
+
+|| ID || Requirement || Priority ||
+| GRF-001 | Define Neo4j graph schema | P0 |
+| GRF-002 | Create constraints and indexes | P0 |
+| GRF-003 | Load Distribution/Dataset nodes | P0 |
+| GRF-004 | Load Attribute nodes | P0 |
+| GRF-005 | Load DataService relationships | P1 |
+| GRF-006 | Load DataFlow lineage | P1 |
+| GRF-007 | Load DataProcess lineage | P1 |
+| GRF-008 | Build upstream/downstream traversal queries | P1 |
+
+h2. Success Criteria
+
+* Graph nodes reconcile with MongoDB source counts.
+* Upstream traversal works by JRN.
+* Downstream traversal works by JRN.
+* Lineage paths can be returned with source references.
+* Graph can be rebuilt from source metadata.
+
+h2. Pitfalls / Risks
+
+|| Risk || Impact || Mitigation ||
+| Neo4j becomes competing source of truth | Conflicting answers | Treat graph as rebuildable projection |
+| Missing JRN | Broken graph edges | Validate JRN before graph load |
+| Duplicate nodes | Incorrect traversals | Enforce uniqueness constraints |
+| Excessive traversal depth | Slow queries/noisy answers | Apply depth limits and filters |

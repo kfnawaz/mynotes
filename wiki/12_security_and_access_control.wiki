@@ -1,0 +1,50 @@
+h1. Security and Access Control
+
+h2. Purpose
+
+Ensure metadata access is controlled before any retrieved context is passed to the LLM.
+
+h2. Core Rule
+
+{quote}
+Security filtering must happen before context assembly and before LLM answer generation.
+{quote}
+
+h2. Access Dimensions
+
+* User role
+* Owner
+* Node
+* Business unit
+* Lifecycle status
+* Confidentiality classification
+* PII/SPI flags
+* Environment/source system
+
+h2. Requirements
+
+|| ID || Requirement || Priority ||
+| SEC-001 | Define access-control model | P0 |
+| SEC-002 | Apply filters to exact search | P0 |
+| SEC-003 | Apply filters to semantic search | P0 |
+| SEC-004 | Apply filters to graph search | P0 |
+| SEC-005 | Prevent restricted chunks from entering LLM context | P0 |
+| SEC-006 | Audit user queries and retrieved sources | P1 |
+| SEC-007 | Build access-control test suite | P1 |
+| SEC-008 | Define sensitive metadata handling | P1 |
+
+h2. Success Criteria
+
+* Unauthorized metadata is not retrieved.
+* Deprecated records are excluded by default.
+* Sensitive records are filtered based on policy.
+* Query and retrieval decisions are auditable.
+* Negative access tests pass.
+
+h2. Pitfalls / Risks
+
+|| Risk || Impact || Mitigation ||
+| Filtering occurs after LLM context assembly | Data leakage | Filter before retrieval/context assembly |
+| Sensitive metadata is over-logged | Compliance issue | Define logging redaction rules |
+| Lifecycle status ignored | Stale/deprecated assets appear | Enforce lifecycle filters globally |
+| Graph traversal bypasses filters | Data leakage via relationships | Apply filters to graph traversal and expansion |

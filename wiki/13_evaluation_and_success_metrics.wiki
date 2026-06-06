@@ -1,0 +1,82 @@
+h1. Evaluation and Success Metrics
+
+h2. Purpose
+
+Define how retrieval quality, graph correctness, answer quality, and security will be measured.
+
+h2. Evaluation Categories
+
+|| Category || Metric ||
+| Exact Search | Exact lookup accuracy |
+| Semantic Search | Top-K retrieval accuracy |
+| Graph Search | Lineage correctness |
+| Answer Quality | Groundedness and citation coverage |
+| Security | Unauthorized retrieval prevention |
+| Operations | Reindex success rate |
+| Performance | Latency |
+
+h2. Golden Question Set
+
+Golden questions should cover:
+* Exact lookup
+* Semantic discovery
+* Lineage / impact
+* Governance / classification
+* Ambiguous entity handling
+* Missing metadata handling
+* Restricted metadata access
+
+h2. Initial Success Targets
+
+|| Metric || MVP Target ||
+| Exact lookup accuracy | 95%+ |
+| Top-5 semantic retrieval accuracy | 80%+ |
+| Lineage traversal correctness | 90%+ |
+| Answer citation coverage | 95%+ |
+| Unauthorized retrieval prevention | 100% |
+| Reindex success rate | 95%+ |
+
+h2. Requirements
+
+|| ID || Requirement || Priority ||
+| EVAL-001 | Create golden question set | P0 |
+| EVAL-002 | Define expected answers | P0 |
+| EVAL-003 | Build retrieval evaluation | P1 |
+| EVAL-004 | Build lineage correctness evaluation | P1 |
+| EVAL-005 | Build answer quality evaluation | P1 |
+| EVAL-006 | Build access-control test suite | P1 |
+| EVAL-007 | Build regression test report | P1 |
+
+h2. Initial Golden Question Categories
+
+h3. Exact Lookup
+
+* Find Distribution by JRN.
+* Find Dataset by name.
+* Find Report by report identification number.
+* Find assets owned by SID.
+* Find tables in schema X.
+
+h3. Semantic Discovery
+
+* Find datasets related to customer risk.
+* Find assets related to liquidity reporting.
+* Find reports that use trade exposure data.
+* Find data products related to regulatory reporting.
+* Find attributes that represent customer identifiers.
+
+h3. Lineage / Impact
+
+* What is upstream of Distribution X?
+* What is downstream of Distribution X?
+* Which reports depend on Dataset X?
+* Which DataProcesses produce Distribution X?
+* Which services expose Distribution X?
+
+h3. Governance / Classification
+
+* Which assets contain personal information?
+* Which attributes are highly confidential?
+* Which datasets have purge indicators?
+* Which assets are deprecated?
+* Which nodes are authoritative sources?
