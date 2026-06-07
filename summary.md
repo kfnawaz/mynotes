@@ -54,3 +54,42 @@ JRN path	databricks/cat/sch/tbl	snowflake/db/sch/tbl	tableau/site/proj/ds	altery
 All four levels, same depth, same JrnBuilder.mint_distribution call, zero special handling needed.
 
 The 3-level version from the S10b doc was wrong — it loses the project hierarchy, which matters for scope filtering (include/exclude_projects) and organizational context. I'll update the doc.
+
+
+How should Altery project-level scope filtering be expressed in config?
+The S10b doc introduces new include_projects/exclude_projects fields. But CrawlScope already handles Tableau project filtering through
+include_schemas/exclude_schemas (project = schema convention). Adding new fields means extending the shared CrawlScope model.
+
+﻿﻿Reuse include_schemas / exclude_schemas for projects Zero CrawlScope changes — same convention as Tableau. Config users write 'schema' but mean 'project".
+﻿﻿Add include_ projects / exclude_projects to CrawlScope Explicit and self-documenting, but adds 2 fields to shared model used by all platforms
+2:37 AM
+
+Discovered that project fields already exist in CrawlScope
+Discovered that project fields already exist in CrawlScope
+Neither — include_projects / exclude_projects already exist in CrawlScope.
+
+They were added during the scope filtering story for Tableau. Check:
+
+bash
+grep -n "include_projects\|exclude_projects" src/datacompass_metadata_harvester/models/shared.py
+Alteryx just uses them — same fields, same glob matching, zero model changes. The Tableau connector already filters on these fields in get_distribution_inventory(). The Alteryx connector does the same:
+
+python
+# connectors/alteryx/connector.py — already works
+if not ScopeFilter.is_included(
+    project_name,
+    self._scope.include_projects,
+    self._scope.exclude_projects,
+):
+    continue
+Config is self-documenting because the field is already called projects, not schemas:
+
+yaml
+alteryx_workspaces:
+  - workspace_name: alteryx-prod
+    scope:
+      exclude_projects:        # ← same field Tableau uses
+        - "*_test"
+        - "*_sandbox"
+        - "*_dev"
+No new fields, no model change, no Option 1 workaround. The S10b doc was wrong to suggest adding new fields — they already exist.
