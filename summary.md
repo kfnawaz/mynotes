@@ -1,301 +1,112 @@
-The workflow ID: is it going to be a UUID or a slug or both? 
-Thought for 9s
+2. Error category vocabulary
 
-Use both, but do not treat them as the same thing.
+Define a canonical controlled vocabulary based on the “Failure and Error Handling Guardrails” requirements.
 
-My recommendation:
+Do not let each crawler/miner invent its own error categories.
 
-workflowId  = immutable system ID, UUID or ULID
-workflowKey = human-readable slug
+Recommended approach:
+
+Use a fixed enum of error categories and stable error codes.
+Allow connector-specific details in the error message/details field, not in the category itself.
+
+Suggested categories:
+
+CONFIGURATION
+AUTHENTICATION
+AUTHORIZATION
+SOURCE_CONNECTION
+SOURCE_API
+SOURCE_RATE_LIMIT
+EXTRACTION
+TRANSFORMATION
+CANONICAL_VALIDATION
+MONGODB_LOAD
+LINEAGE_MINING
+TIMEOUT
+CANCELLATION
+PARTIAL_SUCCESS
+UNKNOWN
 
 Example:
 
 {
-  "workflowId": "01HZV7A9Q6K2B8Q3QW8N5M4P2X",
-  "workflowKey": "databricks-prod-metadata-crawler",
-  "name": "Databricks PROD Metadata Crawler",
-  "environment": "PROD",
-  "platform": "DATABRICKS",
-  "type": "CRAWLER",
-  "currentRevision": 7
+  "category": "SOURCE_CONNECTION",
+  "errorCode": "DATABRICKS_CONNECTION_TIMEOUT",
+  "message": "Timed out connecting to Databricks workspace",
+  "retryable": true
 }
-Best choice
+3. Cancellation grace period
 
-Use:
+Kubernetes default 30s is probably too tight for crawler/miner jobs that may need to flush an in-flight batch.
 
-Primary internal identity: ULID or UUID
-Human/operator identity: slug
+Recommended default:
 
-I slightly prefer ULID over UUID because it is sortable by creation time and still globally unique. UUID is also fine.
+terminationGracePeriodSeconds = 120
 
-Why not only slug?
+Make it configurable per workflow:
 
-A slug is readable:
+default: 120s
+minimum: 30s
+maximum: 300s
 
-databricks-prod-metadata-crawler
+Harvester behavior on SIGTERM:
 
-But it can become problematic if:
+1. Stop accepting new work.
+2. Stop pulling new source data.
+3. Finish or safely stop current batch.
+4. Flush partial summary/checkpoint.
+5. Emit RUN_CANCELLED event.
+6. Exit cleanly before SIGKILL.
 
-name changes
-environment changes
-team wants to rename it
-two teams create similar workflows
-workflow is cloned
-old run history must remain stable
+Also, the harvester should checkpoint/flush periodically so it does not depend entirely on a long shutdown window.
 
-If the slug is your only ID, renames become dangerous.
+4. Run summary delivery
 
-Why not only UUID/ULID?
+Use both stdout and a known file path, but make the control plane the owner of the final stored run summary.
 
-A UUID/ULID is stable, but not friendly:
+Recommended pattern:
 
-01HZV7A9Q6K2B8Q3QW8N5M4P2X
+Harvester emits SUMMARY_EMITTED event to stdout as structured JSON.
+Harvester also writes final summary JSON to a known path.
+Control plane/orchestrator reads the summary and stores it in the control plane run store.
+UI reads run summaries from the control plane API, not directly from harvester output.
 
-Operators do not want to troubleshoot with only that.
+Recommended path:
 
-They want to say:
+/var/run/data-compass/run-summary.json
 
-“The Snowflake PROD lineage miner failed.”
+This gives you flexibility:
 
-So you need a readable key too.
+stdout = easy log-based capture
+known path = reliable artifact capture
+control plane run store = authoritative UI source
+5. Capability manifest delivery
 
-Recommended naming
+For MVP, this is acceptable:
 
-Use these fields:
+python scripts/list_capabilities.py --json
 
-{
-  "workflowId": "01HZV7A9Q6K2B8Q3QW8N5M4P2X",
-  "workflowKey": "snowflake-prod-lineage-miner",
-  "displayName": "Snowflake PROD Lineage Miner"
-}
-Field meanings
-Field	Purpose	Mutable?
-workflowId	Permanent system identity	No
-workflowKey	Human-readable unique key / slug	Prefer no, but can support controlled rename
-displayName	UI name	Yes
-workflowRevision	Config version number	Increments
-configHash	Exact snapshot fingerprint	No
-Recommended run record
+But the better production pattern is:
 
-Every run should store both the ID and key snapshot.
+Bake a static capability manifest into the image
+AND
+provide a standard command to print it.
 
-{
-  "runId": "run_01HZV7F4S6Z7K9",
-  "workflowId": "01HZV7A9Q6K2B8Q3QW8N5M4P2X",
-  "workflowKey": "snowflake-prod-lineage-miner",
-  "workflowName": "Snowflake PROD Lineage Miner",
-  "workflowRevision": 7,
-  "configHash": "sha256:abc123",
-  "status": "SUCCEEDED"
-}
+Recommended command:
 
-This way, even if the workflow is renamed later, old runs still show the name/key used at execution time.
+metadata-harvester manifest --json
 
-Slug rules
+Recommended behavior:
 
-Generate slugs like:
+The command reads the baked manifest file and prints it as JSON.
 
-{platform}-{environment}-{purpose}
+Example baked path:
 
-Examples:
+/app/manifest/capabilities.json
 
-databricks-prod-metadata-crawler
-databricks-uat-metadata-crawler
-snowflake-prod-lineage-miner
-tableau-prod-metadata-crawler
-alteryx-dev-lineage-miner
+Final recommendation:
 
-Use uniqueness constraints like:
+MVP: scripts/list_capabilities.py --json is acceptable.
+Production: metadata-harvester manifest --json backed by a static manifest inside the image.
 
-tenantId + workflowKey must be unique
-
-or, if there is no tenant:
-
-environment + workflowKey must be unique
-Final recommendation
-
-Use this pattern:
-
-workflowId       = immutable ULID/UUID, used by APIs, DB references, runs, audit
-workflowKey      = readable slug, used in UI, search, logs, operator conversations
-displayName      = friendly name, freely editable
-workflowRevision = integer config version
-configHash       = exact config snapshot fingerprint
-
-That gives you stable engineering identity and clean operational usability.
-
-
-
-What's a better choice for workflow version: an integer or a semver or a hash? 
-Thought for 8s
-
-For workflow version, the best choice is:
-
-Use a monotonically increasing integer revision as the primary workflow version, and also store a content hash for immutability/integrity.
-
-Do not use SemVer as the main workflow version.
-
-Best model
-
-Use this:
-
-{
-  "workflowId": "wf_databricks_prod_crawler",
-  "workflowRevision": 7,
-  "workflowVersionId": "wf_databricks_prod_crawler:v7",
-  "configHash": "sha256:abc123...",
-  "templateVersion": "1.3.0",
-  "harvesterVersion": "2.1.4",
-  "containerImage": "data-compass/metadata-harvester:2.1.4",
-  "containerDigest": "sha256:def456..."
-}
-Why integer is best for workflow version
-
-A workflow version represents a configuration snapshot, not a software release.
-
-Example changes:
-
-v1: Databricks crawler created
-v2: Added finance catalog
-v3: Changed schedule from 2 AM to 3 AM
-v4: Increased timeout
-v5: Changed schema filter
-v6: Disabled lineage option
-v7: Updated resource profile
-
-These are simple revisions. A human-readable integer is perfect.
-
-Use:
-
-workflowRevision = 1, 2, 3, 4, 5...
-
-This makes troubleshooting easy:
-
-“Run failed on workflow revision 7, but revision 6 was successful.”
-
-That is exactly what operators need.
-
-Why not SemVer for workflow config?
-
-SemVer is better for software artifacts, not operational configuration.
-
-SemVer means:
-
-MAJOR.MINOR.PATCH
-
-That implies semantic compatibility rules:
-
-1.0.0 → 1.0.1 = patch
-1.0.0 → 1.1.0 = minor enhancement
-1.0.0 → 2.0.0 = breaking change
-
-But for workflow config, it becomes awkward:
-
-Is changing a cron schedule a patch?
-Is changing a catalog filter a minor version?
-Is changing timeout a patch?
-Is changing source scope a major version?
-
-The team will waste time debating version numbers.
-
-Use SemVer for:
-
-Harvester application version
-Connector version
-Workflow template version
-Runtime contract version
-SDK version
-
-Example:
-
-{
-  "templateVersion": "1.2.0",
-  "harvesterVersion": "2.0.1",
-  "runtimeContractVersion": "1.0.0"
-}
-Why not hash as the main workflow version?
-
-A hash is excellent for integrity, but bad for humans.
-
-Example:
-
-sha256:9f86d081884c7d659a2feaa0c55ad015...
-
-That is not useful in meetings or operations.
-
-Nobody wants to say:
-
-“The failure happened on config hash 9f86d081...”
-
-But hash is very useful behind the scenes because it proves the exact config used.
-
-Use hash for:
-
-immutability
-change detection
-deduplication
-audit
-proving exact config snapshot
-detecting accidental mutation
-Recommended final design
-1. Workflow definition
-
-Current editable workflow.
-
-{
-  "workflowId": "wf_snowflake_lineage_miner_prod",
-  "name": "Snowflake PROD Lineage Miner",
-  "currentRevision": 12,
-  "status": "ACTIVE"
-}
-2. Workflow version snapshot
-
-Immutable config snapshot.
-
-{
-  "workflowId": "wf_snowflake_lineage_miner_prod",
-  "revision": 12,
-  "versionId": "wf_snowflake_lineage_miner_prod:v12",
-  "configSnapshot": {},
-  "scheduleSnapshot": {},
-  "resourceProfileSnapshot": {},
-  "configHash": "sha256:abc123...",
-  "createdBy": "sid123",
-  "createdAt": "2026-06-08T10:00:00Z",
-  "changeReason": "Expanded query history lookback from 7 days to 14 days"
-}
-3. Workflow run
-
-Every run points to the exact revision used.
-
-{
-  "runId": "run_20260608_001",
-  "workflowId": "wf_snowflake_lineage_miner_prod",
-  "workflowRevision": 12,
-  "workflowVersionId": "wf_snowflake_lineage_miner_prod:v12",
-  "configHash": "sha256:abc123...",
-  "status": "SUCCEEDED"
-}
-Versioning rules I recommend
-Item	Version Type	Example
-Workflow config snapshot	Integer revision	revision: 7
-Workflow version ID	Human-readable composite	wf_x:v7
-Config integrity	SHA-256 hash	sha256:abc123
-Workflow template	SemVer	1.4.0
-Metadata Harvester app	SemVer	2.1.0
-Connector implementation	SemVer	databricks-crawler:1.8.2
-Runtime contract	SemVer	1.0.0
-Container identity	Image tag + digest	2.1.0, sha256:def456
-Final recommendation
-
-Use this combination:
-
-Primary workflow version = integer revision
-Integrity/version fingerprint = hash
-Software/template/contract version = SemVer
-
-So the clean answer is:
-
-Integer for workflow version, hash for exact snapshot integrity, SemVer for harvester/template/runtime software versions.
-
-That gives you human-friendly operations, strong auditability, and clean separation between configuration changes and software releases.
+This keeps the manifest stable, versioned with the image, and easy for the control plane to discover.
