@@ -93,3 +93,37 @@ alteryx_workspaces:
         - "*_sandbox"
         - "*_dev"
 No new fields, no model change, no Option 1 workaround. The S10b doc was wrong to suggest adding new fields — they already exist.
+
+
+
+
+How should the Alteryx miner resolve workflow 1/0 connections to JRNs?
+The S10b miner plans to use ConnectionRegistry. resolve (namespace, name) - designed for OpenLineage namespace strings like snowflake://account.snowflakecomputing.com. com. But Alteryx One's lineage API gives structured data: {"connectionType": "ODBC", "server":
+"...", "database": "...", "schema": "...", "table": "..."}. Two options:﻿﻿﻿﻿Synthetic namespace (jdbc: odbc: //server/database): construct a namespace string from connection data, add Alteryx-specific patterns to connection_registry in config. Keeps ConnectionRegistry as single resolver but needs config entries per Altery ODBC source.﻿﻿﻿﻿Direct JRN construction: bypass ConnectionRegistry, look up catalog_seal_map by server/database name and call IrnBuilder mint_distribution_jrn() directly. Simpler code, no connection registry config needed, but diverges from the S10a OpenLineage receiver approach. 1 B - Direct JRN from structured connection data Simpler miner code: Alteryx structured data maps cleanly to mint_distribution imO params
+2 A - Synthetic namespace via ConnectionRegistry
+Consistent with $10a receiver; config entries enable/disable per-source JRN resolution
+3 custom answer hereShow less2:49 AMClaude responded: Option 1 — synthetic namespace via ConnectionRegistry.Weighed architectural tradeoffs between registry consistency and direct constructionWeighed architectural tradeoffs between registry consistency and direct constructionOption 1 — synthetic namespace via ConnectionRegistry.
+The reason is seal_node_id. To construct a JRN for snowflake/PROD_DB/risk/positions, you need seal_node_id 34243 — which lives in the Snowflake workspace's catalog_seal_map, not in the Alteryx config. Direct JRN construction (Option 2) would require duplicating every source platform's seal_node_id mapping into the Alteryx workspace config. That's the wrong place for it — the ConnectionRegistry already has it.
+The synthetic namespace construction is a 5-line helper, not real complexity:
+python_CONN_TYPE_TO_SCHEME: dict[str, str] = {
+    "odbc": "mssql",
+    "snowflake": "snowflake",
+    "oracle": "oracle",
+    "teradata": "teradatasql",
+    "databricks": "databricks",
+}
+
+def _to_namespace(connection: dict) -> str:
+    """Convert Alteryx structured connection to OpenLineage namespace."""
+    scheme = _CONN_TYPE_TO_SCHEME.get(
+        connection.get("connectionType", "").lower(), "unknown"
+    )
+    server = connection.get("server", "")
+    database = connection.get("database", "")
+    return f"{scheme}://{server}/{database}"
+Then the miner calls:
+pythonnamespace = _to_namespace(input_connection)
+name = f"{input_connection['schema']}.{input_connection['table']}"
+resolved = self._connection_registry.resolve(namespace, name)
+Same registry, same config entries, same resolution path as S10a. The S10a receiver's connection_registry config entries already cover all the source systems — the miner reuses them with zero additional config.
+The alternative (Option 2) looks simpler in the miner code but pushes complexity into config management — every Alteryx workspace config would need a copy of every source platform's seal_node_id mapping, and those copies would need to be kept in sync. That's an operational burden that ConnectionRegistry was specifically designed to eliminate.
