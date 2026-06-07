@@ -1,3 +1,42 @@
+1. Workflow Idendity Shape 
+
+Recommendation: Use both.
+
+Use an immutable system-generated ID as the primary workflow identity, and a human-readable slug/key for operator usability.
+
+Recommended model:
+
+{
+  "workflowId": "01HZV7A9Q6K2B8Q3QW8N5M4P2X",
+  "workflowKey": "databricks-prod-metadata-crawler",
+  "displayName": "Databricks PROD Metadata Crawler",
+  "workflowRevision": 7,
+  "workflowVersionId": "databricks-prod-metadata-crawler:v7",
+  "configHash": "sha256:abc123..."
+}
+
+Identity rules:
+
+- workflowId: immutable UUID or ULID used by APIs, database references, runs, audit, and internal joins.
+- workflowKey: human-readable slug used in UI, logs, search, and operator conversations.
+- displayName: friendly name shown in the UI and can be changed.
+- workflowRevision: monotonically increasing integer for configuration versions.
+- configHash: SHA-256 hash of the exact workflow config snapshot.
+- SemVer should be used only for software artifacts such as harvester version, connector version, template version, and runtime contract version.
+
+Preferred ID type:
+
+Use ULID if available because it is globally unique and time-sortable. UUID is also acceptable.
+
+Final decision:
+
+- workflow_id / workflowId = immutable ULID or UUID.
+- workflow_key / workflowKey = stable slug.
+- workflow_version / workflowRevision = integer revision.
+- workflow_version_id = composite readable value, for example databricks-prod-metadata-crawler:v7.
+- config_hash = immutable fingerprint of the exact config snapshot.
+
+
 2. Error category vocabulary
 
 Define a canonical controlled vocabulary based on the “Failure and Error Handling Guardrails” requirements.
