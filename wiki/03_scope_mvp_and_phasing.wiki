@@ -1,86 +1,973 @@
 h1. Scope, MVP, and Phasing
 
-h2. MVP Objective
+h2. 1. Purpose of This Page
 
-Deliver a working vertical slice that supports AI-ready metadata discovery and basic lineage-aware search.
+This page defines the scope, MVP boundaries, phased delivery approach, and rationale for sequencing the Data Compass AI Modernization program.
 
-h2. MVP Entity Scope
+The goal is to avoid treating this effort as a broad, undefined "AI search" project. The work must be delivered as controlled increments that first stabilize metadata identity and relationships, then build AI-ready chunks, then add vector search, graph traversal, GraphRAG orchestration, context plane capabilities, and operational controls.
 
-|| Entity || MVP? || Reason ||
-| Distribution | Yes | Primary physical asset |
-| Dataset | Yes | Logical data asset |
-| DataModelEntity | Yes | Table/view/entity-level structure |
-| DataModelAttribute | Yes | Column/attribute search |
-| DataService | Yes | Service exposure and access metadata |
-| DataFlow | Yes | Observed lineage |
-| DataProcess | Yes | Processing and transformation lineage |
-| Node | Yes | Foundational relationship entity |
-| Report | Yes | Downstream report dependency search |
-| DataProduct | Phase 2 | Product-level grouping |
-| DataDomain | Phase 2 | Domain-level grouping |
-| Glossary/Semantic Entities | Phase 2 | Business meaning |
-| Governance/Classification Entities | Phase 2/3 | Governance-aware search |
-| Event Entities | Phase 3 | Summarized event intelligence |
+h2. 2. Program Objective
 
-h2. Phase 0 — Planning and Architecture
+Data Compass AI Modernization will make the metadata catalog AI-ready by creating a governed retrieval and reasoning layer over Data Compass metadata.
 
-* Define MVP scope
-* Confirm identity rules
-* Confirm *jrn* strategy
-* Define chunk schema
-* Define graph schema
-* Define access control approach
-* Create golden question set
+The platform should allow users to:
 
-h2. Phase 1 — Metadata Foundation
+* Search metadata using natural language.
+* Find assets by exact identifiers, names, schemas, owners, and reports.
+* Understand upstream and downstream dependencies.
+* Discover datasets, distributions, data services, reports, and processes by business meaning.
+* Ask lineage and impact-analysis questions.
+* Receive source-backed answers using authoritative catalog metadata.
+* Avoid stale, deprecated, or unauthorized metadata in AI-generated answers.
 
-* MongoDB reader
-* Entity validation
-* Relationship resolver
-* Node resolver
-* Indexing status tracking
-* Change detection
+h2. 3. Core Scope Statement
 
-h2. Phase 2 — AI Chunks and Vector Search
+The project will deliver a metadata intelligence layer over the Data Compass catalog using:
 
-* Chunk templates
-* Embedding service
-* Vector index
-* Vector upsert
-* Semantic search API
-* Basic answer grounding
+* MongoDB as the authoritative metadata source.
+* A canonical / normalized Data Compass metadata model as the contract.
+* AI-readable metadata chunks for semantic retrieval.
+* Vector search for business-language discovery.
+* Neo4j graph projection for relationship traversal and lineage.
+* GraphRAG orchestration to combine vector search, exact lookup, and graph traversal.
+* Context Plane capabilities for acronyms, bookmarks, feedback, and historical Q&A.
+* Security and access filters before any metadata is passed into LLM context.
 
-h2. Phase 3 — Graph Projection
+h2. 4. Primary Delivery Principle
 
-* Neo4j schema
-* Graph loaders
-* Lineage traversal queries
-* Impact analysis queries
+bq. Build a trusted metadata retrieval foundation before building advanced AI agents.
 
-h2. Phase 4 — GraphRAG Search
+The sequence matters. If identity, source traceability, lifecycle handling, and relationship resolution are not stable, then vector search and graph search will produce misleading results. If security filters are not designed early, the AI layer may retrieve metadata the user should not see. If operational controls are missing, users will not trust the search results.
 
-* Intent classifier
-* Entity resolver
-* Graph expansion
-* Context assembler
-* Answer composer
-* Citation/source references
+h2. 5. MVP Definition
 
-h2. Phase 5 — Context Plane and Agents
+h3. 5.1 MVP Objective
 
-* Acronyms
-* Historical Q&A
-* User bookmarks
-* Feedback
-* Supervisor Agent
-* Structured Discovery Agent
-* Metadata Enrichment Agent
+The MVP will deliver the first working vertical slice of AI-ready Data Compass search.
 
-h2. Phase 6 — Evaluation and Operations
+The MVP should prove that the platform can:
 
-* Golden question testing
-* Retrieval quality evaluation
-* Lineage correctness evaluation
-* Access-control testing
-* Reindex dashboard
-* Runbooks
+* Read selected Data Compass entities from MongoDB.
+* Resolve identity using *guid* and *jrn*.
+* Generate deterministic AI-readable chunks.
+* Create vector embeddings and search them.
+* Apply metadata filters before returning results.
+* Provide exact and semantic search for core metadata entities.
+* Return source-backed results with *guid*, *jrn*, entity type, lifecycle status, and source collection.
+* Support basic lineage discovery using the first set of lineage entities.
+
+h3. 5.2 MVP Success Statement
+
+The MVP is successful when a user can ask questions such as:
+
+* "Find tables related to customer risk."
+* "Show datasets related to trade exposure."
+* "Which attributes look like customer identifiers?"
+* "What service exposes this distribution?"
+* "What is upstream or downstream of this asset?"
+* "Find reports that depend on this dataset."
+* "Who owns this asset?"
+
+And the system can return source-backed, filtered, and traceable results.
+
+h2. 6. MVP Scope
+
+h3. 6.1 MVP In Scope
+
+The MVP includes the following capabilities:
+
+|| Capability || MVP Scope || Rationale ||
+| Metadata source read | Read selected MongoDB collections | Needed before any indexing or search can happen |
+| Identity handling | Use *guid* and *jrn* consistently | Required for traceability, reindexing, graph relationships, and citations |
+| Relationship resolution | Resolve selected *jrn*-based references | Required for relationship-aware chunks and graph projection |
+| AI chunk generation | Generate deterministic chunks for selected entities | Required for semantic search quality |
+| Embedding generation | Generate embeddings for approved chunk types | Required for vector search |
+| Vector indexing | Store embeddings and metadata filters | Required for natural-language metadata discovery |
+| Exact search | Search by identifiers and structured fields | Required for precision lookup |
+| Basic semantic search | Search metadata using natural language | Core MVP user value |
+| Basic lineage search | Support simple upstream/downstream discovery | Proves graph/relationship value |
+| Source references | Return source *guid*, *jrn*, entity type, and collection | Required for trust and auditability |
+| Security filters | Apply lifecycle and basic access filters | Required before LLM/context assembly |
+| Reindex control | Reindex by entity or source *jrn* | Required for operations and trust |
+
+h3. 6.2 MVP Out of Scope
+
+The following are intentionally out of scope for MVP:
+
+|| Out-of-Scope Item || Reason for Deferral || Target Phase ||
+| Full event-level embedding | Event volume can be large and noisy; raw event indexing can increase cost without improving initial search quality | Phase 3 |
+| Full governance/retention automation | Requires policy alignment and source-of-record validation | Phase 3 |
+| Automated AI updates to authoritative metadata | Requires approval workflow and governance | Phase 5 |
+| Full autonomous multi-agent behavior | Search and grounding must be trusted first | Phase 5 |
+| All 34 entity types | Too broad for first delivery; risks slowing MVP and increasing test burden | Phase 2/3 |
+| Production-grade personalization | User-specific ranking can wait until core search works | Phase 5 |
+| Full UI redesign | MVP can initially use API or simple UI integration | Phase 6/7 |
+| Real-time streaming updates | Batch or scheduled indexing is sufficient for MVP | Phase 6 |
+
+h2. 7. MVP Entity Scope
+
+The Data Compass model contains 34 entity types. The MVP focuses on entities that provide the highest value for metadata discovery, physical asset search, attribute search, service exposure, and basic lineage.
+
+|| Entity || MVP Status || Rationale || Primary MVP Use Cases ||
+| *Distribution* | In MVP | Primary physical data asset; central to crawler output and table/view discovery | Find tables/views; understand store/schema/type; link to dataset and services |
+| *Dataset* | In MVP | Logical data asset; provides business/logical meaning above physical implementation | Find logical data assets; connect business meaning to physical distributions |
+| *DataModelEntity* | In MVP | Represents table/view/entity-level structure | Search entities by schema/store/type; support graph structure |
+| *DataModelAttribute* | In MVP | Enables column/attribute-level search and classification search | Find columns; identify PII/confidential fields; map attributes to business elements |
+| *DataService* | In MVP | Shows how assets are exposed or consumed | Find APIs/databases/services exposing a distribution |
+| *DataFlow* | In MVP | Represents observed lineage and data movement | Show provider-consumer relationships and observed flow paths |
+| *DataProcess* | In MVP | Represents processing and transformation lineage | Show processes that consume/produce assets and transformations |
+| *Node* | In MVP | Foundational entity used by many relationships | Resolve provider, consumer, broker, and ownership context |
+| *Report* | In MVP | Important downstream consumption target | Find reports depending on assets and support impact analysis |
+| DataProduct | Phase 2 | Useful for product-level grouping, but not required for first asset search slice | Product discovery and product dependency mapping |
+| DataDomain | Phase 2 | Useful for domain hierarchy, but can follow DataProduct integration | Domain-level discovery and ownership |
+| BusinessGlossary | Phase 2 | Adds semantic business meaning | Business-term search |
+| BusinessGlossaryTerm | Phase 2 | Adds glossary term mapping | Term-to-asset discovery |
+| DataConcept | Phase 2 | Adds conceptual meaning | Concept-to-asset discovery |
+| DataElement | Phase 2 | Adds business element mapping | Attribute-to-business element search |
+| DataContract | Phase 3 | Important for provider/consumer agreements but requires stronger governance workflow | Contract-aware search |
+| DataOffer | Phase 3 | Useful for quality/timeliness commitments | Data offer and SLA search |
+| DataQualityMetric | Phase 3 | Valuable but depends on quality systems and measurement alignment | Quality-aware search |
+| Governance/classification entities | Phase 3 | Important but policy-sensitive | Retention and classification search |
+| Event entities | Phase 3 | High volume; should be summarized rather than fully embedded | Usage, quality, breach, and process event intelligence |
+
+h2. 8. Why These Entities Are in MVP
+
+h3. 8.1 Distribution
+
+*Distribution* is the most important MVP entity because it represents the physical data asset. For technical users, the first questions are usually about tables, views, schemas, stores, formats, attributes, and ownership. Distribution is also the bridge between physical metadata and higher-level logical or business concepts.
+
+MVP value:
+
+* Enables physical asset search.
+* Supports source-system search such as Databricks or Snowflake.
+* Provides schema/store/table/view context.
+* Anchors many downstream relationships.
+* Supports impact analysis when linked to flows, processes, services, and reports.
+
+h3. 8.2 Dataset
+
+*Dataset* provides logical meaning. Without Dataset, the system risks being only a technical table search. Dataset allows the AI search layer to answer questions about logical data assets, not just physical objects.
+
+MVP value:
+
+* Connects physical assets to logical data meaning.
+* Improves semantic discovery.
+* Supports business-friendly answers.
+* Provides a bridge toward glossary and DataProduct integration in later phases.
+
+h3. 8.3 DataModelEntity and DataModelAttribute
+
+These entities provide structure and attribute-level search. Attribute-level search is essential for questions about PII, confidential data, customer identifiers, keys, nullable fields, and column-level meaning.
+
+MVP value:
+
+* Enables column search.
+* Supports classification-aware discovery.
+* Supports future data element and glossary mapping.
+* Improves precision for semantic search.
+
+h3. 8.4 DataService
+
+DataService shows how metadata assets are exposed through APIs, databases, storage, or other service interfaces.
+
+MVP value:
+
+* Answers "how is this data exposed?"
+* Connects assets to access mechanisms.
+* Supports provider/consumer discovery.
+* Helps users understand operational access paths.
+
+h3. 8.5 DataFlow and DataProcess
+
+DataFlow and DataProcess are the first lineage-related MVP entities. DataFlow captures observed movement. DataProcess captures processing, transformation, inputs, and outputs.
+
+MVP value:
+
+* Enables basic upstream/downstream analysis.
+* Supports impact-analysis questions.
+* Provides GraphRAG value beyond simple vector search.
+* Enables process-level discovery and transformation explanation.
+
+h3. 8.6 Node
+
+Node is foundational because many entities refer to providers, consumers, brokers, or performing systems using node references.
+
+MVP value:
+
+* Resolves provider/consumer context.
+* Supports ownership and organizational filtering.
+* Enables graph relationships to be properly anchored.
+
+h3. 8.7 Report
+
+Report is included because downstream reporting is one of the most valuable impact-analysis use cases.
+
+MVP value:
+
+* Answers "which reports depend on this asset?"
+* Supports regulatory/reporting impact analysis.
+* Helps business users understand consumption.
+
+h2. 9. Why Other Entities Are Deferred
+
+h3. 9.1 DataProduct and DataDomain Deferred to Phase 2
+
+DataProduct and DataDomain are valuable grouping concepts, but the MVP can first prove value at the asset, attribute, service, and lineage level. Once asset identity and relationships are stable, DataProduct and DataDomain can improve navigation and product-level discovery.
+
+Reason for deferral:
+
+* Product/domain hierarchy may require additional governance alignment.
+* MVP does not need full product taxonomy to prove semantic search.
+* Product/domain relationships can be layered on top of stable asset identity.
+
+h3. 9.2 Glossary and Semantic Layer Deferred to Phase 2
+
+Glossary entities provide business meaning, but they are often managed by another system of record. They should be integrated after core metadata search works.
+
+Reason for deferral:
+
+* Glossary SoR ownership needs to be confirmed.
+* Mapping quality may vary.
+* Premature glossary integration can make MVP scope too large.
+* Semantic layer should enhance, not block, core metadata discovery.
+
+h3. 9.3 Governance and Classification Deferred to Phase 2/3
+
+Some classification indicators should be included in MVP metadata filters, but full governance and retention workflows should be deferred.
+
+Reason for deferral:
+
+* Governance rules may require policy approval.
+* Record retention data may come from different SoRs.
+* Incorrect governance answers carry higher risk.
+* MVP should include basic classification filtering but not full governance automation.
+
+h3. 9.4 Event Entities Deferred to Phase 3
+
+Event entities can be very high volume. Embedding raw events is usually expensive and noisy. Events should be summarized into daily/weekly/asset-level summaries before vectorization.
+
+Reason for deferral:
+
+* Event volume can create cost and performance issues.
+* Raw events are less useful than summarized patterns.
+* Event intelligence requires aggregation logic.
+* MVP should prove static and relationship metadata first.
+
+h2. 10. Phasing Strategy
+
+h3. 10.1 Summary Phase Plan
+
+|| Phase || Name || Main Goal || Primary Deliverables || Exit Criteria ||
+| Phase 0 | Planning and Architecture | Lock scope, decisions, and design contracts | Confluence package, ADRs, MVP scope, identity rules, schema decisions | Stakeholders agree on MVP and identity rules |
+| Phase 1 | Metadata Foundation | Read and normalize source metadata | MongoDB reader, validators, relationship resolver, indexing status | MVP entities can be read, validated, and relationship-resolved |
+| Phase 2 | AI Chunks and Vector Search | Make metadata semantically searchable | Chunk builder, embedding service, vector index, semantic search API | Golden semantic questions return relevant source-backed results |
+| Phase 3 | Graph Projection and Lineage | Add graph traversal and impact analysis | Neo4j schema, graph loaders, lineage queries | Upstream/downstream traversal works by JRN |
+| Phase 4 | GraphRAG Orchestration | Combine vector, exact, and graph retrieval | Intent classifier, entity resolver, graph expansion, answer composer | GraphRAG answers are grounded with source references |
+| Phase 5 | Context Plane and Agents | Improve interpretation and workflow support | Acronyms, Q&A, bookmarks, feedback, agents | Agents route requests correctly and capture feedback |
+| Phase 6 | Evaluation and Operations | Harden trust, monitoring, and support | Evaluation suite, dashboards, reindex controls, runbooks | System can be measured, operated, and supported |
+| Phase 7 | UI / UX Integration | Make capabilities available through Data Compass UI | Search UI, lineage display, citations, feedback UI | Users can access AI search and provide feedback in UI |
+
+h2. 11. Detailed Phase Definitions
+
+h3. Phase 0 — Planning and Architecture
+
+h4. Objective
+
+Establish the delivery foundation before engineering build begins.
+
+h4. In Scope
+
+* Create Confluence project structure.
+* Document current-state architecture.
+* Document target-state architecture.
+* Define MVP entity scope.
+* Define *guid* and *jrn* usage.
+* Define deterministic chunk ID strategy.
+* Define initial access-control model.
+* Define ADRs.
+* Create risk register.
+* Create open questions register.
+* Create initial Jira epics and stories.
+
+h4. Key Deliverables
+
+* Architecture pages.
+* Scope and phasing page.
+* ADR log.
+* Jira backlog map.
+* Open questions register.
+* Risk register.
+* Initial golden question categories.
+
+h4. Exit Criteria
+
+* MVP entity list is approved.
+* Identity rules are documented.
+* Major architecture decisions are captured as ADRs.
+* Phase 1 stories are ready for sprint planning.
+
+h4. Rationale
+
+This phase prevents the team from building vector and graph projections before identity, scope, and relationship rules are stable.
+
+----
+
+h3. Phase 1 — Metadata Foundation
+
+h4. Objective
+
+Build the metadata foundation required for AI chunking and graph projection.
+
+h4. In Scope
+
+* MongoDB reader for MVP entities.
+* Entity validation.
+* Relationship resolver using *jrn*.
+* Node resolver.
+* Owner resolver.
+* Indexing status tracking.
+* Change detection.
+* Failure logging and retry framework.
+
+h4. Key Deliverables
+
+* Batch metadata reader.
+* Validation output.
+* Relationship-resolved metadata objects.
+* Indexing status collection.
+* Failed record handling.
+
+h4. Exit Criteria
+
+* MVP entity records can be read from MongoDB.
+* Required fields are validated.
+* Invalid records are logged with reason.
+* Basic relationships can be resolved by *jrn*.
+* Indexing candidates can be produced.
+
+h4. Rationale
+
+This phase is mandatory before chunking or graph loading. AI search quality depends on clean source metadata, stable identity, and resolved relationships.
+
+----
+
+h3. Phase 2 — AI Chunks and Vector Search
+
+h4. Objective
+
+Create AI-readable metadata chunks, generate embeddings, and enable semantic search.
+
+h4. In Scope
+
+* AI chunk schema.
+* Distribution summary chunks.
+* Dataset summary chunks.
+* Attribute-level chunks.
+* DataService chunks.
+* DataFlow lineage chunks.
+* DataProcess transformation chunks.
+* Report summary chunks.
+* Embedding service wrapper.
+* Vector index creation.
+* Vector upsert service.
+* Basic semantic search API.
+* Metadata filters.
+
+h4. Key Deliverables
+
+* Chunk templates.
+* Batch chunk generation.
+* Embedding generation.
+* Vector index.
+* Semantic search endpoint.
+* Search smoke tests.
+
+h4. Exit Criteria
+
+* AI chunks are generated with deterministic IDs.
+* Chunks include source *guid* and *jrn*.
+* Vector search returns relevant results for golden questions.
+* Metadata filters work for lifecycle and basic access constraints.
+* Reindex by source *jrn* works.
+
+h4. Rationale
+
+This phase delivers the first visible user value: semantic metadata discovery. It should be built before advanced graph/agent capabilities so that the team can validate chunk quality and search relevance early.
+
+----
+
+h3. Phase 3 — Graph Projection and Lineage
+
+h4. Objective
+
+Build a graph projection to support relationship traversal, lineage, and impact analysis.
+
+h4. In Scope
+
+* Neo4j graph schema.
+* Cypher schema runner.
+* Distribution/Dataset loader.
+* Attribute loader.
+* DataService loader.
+* DataFlow lineage loader.
+* DataProcess loader.
+* Report dependency loader.
+* Upstream traversal query.
+* Downstream traversal query.
+* Count reconciliation between MongoDB and Neo4j.
+
+h4. Key Deliverables
+
+* Neo4j schema.
+* Graph loaders.
+* Graph traversal APIs/queries.
+* Graph sync status.
+* Lineage test cases.
+
+h4. Exit Criteria
+
+* Graph nodes can be created using source *jrn* as stable identity.
+* Upstream/downstream traversal works for selected assets.
+* Graph counts reconcile with source metadata within agreed tolerance.
+* Lineage paths include source references.
+
+h4. Rationale
+
+Graph projection should follow identity and chunk foundation. Building Neo4j too early risks creating a graph on unstable relationships. This phase adds the relationship reasoning that vector search alone cannot provide.
+
+----
+
+h3. Phase 4 — GraphRAG Orchestration
+
+h4. Objective
+
+Combine exact lookup, semantic retrieval, graph traversal, and answer generation into a source-backed GraphRAG workflow.
+
+h4. In Scope
+
+* Question intent classifier.
+* Entity resolver.
+* Ambiguity handling.
+* Graph expansion service.
+* Context assembler.
+* Answer composer.
+* Citation/source reference builder.
+* Missing metadata response behavior.
+
+h4. Key Deliverables
+
+* Retrieval strategy router.
+* GraphRAG orchestration service.
+* Source-backed answer composer.
+* Lineage answer template.
+* Clarification flow for ambiguous assets.
+
+h4. Exit Criteria
+
+* The system chooses the correct retrieval path for exact, semantic, and lineage questions.
+* Answers include source references.
+* Ambiguous entity names trigger clarification.
+* Missing metadata does not result in hallucinated answers.
+
+h4. Rationale
+
+GraphRAG should be added only after vector search and graph traversal are available. This phase turns retrieval capabilities into a user-facing question-answering workflow.
+
+----
+
+h3. Phase 5 — Context Plane and Agents
+
+h4. Objective
+
+Add enterprise context, memory, feedback, and agent orchestration.
+
+h4. In Scope
+
+* Acronyms loader.
+* Business alias manager.
+* Historical Q&A store.
+* User bookmarks.
+* Feedback capture.
+* Supervisor Agent.
+* Structured Discovery Agent.
+* Metadata Enrichment Agent.
+* Answer Evaluation Agent.
+
+h4. Key Deliverables
+
+* Context store.
+* Feedback loop.
+* Agent routing.
+* Metadata enrichment suggestion workflow.
+* Answer quality feedback capture.
+
+h4. Exit Criteria
+
+* Acronyms and aliases improve query interpretation.
+* Historical Q&A can be retrieved but does not override authoritative metadata.
+* Feedback is captured and reviewable.
+* Supervisor Agent routes user questions to the appropriate retrieval flow.
+* Enrichment suggestions require human approval before metadata updates.
+
+h4. Rationale
+
+Agents should not be built before retrieval is trustworthy. The Context Plane is valuable after there is a reliable retrieval layer for agents to use.
+
+----
+
+h3. Phase 6 — Evaluation and Operations
+
+h4. Objective
+
+Make the platform measurable, supportable, and trusted.
+
+h4. In Scope
+
+* Golden question set.
+* Expected answer set.
+* Retrieval quality evaluation.
+* Lineage correctness evaluation.
+* Answer quality evaluation.
+* Access-control test suite.
+* Indexing dashboard.
+* Failed indexing queue.
+* Reindex controls.
+* Vector and graph count reconciliation.
+* Operational runbooks.
+
+h4. Key Deliverables
+
+* Evaluation suite.
+* Search quality dashboard.
+* Indexing dashboard.
+* Reindex APIs/admin controls.
+* Runbooks.
+* Regression reports.
+
+h4. Exit Criteria
+
+* Retrieval quality can be measured.
+* Lineage correctness can be tested.
+* Failed indexing records can be identified and retried.
+* Operators can reindex by *jrn* or entity type.
+* Access-control tests pass.
+
+h4. Rationale
+
+Trust is a product feature. If users cannot see sources, if operators cannot reindex data, or if teams cannot measure answer quality, adoption will suffer.
+
+----
+
+h3. Phase 7 — UI / UX Integration
+
+h4. Objective
+
+Expose the AI search and GraphRAG capabilities in the Data Compass user experience.
+
+h4. In Scope
+
+* Search result cards.
+* Source citation display.
+* Lineage answer display.
+* Clarification UI.
+* Feedback UI.
+* Bookmark UI.
+* No-answer and restricted-answer states.
+
+h4. Key Deliverables
+
+* UI integration with Search Service.
+* AI answer panel.
+* Source reference display.
+* Feedback controls.
+* Lineage path visualization.
+
+h4. Exit Criteria
+
+* Users can run exact, semantic, and lineage searches from the UI.
+* Results show entity type, lifecycle status, source reference, and matched snippet.
+* Users can provide feedback.
+* Ambiguous results can be resolved through UI clarification.
+
+h4. Rationale
+
+UI integration should follow the backend foundation. The early phases can be validated with APIs, but durable adoption requires a clean Data Compass UI experience.
+
+h2. 12. Phasing Rationale
+
+h3. 12.1 Why Metadata Foundation Comes First
+
+The AI layer depends on stable metadata identity. If *jrn* construction, *guid* usage, and lifecycle handling are unclear, then chunks, embeddings, graph nodes, and citations will be unstable.
+
+Key risks avoided:
+
+* Duplicate chunks.
+* Broken lineage edges.
+* Inability to reindex cleanly.
+* Incorrect source references.
+* Stale or deprecated assets appearing in search.
+
+h3. 12.2 Why Vector Search Comes Before Advanced GraphRAG
+
+Semantic search can deliver early value with fewer dependencies than full GraphRAG. It also gives the team a way to test chunk quality before adding graph expansion and answer generation.
+
+Key benefits:
+
+* Early user-visible value.
+* Fast testing of chunk templates.
+* Clear feedback on semantic retrieval quality.
+* Lower initial complexity than GraphRAG.
+
+h3. 12.3 Why Graph Projection Comes After Identity Stabilization
+
+Graph quality depends on stable node identities and relationship references. If the graph is built before identity rules are settled, it may need to be rebuilt repeatedly.
+
+Key benefits of waiting:
+
+* Cleaner graph schema.
+* Fewer duplicate nodes.
+* Better lineage correctness.
+* Easier graph count reconciliation.
+
+h3. 12.4 Why Agents Are Deferred
+
+Agents should orchestrate reliable tools. They should not compensate for missing retrieval quality or unstable metadata. Building agents too early can hide foundational problems and create false confidence.
+
+Key benefits of deferral:
+
+* Agents will use tested APIs.
+* The system can enforce security consistently.
+* Answer quality can be measured before automation expands.
+* Human approval can be designed before enrichment updates are allowed.
+
+h3. 12.5 Why Events Are Deferred and Summarized
+
+Event data can be large, repetitive, and noisy. Embedding every raw event is likely to increase cost and reduce retrieval quality. Summaries are more useful for AI answers.
+
+Recommended event approach:
+
+* Summarize usage by asset.
+* Summarize quality failures by metric and asset.
+* Summarize process executions by process and date range.
+* Summarize contract breaches by contract and commitment type.
+
+h2. 13. Cross-Phase Dependencies
+
+|| Dependency || Required Before || Why It Matters ||
+| MVP entity scope | Phase 1 build | Determines which collections/readers/validators are needed |
+| GUID/JRN identity rules | Chunking, vector indexing, graph loading | Required for deterministic IDs and relationship edges |
+| Relationship resolution rules | Chunking and graph projection | Required for relationship-aware search and lineage |
+| Lifecycle handling rules | Search and security | Prevents stale/deprecated assets from being returned |
+| Chunk schema | Embedding and vector indexing | Defines what is embedded and how results are traced |
+| Security filter model | Search service and GraphRAG | Prevents unauthorized context from reaching LLM |
+| Graph schema | Neo4j loaders and traversal | Defines graph model and relationship types |
+| Golden questions | Evaluation | Measures quality and prevents regressions |
+
+h2. 14. Release Gates
+
+h3. Gate 0 — Architecture Readiness
+
+* MVP scope approved.
+* ADRs created for key decisions.
+* Identity rules documented.
+* Open questions assigned.
+* Phase 1 Jira stories refined.
+
+h3. Gate 1 — Metadata Foundation Readiness
+
+* MVP entities can be read.
+* Required field validation works.
+* JRN relationship resolver works for selected relationships.
+* Indexing status records are created.
+
+h3. Gate 2 — Vector Search Readiness
+
+* Chunk generation works for MVP entities.
+* Embeddings are created.
+* Vector search returns source-backed results.
+* Lifecycle filters work.
+* Reindex by source JRN works.
+
+h3. Gate 3 — Graph Readiness
+
+* Neo4j schema deployed.
+* Graph nodes and edges load from canonical metadata.
+* Upstream/downstream traversal works.
+* Graph counts reconcile with source records.
+
+h3. Gate 4 — GraphRAG Readiness
+
+* Intent classifier routes questions correctly.
+* Entity resolver handles ambiguity.
+* Context assembler preserves source references.
+* Answer composer avoids unsupported claims.
+
+h3. Gate 5 — Production Readiness
+
+* Access-control test suite passes.
+* Golden question regression suite is available.
+* Reindex and failure handling are operational.
+* Runbooks are complete.
+* Monitoring is in place.
+
+h2. 15. MVP Acceptance Criteria
+
+The MVP will be accepted when the following are true:
+
+|| Category || Acceptance Criteria ||
+| Functional | MVP entities are indexed into AI chunks and searchable |
+| Exact Search | Users can search by *guid*, *jrn*, name, schema/store, and owner |
+| Semantic Search | Business-language questions return relevant chunks in top results |
+| Source Traceability | Every result includes source collection, entity type, *guid*, and *jrn* |
+| Lifecycle Filtering | Deprecated/rejected assets are excluded by default |
+| Relationship Awareness | Distribution-Dataset, DataService-Distribution, and basic lineage relationships are represented |
+| Reindexing | One source asset can be reindexed deterministically |
+| Security | Restricted records are filtered before LLM context assembly |
+| Evaluation | Initial golden question set can be run and reviewed |
+| Operations | Failed indexing records are logged with reason |
+
+h2. 16. Phase-to-Jira Mapping
+
+|| Phase || Primary Jira Epics ||
+| Phase 0 | EPIC 1: Architecture and Planning; EPIC 2: Canonical Metadata Foundation |
+| Phase 1 | EPIC 3: Metadata Ingestion Service; EPIC 10: Security and Access Control |
+| Phase 2 | EPIC 4: AI Document and Chunk Builder; EPIC 5: Embedding and Vector Indexing; EPIC 7: Search Service |
+| Phase 3 | EPIC 6: Graph Projection and Neo4j Builder; EPIC 7: Search Service |
+| Phase 4 | EPIC 8: GraphRAG Orchestration; EPIC 10: Security and Access Control |
+| Phase 5 | EPIC 9: Context Plane and Agent Layer; EPIC 13: UI / UX Integration |
+| Phase 6 | EPIC 11: Evaluation and Quality; EPIC 12: Operations and Monitoring |
+| Phase 7 | EPIC 13: UI / User Experience Integration |
+
+h2. 17. Phase 0 Jira Stories
+
+|| Story ID || Story || Purpose ||
+| DC-AI-001 | Create Confluence Space and Page Structure | Establish project documentation structure |
+| DC-AI-002 | Document Current-State Architecture | Capture current system view and known gaps |
+| DC-AI-003 | Document Target-State Architecture | Define target architecture and responsibilities |
+| DC-AI-004 | Create Architecture Decision Log | Track key decisions and rationale |
+| DC-AI-005 | Define MVP Scope and Phasing | Finalize scope and delivery plan |
+| DC-AI-006 | Create Risk and Pitfall Register | Capture project delivery and architecture risks |
+| DC-AI-007 | Create Open Questions Register | Track unresolved decisions and dependencies |
+| DC-AI-008 | Create Golden Question Categories | Establish evaluation categories |
+
+h2. 18. Phase 1 Jira Stories
+
+|| Story ID || Story || Purpose ||
+| DC-AI-010 | Confirm MVP Entity Scope | Approve entities included in MVP |
+| DC-AI-011 | Define GUID and JRN Identity Rules | Lock source identity and relationship key rules |
+| DC-AI-012 | Define Deterministic Chunk ID Format | Support idempotent upserts and reindexing |
+| DC-AI-013 | Define Canonical Field Requirements | Define required and optional fields by entity |
+| DC-AI-014 | Define Relationship Resolution Rules | Define how relationships are resolved from *jrn* references |
+| DC-AI-015 | Define Lifecycle Status Handling | Define indexing/search behavior by lifecycle status |
+| DC-AI-016 | Define Classification Metadata Handling | Define how classification fields are captured and filtered |
+| DC-AI-020 | Build MongoDB Reader for MVP Entities | Read selected collections from source MongoDB |
+| DC-AI-021 | Build Entity Validator | Validate source records before projection |
+| DC-AI-022 | Build JRN Relationship Resolver | Resolve cross-entity references |
+| DC-AI-023 | Build Node Resolver | Resolve node references |
+| DC-AI-024 | Build Owner Resolver | Normalize owner SID and role metadata |
+| DC-AI-025 | Build Indexing Status Collection | Track projection status by source entity |
+| DC-AI-026 | Build Source Change Detection | Identify records requiring reindexing |
+| DC-AI-027 | Build Retry and Failure Handling | Capture failed records and support retry |
+
+h2. 19. Phase 2 Jira Stories
+
+|| Story ID || Story || Purpose ||
+| DC-AI-030 | Define AI Chunk Schema | Define the standard AI chunk payload |
+| DC-AI-031 | Build Distribution Summary Chunk Template | Generate readable chunks for physical assets |
+| DC-AI-032 | Build Dataset Summary Chunk Template | Generate readable chunks for logical assets |
+| DC-AI-033 | Build Attribute-Level Chunk Template | Enable attribute and column-level search |
+| DC-AI-034 | Build DataService Chunk Template | Describe service exposure metadata |
+| DC-AI-035 | Build DataFlow Lineage Chunk Template | Describe provider-consumer lineage |
+| DC-AI-036 | Build DataProcess Transformation Chunk Template | Describe process inputs, outputs, and transformations |
+| DC-AI-037 | Build Report Summary Chunk Template | Describe reports and dependencies |
+| DC-AI-038 | Build Chunk Generation Batch Job | Generate chunks by entity type or source JRN |
+| DC-AI-039 | Build Chunk Quality Review Samples | Provide sample chunks for stakeholder validation |
+| DC-AI-040 | Select Embedding Model and Configuration | Confirm model, dimensions, and security considerations |
+| DC-AI-041 | Build Embedding Service Wrapper | Generate embeddings from chunk text |
+| DC-AI-042 | Create MongoDB Atlas Vector Index | Configure vector index and metadata filters |
+| DC-AI-043 | Build Vector Upsert Service | Store chunks and embeddings deterministically |
+| DC-AI-044 | Build Vector Delete/Deprecate Handling | Exclude or deactivate stale records |
+| DC-AI-045 | Build Semantic Search Smoke Test | Validate vector search against golden questions |
+| DC-AI-046 | Track Embedding Model Version | Preserve model/version traceability |
+| DC-AI-047 | Build Reindex by Source JRN | Rebuild one asset's chunks and embeddings |
+| DC-AI-048 | Build Reindex by Entity Type | Rebuild full entity type projections |
+
+h2. 20. Phase 3 Jira Stories
+
+|| Story ID || Story || Purpose ||
+| DC-AI-050 | Define Neo4j Graph Schema | Define node labels, relationships, properties, and indexes |
+| DC-AI-051 | Build Cypher Schema Runner | Deploy graph constraints and indexes repeatably |
+| DC-AI-052 | Build Distribution/Dataset Graph Loader | Load core asset nodes and relationships |
+| DC-AI-053 | Build Attribute Graph Loader | Load attributes and containment relationships |
+| DC-AI-054 | Build DataService Graph Loader | Load service exposure relationships |
+| DC-AI-055 | Build DataFlow Graph Loader | Load observed lineage relationships |
+| DC-AI-056 | Build DataProcess Graph Loader | Load process consumption and production relationships |
+| DC-AI-057 | Build Report Dependency Graph Loader | Load report-to-asset dependencies |
+| DC-AI-058 | Build Upstream Traversal Query | Support upstream analysis by JRN |
+| DC-AI-059 | Build Downstream Traversal Query | Support downstream impact analysis by JRN |
+
+h2. 21. Phase 4 Jira Stories
+
+|| Story ID || Story || Purpose ||
+| DC-AI-060 | Build Exact Metadata Search API | Support structured lookup by GUID, JRN, name, owner, schema, report ID |
+| DC-AI-061 | Build Semantic Search API | Support natural-language search over AI chunks |
+| DC-AI-062 | Build Graph Search API | Expose controlled graph traversal |
+| DC-AI-063 | Build Hybrid Search API | Combine exact, vector, and graph results |
+| DC-AI-064 | Build Source Record Hydration | Fetch authoritative MongoDB records for search results |
+| DC-AI-065 | Build Source Citation Output | Return source references for grounded answers |
+| DC-AI-066 | Build Result Deduplication | Deduplicate search results by source JRN |
+| DC-AI-067 | Build Result Ranking Rules | Rank based on relevance, lifecycle, ownership, and graph proximity |
+| DC-AI-070 | Build Question Intent Classifier | Route questions to the correct retrieval strategy |
+| DC-AI-071 | Build Entity Resolver | Resolve user mentions to canonical entities/JRNs |
+| DC-AI-072 | Build Ambiguity Handling Flow | Ask clarification when multiple assets match |
+| DC-AI-073 | Build Graph Expansion Service | Expand results through graph relationships |
+| DC-AI-074 | Build Context Assembler | Combine chunks, records, and graph paths into bounded context |
+| DC-AI-075 | Build Answer Composer | Generate grounded answers |
+| DC-AI-076 | Build Missing Metadata Response Behavior | Avoid hallucination when metadata is unavailable |
+| DC-AI-077 | Build Lineage Answer Template | Format lineage answers with paths and sources |
+
+h2. 22. Phase 5 Jira Stories
+
+|| Story ID || Story || Purpose ||
+| DC-AI-080 | Build Acronyms Loader | Load enterprise acronyms for query interpretation |
+| DC-AI-081 | Build Business Alias Manager | Map alternate terms to canonical metadata |
+| DC-AI-082 | Build Historical Q&A Store | Reuse validated Q&A with source awareness |
+| DC-AI-083 | Build User Bookmarks | Allow user-scoped asset bookmarking |
+| DC-AI-084 | Build Feedback Capture | Capture feedback on answers and search results |
+| DC-AI-085 | Build Supervisor Agent | Route requests to retrieval/agent flows |
+| DC-AI-086 | Build Structured Discovery Agent | Convert vague questions into structured search plans |
+| DC-AI-087 | Build Metadata Enrichment Agent | Suggest metadata improvements with evidence |
+| DC-AI-088 | Build Answer Evaluation Agent | Evaluate groundedness and source support |
+
+h2. 23. Phase 6 Jira Stories
+
+|| Story ID || Story || Purpose ||
+| DC-AI-090 | Define Retrieval Access Control Model | Define role, owner, node, lifecycle, and classification rules |
+| DC-AI-091 | Implement Exact Search Filters | Apply access filters to exact search |
+| DC-AI-092 | Implement Semantic Search Filters | Apply access filters to vector search |
+| DC-AI-093 | Implement Graph Search Filters | Apply access filters to graph traversal |
+| DC-AI-094 | Prevent Restricted Context Assembly | Ensure restricted records never enter LLM context |
+| DC-AI-095 | Implement Audit Logging | Log queries, filters, and source references |
+| DC-AI-096 | Build Access-Control Test Suite | Validate restricted retrieval prevention |
+| DC-AI-097 | Define Sensitive Metadata Handling | Define logging/display rules for sensitive metadata |
+| DC-AI-100 | Create Golden Question Set | Create representative evaluation questions |
+| DC-AI-101 | Define Expected Answers | Document expected result sets and source references |
+| DC-AI-102 | Build Retrieval Quality Evaluation | Measure Top-K retrieval accuracy |
+| DC-AI-103 | Build Lineage Correctness Evaluation | Validate traversal correctness |
+| DC-AI-104 | Build Answer Quality Evaluation | Evaluate groundedness and citation coverage |
+| DC-AI-105 | Build Hallucination Test Cases | Test missing-data and unsupported-claim behavior |
+| DC-AI-106 | Build Regression Test Report | Produce recurring test reports |
+| DC-AI-107 | Create Human Review Workflow | Define quality review process |
+| DC-AI-110 | Build Indexing Dashboard | Show index status by entity and source |
+| DC-AI-111 | Build Failed Indexing Queue | Show failed records and retry status |
+| DC-AI-112 | Build Reindex by JRN | Reindex one asset |
+| DC-AI-113 | Build Reindex by Entity Type | Reindex full entity type |
+| DC-AI-114 | Build Vector Count Reconciliation | Compare source records to vector chunks |
+| DC-AI-115 | Build Graph Count Reconciliation | Compare source records to graph nodes/edges |
+| DC-AI-116 | Build Search Quality Dashboard | Track retrieval quality over time |
+| DC-AI-117 | Create Operational Runbooks | Document support procedures |
+| DC-AI-118 | Add Cost and Latency Monitoring | Track cost and performance |
+
+h2. 24. Phase 7 Jira Stories
+
+|| Story ID || Story || Purpose ||
+| DC-AI-120 | Define Search UI Experience | Define user workflow and UI behavior |
+| DC-AI-121 | Build Search Result Card | Show entity name, type, lifecycle, source, and snippet |
+| DC-AI-122 | Build Source Citation Display | Show source GUID/JRN and metadata link |
+| DC-AI-123 | Build Lineage Answer Display | Show upstream/downstream paths |
+| DC-AI-124 | Build Clarification UI | Let users choose among ambiguous matches |
+| DC-AI-125 | Build User Feedback UI | Capture helpful/not helpful and incorrect-source feedback |
+| DC-AI-126 | Build Bookmark UI | Allow users to bookmark assets |
+| DC-AI-127 | Build No-Answer State | Show clear message when metadata is missing or inaccessible |
+
+h2. 25. MVP Golden Questions
+
+h3. Exact Lookup
+
+* Find Distribution by JRN.
+* Find Dataset by name.
+* Find Report by report identification number.
+* Find assets owned by a SID.
+* Find tables in a specific schema/store.
+
+h3. Semantic Discovery
+
+* Find datasets related to customer risk.
+* Find assets related to trade exposure.
+* Find reports that use liquidity data.
+* Find services exposing customer information.
+* Find attributes that represent customer identifiers.
+
+h3. Lineage / Impact
+
+* What is upstream of Distribution X?
+* What is downstream of Distribution X?
+* Which reports depend on Dataset X?
+* Which DataProcesses produce Distribution X?
+* Which services expose Distribution X?
+
+h3. Governance / Classification
+
+* Which assets contain personal information?
+* Which attributes are highly confidential?
+* Which assets are deprecated?
+* Which datasets have purge indicators?
+* Which nodes are authoritative sources?
+
+h3. Missing / Ambiguous Metadata
+
+* Ask for an asset name that maps to multiple objects and confirm clarification is requested.
+* Ask for lineage for an asset with no relationship data and confirm the answer states data is unavailable.
+* Ask for a restricted asset and confirm unauthorized results are not returned.
+
+h2. 26. Success Metrics by Phase
+
+|| Phase || Metrics || Target for Initial Release ||
+| Phase 1 | Entity read success rate | 95%+ of valid MVP records read successfully |
+| Phase 1 | Relationship resolution rate | Baseline measured and unresolved references reported |
+| Phase 2 | Top-5 semantic retrieval accuracy | 80%+ on golden questions |
+| Phase 2 | Source reference coverage | 100% of vector results include source GUID/JRN |
+| Phase 3 | Lineage traversal correctness | 90%+ against expected lineage cases |
+| Phase 4 | Answer citation coverage | 95%+ answers include source references |
+| Phase 4 | Missing-data handling | 100% of unsupported answers avoid hallucination |
+| Phase 5 | Feedback capture rate | Feedback stored for all submitted user ratings |
+| Phase 6 | Unauthorized retrieval prevention | 100% pass rate on negative access tests |
+| Phase 6 | Reindex success rate | 95%+ successful reindex jobs |
+
+h2. 27. Key Risks to Watch During Phasing
+
+|| Risk || Most Relevant Phase || Mitigation ||
+| JRN is not stable across crawls | Phase 0/1 | Finalize deterministic JRN rules before chunking and graph loading |
+| Relationship references are incomplete | Phase 1/3 | Log unresolved references and create reconciliation reports |
+| Chunks are too generic or too raw | Phase 2 | Review sample chunks with users before full indexing |
+| Deprecated assets appear in answers | Phase 2/4 | Enforce lifecycle filters before retrieval and context assembly |
+| Vector search returns semantically plausible but wrong assets | Phase 2/4 | Combine exact filters, source hydration, and graph expansion |
+| Graph becomes a second source of truth | Phase 3 | Make graph rebuildable from MongoDB/canonical metadata |
+| Agents produce unsupported answers | Phase 4/5 | Require source-backed context and answer evaluation |
+| Security is added too late | All phases | Build retrieval filters and access tests early |
+| No operational visibility | Phase 6 | Build indexing dashboard and reindex tools |
+
+h2. 28. Recommended First Sprint Scope
+
+The first sprint should focus on scope, architecture, and identity decisions rather than implementation.
+
+Recommended first sprint stories:
+
+* DC-AI-001 — Create Confluence Space and Page Structure
+* DC-AI-002 — Document Current-State Architecture
+* DC-AI-003 — Document Target-State Architecture
+* DC-AI-004 — Create Architecture Decision Log
+* DC-AI-005 — Define MVP Scope and Phasing
+* DC-AI-010 — Confirm MVP Entity Scope
+* DC-AI-011 — Define GUID and JRN Identity Rules
+* DC-AI-014 — Define Relationship Resolution Rules
+* DC-AI-015 — Define Lifecycle Status Handling
+
+h2. 29. Product Owner Notes
+
+The MVP should not be positioned as a complete AI assistant. It should be positioned as the first trusted foundation for AI-ready metadata discovery.
+
+The key message to stakeholders should be:
+
+bq. The MVP proves that Data Compass metadata can be normalized, chunked, embedded, searched, filtered, traced back to source, and expanded through relationships. Once that foundation is trusted, GraphRAG, context plane, and agents can be added safely.
+
