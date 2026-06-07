@@ -1,14 +1,15 @@
-h1. 14. Operations, Monitoring, and Reindexing
+# 14. Operations, Monitoring, and Reindexing
 
-h2. 1. Purpose
+## 1. Purpose
 
 This page defines the operational capabilities required to run, monitor, troubleshoot, and reindex the Data Compass AI Modernization platform.
 
 Without strong operations, users will not trust AI search results. Every derived projection must be observable, explainable, and rebuildable.
 
-h2. 2. Operational Principles
+## 2. Operational Principles
 
-|| Principle || Description ||
+| Principle | Description |
+| --- | --- |
 | Source reconciliation | Compare MongoDB source records to chunks, vector records, and graph nodes. |
 | Reindexability | Rebuild one asset, one entity type, or entire projections. |
 | Failure visibility | Failed records must be visible with reason and retry status. |
@@ -16,9 +17,9 @@ h2. 2. Operational Principles
 | Auditability | Search, indexing, and answer sources must be traceable. |
 | Cost awareness | Embedding and query costs should be tracked. |
 
-h2. 3. Indexing Status Model
+## 3. Indexing Status Model
 
-{code:language=json}
+```json
 {
   "source_guid": "",
   "source_jrn": "",
@@ -33,46 +34,47 @@ h2. 3. Indexing Status Model
   "failure_reason": "",
   "retry_count": 0
 }
-{code}
+```
 
-h2. 4. Dashboards
+## 4. Dashboards
 
-h3. Indexing Dashboard
-
-Show:
-
-* records by entity type
-* chunk generation status
-* vector indexing status
-* graph sync status
-* failed records
-* retry counts
-* last successful run
-
-h3. Reconciliation Dashboard
+### Indexing Dashboard
 
 Show:
 
-* MongoDB source count
-* chunk count
-* vector record count
-* Neo4j node count
-* Neo4j relationship count
-* mismatch count
+- records by entity type
+- chunk generation status
+- vector indexing status
+- graph sync status
+- failed records
+- retry counts
+- last successful run
 
-h3. Search Quality Dashboard
+### Reconciliation Dashboard
 
 Show:
 
-* golden question pass rate
-* failed search cases
-* top-K retrieval metrics
-* no-answer count
-* user feedback trend
+- MongoDB source count
+- chunk count
+- vector record count
+- Neo4j node count
+- Neo4j relationship count
+- mismatch count
 
-h2. 5. Reindexing Modes
+### Search Quality Dashboard
 
-|| Mode || Purpose ||
+Show:
+
+- golden question pass rate
+- failed search cases
+- top-K retrieval metrics
+- no-answer count
+- user feedback trend
+
+## 5. Reindexing Modes
+
+| Mode | Purpose |
+| --- | --- |
 | Reindex by source jrn | Fix one asset. |
 | Reindex by guid | Fix one source record. |
 | Reindex by entity type | Rebuild all Distributions, Datasets, etc. |
@@ -82,24 +84,25 @@ h2. 5. Reindexing Modes
 | Reindex by embedding model version | Re-embed after model change. |
 | Rebuild graph projection | Full graph rebuild. |
 
-h2. 6. Failure Queue
+## 6. Failure Queue
 
 Failure records should include:
 
-* source guid
-* source jrn
-* entity type
-* stage failed
-* error code
-* error message
-* retryable flag
-* retry count
-* last attempted timestamp
-* owner/team
+- source guid
+- source jrn
+- entity type
+- stage failed
+- error code
+- error message
+- retryable flag
+- retry count
+- last attempted timestamp
+- owner/team
 
-h2. 7. Common Failure Types
+## 7. Common Failure Types
 
-|| Failure || Likely Cause || Handling ||
+| Failure | Likely Cause | Handling |
+| --- | --- | --- |
 | Missing jrn | Source quality issue | Quarantine and report. |
 | Missing relationship target | Orphan reference | Log and continue partial projection. |
 | Invalid lifecycle | Data validation issue | Mark validation failed. |
@@ -108,23 +111,24 @@ h2. 7. Common Failure Types
 | Neo4j constraint failure | Duplicate or bad key | Investigate identity rules. |
 | Access filter failure | Missing security metadata | Block from search until resolved. |
 
-h2. 8. Runbooks
+## 8. Runbooks
 
 Required runbooks:
 
-* How to reindex one asset by jrn.
-* How to reindex one entity type.
-* How to rebuild vector index.
-* How to rebuild Neo4j graph.
-* How to investigate failed chunks.
-* How to investigate low search quality.
-* How to investigate missing lineage.
-* How to handle embedding model change.
-* How to handle schema/template version change.
+- How to reindex one asset by jrn.
+- How to reindex one entity type.
+- How to rebuild vector index.
+- How to rebuild Neo4j graph.
+- How to investigate failed chunks.
+- How to investigate low search quality.
+- How to investigate missing lineage.
+- How to handle embedding model change.
+- How to handle schema/template version change.
 
-h2. 9. Monitoring Metrics
+## 9. Monitoring Metrics
 
-|| Metric || Purpose ||
+| Metric | Purpose |
+| --- | --- |
 | ingestion records processed | Throughput. |
 | validation failure rate | Source quality. |
 | chunk generation success rate | Chunk builder health. |
@@ -136,9 +140,10 @@ h2. 9. Monitoring Metrics
 | retrieval quality score | Search quality. |
 | feedback negative rate | User trust. |
 
-h2. 10. Build Requirements
+## 10. Build Requirements
 
-|| ID || Requirement || Priority ||
+| ID | Requirement | Priority |
+| --- | --- | --- |
 | OPS-001 | Build indexing dashboard | P0 |
 | OPS-002 | Build failed indexing queue | P0 |
 | OPS-003 | Build reindex by jrn | P1 |
@@ -149,18 +154,19 @@ h2. 10. Build Requirements
 | OPS-008 | Create operational runbooks | P1 |
 | OPS-009 | Add cost and latency monitoring | P2 |
 
-h2. 11. Acceptance Criteria
+## 11. Acceptance Criteria
 
-* Operators can see indexing state by entity type.
-* Failed records are visible with reason and retry count.
-* One asset can be reindexed by jrn.
-* Entity type reindexing is supported.
-* Source/chunk/vector/graph counts can be reconciled.
-* Runbooks exist for common support scenarios.
+- Operators can see indexing state by entity type.
+- Failed records are visible with reason and retry count.
+- One asset can be reindexed by jrn.
+- Entity type reindexing is supported.
+- Source/chunk/vector/graph counts can be reconciled.
+- Runbooks exist for common support scenarios.
 
-h2. 12. Related Jira Stories
+## 12. Related Jira Stories
 
-|| Jira || Summary ||
+| Jira | Summary |
+| --- | --- |
 | DC-AI-110 | Build Indexing Dashboard |
 | DC-AI-111 | Build Failed Indexing Queue |
 | DC-AI-112 | Build Reindex by JRN |
@@ -171,9 +177,10 @@ h2. 12. Related Jira Stories
 | DC-AI-117 | Create Operational Runbooks |
 | DC-AI-118 | Add Cost and Latency Monitoring |
 
-h2. 13. Open Questions
+## 13. Open Questions
 
-|| ID || Question || Impact ||
+| ID | Question | Impact |
+| --- | --- | --- |
 | OQ-OPS-001 | What tool will host the operational dashboard? | Implementation. |
 | OQ-OPS-002 | What alerting thresholds are required? | Support model. |
 | OQ-OPS-003 | Who owns failed record remediation? | Operating model. |

@@ -1,29 +1,30 @@
-h1. 18. Jira Backlog Map
+# 18. Jira Backlog Map
 
-h2. 1. Purpose
+## 1. Purpose
 
 This page maps the Data Compass AI Modernization Confluence architecture package to the Jira initiative, epics, stories, labels, components, and delivery workflow.
 
-h2. 2. Jira Hierarchy
+## 2. Jira Hierarchy
 
-{code}
+```
 Initiative: Data Compass AI Modernization
    -> Epic
       -> Story
          -> Sub-task
-{code}
+```
 
-h2. 3. Initiative
+## 3. Initiative
 
-*Name:* Data Compass AI Modernization
+**Name:** Data Compass AI Modernization
 
-*Description:*
+**Description:**
 
 Deliver an AI-ready Data Compass metadata platform using MongoDB as the authoritative metadata source, vector search for semantic retrieval, Neo4j for graph relationship traversal, GraphRAG for grounded question answering, and a Context Plane for enterprise context and agent orchestration.
 
-h2. 4. Epics
+## 4. Epics
 
-|| Epic || Name || Description || Confluence Pages ||
+| Epic | Name | Description | Confluence Pages |
+| --- | --- | --- | --- |
 | EPIC-1 | Architecture and Planning | Define architecture, scope, decisions, risks, and delivery structure. | 00, 01, 02, 03, 15, 16, 17 |
 | EPIC-2 | Canonical Metadata Foundation | Define normalized model, identity, relationships, lifecycle, classification. | 04 |
 | EPIC-3 | Metadata Ingestion Service | Read, validate, resolve, and prepare MongoDB metadata. | 05 |
@@ -38,85 +39,86 @@ h2. 4. Epics
 | EPIC-12 | Operations and Monitoring | Build reindexing, dashboards, reconciliation, runbooks. | 14 |
 | EPIC-13 | UI / User Experience Integration | Integrate search, lineage, citations, feedback in UI. | 19 |
 
-h2. 5. Labels
+## 5. Labels
 
 Use these Jira labels:
 
-* data-compass-ai
-* metadata
-* graphrag
-* vector-search
-* mongodb
-* neo4j
-* lineage
-* context-plane
-* security
-* mvp
-* canonical-model
-* ai-chunks
-* evaluation
-* operations
+- data-compass-ai
+- metadata
+- graphrag
+- vector-search
+- mongodb
+- neo4j
+- lineage
+- context-plane
+- security
+- mvp
+- canonical-model
+- ai-chunks
+- evaluation
+- operations
 
-h2. 6. Components
+## 6. Components
 
 Use these Jira components:
 
-* Canonical Model
-* Ingestion
-* Chunk Builder
-* Vector Index
-* Neo4j Graph
-* Search Service
-* GraphRAG
-* Context Plane
-* Agents
-* Security
-* Evaluation
-* Operations
-* UI
+- Canonical Model
+- Ingestion
+- Chunk Builder
+- Vector Index
+- Neo4j Graph
+- Search Service
+- GraphRAG
+- Context Plane
+- Agents
+- Security
+- Evaluation
+- Operations
+- UI
 
-h2. 7. Workflow
+## 7. Workflow
 
 Recommended Jira workflow:
 
-# Backlog
-# Ready for Refinement
-# Ready for Sprint
-# In Progress
-# Blocked
-# In Review
-# Ready for Demo
-# Done
+1. Backlog
+1. Ready for Refinement
+1. Ready for Sprint
+1. In Progress
+1. Blocked
+1. In Review
+1. Ready for Demo
+1. Done
 
-h2. 8. Definition of Ready
+## 8. Definition of Ready
 
 A story is Ready when:
 
-* Objective is clear.
-* Requirements are documented.
-* Dependencies are identified.
-* Acceptance criteria are written.
-* Related Confluence page is linked.
-* Security impact is understood.
-* Test/evidence expectation is defined.
+- Objective is clear.
+- Requirements are documented.
+- Dependencies are identified.
+- Acceptance criteria are written.
+- Related Confluence page is linked.
+- Security impact is understood.
+- Test/evidence expectation is defined.
 
-h2. 9. Definition of Done
+## 9. Definition of Done
 
 A story is Done when:
 
-* Work is completed.
-* Acceptance criteria are met.
-* Unit/integration tests are complete where applicable.
-* Evidence is attached to Jira.
-* Related Confluence page is updated.
-* Demo is completed where required.
-* Operational notes are added if applicable.
+- Work is completed.
+- Acceptance criteria are met.
+- Unit/integration tests are complete where applicable.
+- Evidence is attached to Jira.
+- Related Confluence page is updated.
+- Demo is completed where required.
+- Operational notes are added if applicable.
 
-h2. 10. First Sprint Recommendation
+## 10. First Sprint Recommendation
 
 Pull these first:
 
-|| Story || Reason ||
+| Story | Reason |
+| --- | --- |
 | DC-AI-001 | Create Confluence structure. |
 | DC-AI-002 | Document current-state architecture. |
 | DC-AI-003 | Document target-state architecture. |
@@ -127,10 +129,10 @@ Pull these first:
 | DC-AI-014 | Define relationship resolution rules. |
 | DC-AI-015 | Define lifecycle status handling. |
 
-h2. 11. Dependency Rules
+## 11. Dependency Rules
 
-* Do not start vector indexing until chunk schema and metadata filters are approved.
-* Do not start Neo4j loaders until graph schema and jrn identity rules are approved.
-* Do not start agents until basic search APIs work.
-* Do not start answer generation until source citation strategy is defined.
-* Do not launch MVP until security negative tests pass.
+- Do not start vector indexing until chunk schema and metadata filters are approved.
+- Do not start Neo4j loaders until graph schema and jrn identity rules are approved.
+- Do not start agents until basic search APIs work.
+- Do not start answer generation until source citation strategy is defined.
+- Do not launch MVP until security negative tests pass.

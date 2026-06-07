@@ -1,12 +1,13 @@
-h1. 19. Demo Evidence and Test Results
+# 19. Demo Evidence and Test Results
 
-h2. 1. Purpose
+## 1. Purpose
 
 This page captures evidence that Data Compass AI Modernization capabilities are working. It should be used during demos, sprint reviews, release readiness reviews, and production readiness reviews.
 
-h2. 2. Evidence Types
+## 2. Evidence Types
 
-|| Evidence Type || Examples ||
+| Evidence Type | Examples |
+| --- | --- |
 | API Response | Exact search response, semantic search response, graph traversal response. |
 | Screenshots | UI search results, lineage path display, feedback form. |
 | Query Results | MongoDB query, vector search result, Neo4j Cypher result. |
@@ -15,9 +16,10 @@ h2. 2. Evidence Types
 | Reconciliation | Source/chunk/vector/graph count comparison. |
 | Demo Recording | Sprint demo recording or walkthrough. |
 
-h2. 3. Demo Log
+## 3. Demo Log
 
-|| Date || Capability || Jira Items || Evidence Link || Demo Result || Notes ||
+| Date | Capability | Jira Items | Evidence Link | Demo Result | Notes |
+| --- | --- | --- | --- | --- | --- |
 |  | Exact Search API | DC-AI-060 |  |  |  |
 |  | Semantic Search API | DC-AI-061 |  |  |  |
 |  | Vector Indexing | DC-AI-040 to DC-AI-048 |  |  |  |
@@ -26,10 +28,11 @@ h2. 3. Demo Log
 |  | Security Filters | DC-AI-090 to DC-AI-097 |  |  |  |
 |  | Operations Dashboard | DC-AI-110 to DC-AI-118 |  |  |  |
 
-h2. 4. Test Result Summary
+## 4. Test Result Summary
 
-|| Test Set || Date || Build Version || Pass Rate || Failures || Owner || Notes ||
-| Exact Search |  |  |  |  |  |  |
+| Test Set | Date | Build Version | Pass Rate | Failures | Owner | Notes |  |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Exact Search |  |  |  |  |  |  |  |
 | Semantic Search |  |  |  |  |  |  |  |
 | Graph Lineage |  |  |  |  |  |  |  |
 | GraphRAG Answer Quality |  |  |  |  |  |  |  |
@@ -37,9 +40,9 @@ h2. 4. Test Result Summary
 | Reindexing |  |  |  |  |  |  |  |
 | Count Reconciliation |  |  |  |  |  |  |  |
 
-h2. 5. Evidence Template
+## 5. Evidence Template
 
-{code}
+```
 h2. Evidence: <Capability Name>
 
 *Date:*
@@ -67,27 +70,28 @@ Pass / Fail / Partial
 h3. Notes
 
 Follow-up actions, defects, observations.
-{code}
+```
 
-h2. 6. Release Evidence Checklist
+## 6. Release Evidence Checklist
 
 Before MVP release, evidence should exist for:
 
-* MongoDB reader for MVP entities.
-* Entity validation and failure logging.
-* AI chunk generation samples.
-* Vector index creation.
-* Semantic search smoke test.
-* Exact search API.
-* Graph schema and basic loaders.
-* Upstream/downstream traversal.
-* Source citation output.
-* Security filtering tests.
-* Reindex by source jrn.
-* Count reconciliation.
-* Golden question evaluation.
+- MongoDB reader for MVP entities.
+- Entity validation and failure logging.
+- AI chunk generation samples.
+- Vector index creation.
+- Semantic search smoke test.
+- Exact search API.
+- Graph schema and basic loaders.
+- Upstream/downstream traversal.
+- Source citation output.
+- Security filtering tests.
+- Reindex by source jrn.
+- Count reconciliation.
+- Golden question evaluation.
 
-h2. 7. Failed Demo / Test Tracking
+## 7. Failed Demo / Test Tracking
 
-|| ID || Failure || Related Jira || Severity || Owner || Target Fix || Status ||
+| ID | Failure | Related Jira | Severity | Owner | Target Fix | Status |
+| --- | --- | --- | --- | --- | --- | --- |
 |  |  |  |  |  |  |  |

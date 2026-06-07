@@ -1,12 +1,13 @@
-h1. 17. Open Questions and Dependencies
+# 17. Open Questions and Dependencies
 
-h2. 1. Purpose
+## 1. Purpose
 
 This page tracks open questions, decisions needed, dependencies, owners, and target dates for Data Compass AI Modernization.
 
-h2. 2. Open Questions
+## 2. Open Questions
 
-|| ID || Question || Impact || Owner || Needed By || Status ||
+| ID | Question | Impact | Owner | Needed By | Status |
+| --- | --- | --- | --- | --- | --- |
 | OQ-001 | Does the crawler mint guid and jrn, or does catalog DB assign them? | Blocks identity design. | TBD | Phase 0 | Open |
 | OQ-002 | What is the deterministic jrn format for each source platform? | Blocks chunks and graph nodes. | TBD | Phase 0 | Open |
 | OQ-003 | Which lifecycle statuses should be searchable by default? | Blocks retrieval filters. | TBD | Phase 0 | Open |
@@ -23,9 +24,10 @@ h2. 2. Open Questions
 | OQ-014 | What is the target golden question pass rate for release? | Blocks release gate. | TBD | Phase 4 | Open |
 | OQ-015 | What tool will host the operations dashboard? | Blocks operations implementation. | TBD | Phase 6 | Open |
 
-h2. 3. Dependency Register
+## 3. Dependency Register
 
-|| ID || Dependency || Type || Impact || Owner || Status ||
+| ID | Dependency | Type | Impact | Owner | Status |
+| --- | --- | --- | --- | --- | --- |
 | DEP-001 | MongoDB source collection access | Platform/Data | Required for ingestion. | TBD | Open |
 | DEP-002 | Data Compass data model approval | Architecture | Required for canonical contract. | TBD | Open |
 | DEP-003 | Embedding model approval | Security/Platform | Required for vector indexing. | TBD | Open |
@@ -37,51 +39,51 @@ h2. 3. Dependency Register
 | DEP-009 | Observability/logging platform | Operations | Required for dashboards and audit. | TBD | Open |
 | DEP-010 | Golden question reviewers | Evaluation | Required for quality gates. | TBD | Open |
 
-h2. 4. Decision Needed by Phase
+## 4. Decision Needed by Phase
 
-h3. Phase 0
+### Phase 0
 
-* MVP entity scope.
-* guid/jrn identity rules.
-* lifecycle filtering rules.
-* canonical relationship resolution rules.
-* ADR approval process.
+- MVP entity scope.
+- guid/jrn identity rules.
+- lifecycle filtering rules.
+- canonical relationship resolution rules.
+- ADR approval process.
 
-h3. Phase 1
+### Phase 1
 
-* MongoDB access and collection list.
-* validation rules.
-* indexing status schema.
-* change detection approach.
+- MongoDB access and collection list.
+- validation rules.
+- indexing status schema.
+- change detection approach.
 
-h3. Phase 2
+### Phase 2
 
-* embedding model.
-* vector index configuration.
-* metadata filters.
-* chunk text sensitivity exclusions.
+- embedding model.
+- vector index configuration.
+- metadata filters.
+- chunk text sensitivity exclusions.
 
-h3. Phase 3
+### Phase 3
 
-* Neo4j deployment model.
-* graph schema.
-* traversal depth defaults.
-* graph access-control strategy.
+- Neo4j deployment model.
+- graph schema.
+- traversal depth defaults.
+- graph access-control strategy.
 
-h3. Phase 4+
+### Phase 4+
 
-* answer generation model.
-* citation format.
-* confidence/clarification thresholds.
-* feedback review process.
+- answer generation model.
+- citation format.
+- confidence/clarification thresholds.
+- feedback review process.
 
-h2. 5. Escalation Criteria
+## 5. Escalation Criteria
 
 Escalate an open question when:
 
-* It blocks a P0 Jira story.
-* It blocks security design.
-* It changes architecture direction.
-* It affects production approval.
-* It impacts data privacy or compliance.
-* It delays current sprint commitment.
+- It blocks a P0 Jira story.
+- It blocks security design.
+- It changes architecture direction.
+- It affects production approval.
+- It impacts data privacy or compliance.
+- It delays current sprint commitment.

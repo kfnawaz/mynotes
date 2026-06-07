@@ -1,33 +1,34 @@
-h1. 07. Embedding and Vector Indexing
+# 07. Embedding and Vector Indexing
 
-h2. 1. Purpose
+## 1. Purpose
 
 The Embedding and Vector Indexing capability converts AI-ready chunks into vector embeddings and stores them in a searchable index with strong metadata filters. This provides semantic discovery over Data Compass metadata while preserving source traceability, lifecycle filtering, classification filtering, and reindexing controls.
 
-h2. 2. Role in Architecture
+## 2. Role in Architecture
 
-{code}
+```
 AI Chunk Builder
    -> Embedding Service Wrapper
    -> Vector Upsert Service
    -> MongoDB Atlas Vector Index
    -> Semantic Search API
    -> Hybrid Search / GraphRAG
-{code}
+```
 
-h2. 3. Recommended Initial Platform
+## 3. Recommended Initial Platform
 
 MongoDB Atlas Vector Search is the recommended initial vector platform because:
 
-* Data Compass metadata is already MongoDB-centered.
-* Chunk documents can live close to source metadata.
-* Metadata filtering is critical for lifecycle, owner, node, and classification rules.
-* It reduces the number of moving parts for MVP.
-* Neo4j remains available for graph traversal while MongoDB handles document/vector retrieval.
+- Data Compass metadata is already MongoDB-centered.
+- Chunk documents can live close to source metadata.
+- Metadata filtering is critical for lifecycle, owner, node, and classification rules.
+- It reduces the number of moving parts for MVP.
+- Neo4j remains available for graph traversal while MongoDB handles document/vector retrieval.
 
-h2. 4. Design Principles
+## 4. Design Principles
 
-|| Principle || Description ||
+| Principle | Description |
+| --- | --- |
 | Store chunks, not raw records | Only AI-ready chunks should be embedded. |
 | Preserve traceability | Every vector record must include source guid and jrn. |
 | Filter before context | Metadata filters must be applied before results are used by LLM. |
@@ -35,30 +36,30 @@ h2. 4. Design Principles
 | Version everything | Track chunk schema, template, embedding model, and embedding timestamp. |
 | Rebuildable | Vector index can be deleted and rebuilt from canonical metadata and chunks. |
 
-h2. 5. In Scope
+## 5. In Scope
 
-* Embedding model selection and configuration.
-* Embedding wrapper service.
-* Vector index definition.
-* Vector record schema.
-* Metadata filter design.
-* Upsert behavior.
-* Delete/deprecate behavior.
-* Reindexing by source jrn, entity type, and embedding model version.
-* Semantic search smoke tests.
-* Cost and latency tracking.
+- Embedding model selection and configuration.
+- Embedding wrapper service.
+- Vector index definition.
+- Vector record schema.
+- Metadata filter design.
+- Upsert behavior.
+- Delete/deprecate behavior.
+- Reindexing by source jrn, entity type, and embedding model version.
+- Semantic search smoke tests.
+- Cost and latency tracking.
 
-h2. 6. Out of Scope
+## 6. Out of Scope
 
-* Creating chunk text.
-* Graph traversal.
-* Final answer generation.
-* Updating authoritative metadata.
-* UI result rendering.
+- Creating chunk text.
+- Graph traversal.
+- Final answer generation.
+- Updating authoritative metadata.
+- UI result rendering.
 
-h2. 7. Vector Record Schema
+## 7. Vector Record Schema
 
-{code:language=json}
+```json
 {
   "_id": "<chunk_id>",
   "chunk_id": "<chunk_id>",
@@ -105,13 +106,14 @@ h2. 7. Vector Record Schema
     "embeddedAt": ""
   }
 }
-{code}
+```
 
-h2. 8. Metadata Filters
+## 8. Metadata Filters
 
 The vector index must support filtering by:
 
-|| Filter || Purpose ||
+| Filter | Purpose |
+| --- | --- |
 | entity_type | Limit search to Distribution, Dataset, Attribute, etc. |
 | chunk_type | Search summaries, attributes, lineage, classifications separately. |
 | lifecycleStatus | Exclude DRAFT/REJECTED/DEPRECATED by default. |
@@ -123,9 +125,10 @@ The vector index must support filtering by:
 | hasPII/hasSPI/hasMNPI | Security and governance filters. |
 | sourcePlatform | Source-specific search. |
 
-h2. 9. Embedding Model Selection Criteria
+## 9. Embedding Model Selection Criteria
 
-|| Criterion || Consideration ||
+| Criterion | Consideration |
+| --- | --- |
 | Accuracy | Must retrieve relevant assets for business-language questions. |
 | Cost | Must be acceptable for expected chunk volume and reindexing frequency. |
 | Latency | Embedding generation should support batch and ad hoc reindexing. |
@@ -133,9 +136,9 @@ h2. 9. Embedding Model Selection Criteria
 | Security | Must comply with enterprise data handling rules. |
 | Versioning | Model version must be stored on every vector record. |
 
-h2. 10. Embedding Flow
+## 10. Embedding Flow
 
-{code}
+```
 1. Read pending chunks from ai_metadata_chunks.
 2. Validate chunk text and metadata.
 3. Generate embedding through embedding service wrapper.
@@ -143,28 +146,30 @@ h2. 10. Embedding Flow
 5. Upsert vector record by deterministic chunk_id.
 6. Update indexing status.
 7. Log success/failure counts.
-{code}
+```
 
-h2. 11. Upsert Rules
+## 11. Upsert Rules
 
-* Upsert by chunk_id.
-* Existing vector record with same chunk_id must be replaced.
-* Source guid/jrn cannot be changed without generating a new chunk identity.
-* EmbeddingInfo must be updated on every successful embedding.
-* Failure must not delete existing good vector record unless explicitly configured.
+- Upsert by chunk_id.
+- Existing vector record with same chunk_id must be replaced.
+- Source guid/jrn cannot be changed without generating a new chunk identity.
+- EmbeddingInfo must be updated on every successful embedding.
+- Failure must not delete existing good vector record unless explicitly configured.
 
-h2. 12. Delete and Deprecate Rules
+## 12. Delete and Deprecate Rules
 
-|| Source State || Vector Behavior ||
+| Source State | Vector Behavior |
+| --- | --- |
 | Source deleted | Delete or mark inactive based on retention policy. |
 | lifecycleStatus = DEPRECATED | Exclude by default; keep for historical search if enabled. |
 | lifecycleStatus = REJECTED | Remove or inactive. |
 | lifecycleStatus = DRAFT | Exclude unless restricted draft search is enabled. |
 | Classification becomes restricted | Re-embed if text changed; update metadata filters immediately. |
 
-h2. 13. Reindexing Scenarios
+## 13. Reindexing Scenarios
 
-|| Scenario || Required Action ||
+| Scenario | Required Action |
+| --- | --- |
 | Chunk template changed | Regenerate and re-embed affected chunk types. |
 | Embedding model changed | Re-embed all active chunks or selected entity types. |
 | Source record changed | Regenerate chunks for source jrn and related rollups. |
@@ -172,28 +177,29 @@ h2. 13. Reindexing Scenarios
 | Classification changed | Update metadata and re-check security filters. |
 | Lifecycle changed | Update active/deprecated filtering state. |
 
-h2. 14. Semantic Search Smoke Test
+## 14. Semantic Search Smoke Test
 
 Initial smoke test should include at least 20 questions across:
 
-* Business-language discovery.
-* Technical table/schema lookup.
-* Attribute discovery.
-* Classification/gov discovery.
-* Service exposure.
-* Lineage-related discovery.
+- Business-language discovery.
+- Technical table/schema lookup.
+- Attribute discovery.
+- Classification/gov discovery.
+- Service exposure.
+- Lineage-related discovery.
 
 Example questions:
 
-# Find datasets related to customer risk.
-# Which assets contain customer identifier fields?
-# Find Databricks tables in schema capital.
-# Which distributions are related to liquidity reporting?
-# Find metadata for trade exposure.
+1. Find datasets related to customer risk.
+1. Which assets contain customer identifier fields?
+1. Find Databricks tables in schema capital.
+1. Which distributions are related to liquidity reporting?
+1. Find metadata for trade exposure.
 
-h2. 15. Quality Metrics
+## 15. Quality Metrics
 
-|| Metric || MVP Target ||
+| Metric | MVP Target |
+| --- | --- |
 | Top-5 semantic retrieval relevance | 80%+ on golden questions. |
 | Vector upsert success rate | 95%+ for valid chunks. |
 | Duplicate chunk rate | 0% for deterministic chunk IDs. |
@@ -201,26 +207,27 @@ h2. 15. Quality Metrics
 | Source traceability coverage | 100% active vector records. |
 | Metadata filter coverage | 100% active vector records. |
 
-h2. 16. Operational Logging
+## 16. Operational Logging
 
 Log:
 
-* chunk_id
-* source_guid
-* source_jrn
-* entity_type
-* chunk_type
-* embedding model
-* embedding status
-* error message
-* retry count
-* elapsed time
-* token/character count
-* vector upsert status
+- chunk_id
+- source_guid
+- source_jrn
+- entity_type
+- chunk_type
+- embedding model
+- embedding status
+- error message
+- retry count
+- elapsed time
+- token/character count
+- vector upsert status
 
-h2. 17. Build Requirements
+## 17. Build Requirements
 
-|| ID || Requirement || Priority ||
+| ID | Requirement | Priority |
+| --- | --- | --- |
 | VEC-001 | Select embedding model and dimensions | P0 |
 | VEC-002 | Define vector record schema | P0 |
 | VEC-003 | Create MongoDB Atlas vector index | P0 |
@@ -233,19 +240,20 @@ h2. 17. Build Requirements
 | VEC-010 | Build reindex by entity type | P1 |
 | VEC-011 | Build semantic smoke tests | P1 |
 
-h2. 18. Acceptance Criteria
+## 18. Acceptance Criteria
 
-* Vector index is created with correct dimensions.
-* Chunks can be embedded and upserted by deterministic chunk_id.
-* Search results include source guid, jrn, entity type, chunk type, and lifecycle status.
-* Metadata filters work for lifecycle, entity type, node, owner, and classification fields.
-* Deprecated records are excluded by default.
-* Reindexing a single source jrn replaces old vector records.
-* Smoke test search produces reviewed results for golden questions.
+- Vector index is created with correct dimensions.
+- Chunks can be embedded and upserted by deterministic chunk_id.
+- Search results include source guid, jrn, entity type, chunk type, and lifecycle status.
+- Metadata filters work for lifecycle, entity type, node, owner, and classification fields.
+- Deprecated records are excluded by default.
+- Reindexing a single source jrn replaces old vector records.
+- Smoke test search produces reviewed results for golden questions.
 
-h2. 19. Related Jira Stories
+## 19. Related Jira Stories
 
-|| Jira || Summary ||
+| Jira | Summary |
+| --- | --- |
 | DC-AI-040 | Select Embedding Model and Configuration |
 | DC-AI-041 | Build Embedding Service Wrapper |
 | DC-AI-042 | Create MongoDB Atlas Vector Index |
@@ -256,9 +264,10 @@ h2. 19. Related Jira Stories
 | DC-AI-047 | Build Reindex by Source JRN |
 | DC-AI-048 | Build Reindex by Entity Type |
 
-h2. 20. Open Questions
+## 20. Open Questions
 
-|| ID || Question || Impact ||
+| ID | Question | Impact |
+| --- | --- | --- |
 | OQ-VEC-001 | Which embedding model is approved for enterprise use? | Blocks implementation. |
 | OQ-VEC-002 | What is the expected chunk volume by entity type? | Cost and sizing. |
 | OQ-VEC-003 | Should deprecated chunks be retained but filtered or physically deleted? | Reindexing and audit. |

@@ -1,27 +1,49 @@
-h1. Architecture Decision Log
+h1. 16. Architecture Decision Log
 
-h2. ADR Index
+h2. 1. Purpose
 
-|| ADR || Decision || Status ||
-| ADR-001 | MongoDB remains authoritative source of metadata | Proposed |
-| ADR-002 | Vector and graph stores are derived projections | Proposed |
-| ADR-003 | JRN is the stable relationship identity key | Proposed |
-| ADR-004 | MVP entity scope | Proposed |
-| ADR-005 | MongoDB Atlas Vector Search as initial vector store | Proposed |
-| ADR-006 | Neo4j as graph projection for lineage and impact analysis | Proposed |
-| ADR-007 | AI chunks use deterministic chunk IDs | Proposed |
-| ADR-008 | Security filters are applied before LLM context assembly | Proposed |
-| ADR-009 | Raw event records are summarized before vectorization | Proposed |
-| ADR-010 | AI enrichment suggestions require human approval | Proposed |
+The Architecture Decision Log records important architecture decisions for Data Compass AI Modernization. Each Architecture Decision Record (ADR) explains the decision, options considered, rationale, consequences, and related Jira items.
 
-h2. ADR Template
+h2. 2. ADR Process
+
+# Create ADR as Proposed.
+# Review with architecture/product/engineering/security stakeholders.
+# Mark as Accepted when decision is approved.
+# Mark as Superseded if replaced by a later decision.
+# Link ADR to related Jira stories and Confluence pages.
+
+h2. 3. ADR Status Values
+
+|| Status || Meaning ||
+| Proposed | Draft decision under review. |
+| Accepted | Approved and active. |
+| Superseded | Replaced by later ADR. |
+| Rejected | Considered but not selected. |
+
+h2. 4. ADR Index
+
+|| ADR || Decision || Status || Related Pages ||
+| ADR-001 | MongoDB remains authoritative source of metadata. | Proposed | 02, 04 |
+| ADR-002 | Vector and graph stores are derived projections. | Proposed | 02, 07, 08 |
+| ADR-003 | JRN is the stable relationship identity key. | Proposed | 04, 05, 06, 08 |
+| ADR-004 | MVP entity scope. | Proposed | 03, 04 |
+| ADR-005 | MongoDB Atlas Vector Search as initial vector store. | Proposed | 07, 09 |
+| ADR-006 | Neo4j as graph projection for lineage and impact analysis. | Proposed | 08, 10 |
+| ADR-007 | AI chunks use deterministic chunk IDs. | Proposed | 06, 07 |
+| ADR-008 | Security filters are applied before LLM context assembly. | Proposed | 12 |
+| ADR-009 | Raw event records are summarized before vectorization. | Proposed | 03, 06, 07 |
+| ADR-010 | AI enrichment suggestions require human approval. | Proposed | 11 |
+| ADR-011 | Search Service is the controlled retrieval boundary. | Proposed | 09, 10 |
+| ADR-012 | Historical Q&A cannot override source metadata. | Proposed | 11, 12 |
+
+h2. 5. ADR Template
 
 {code}
 h1. ADR-###: <Decision Title>
 
 h2. Status
 
-Proposed / Accepted / Superseded
+Proposed / Accepted / Superseded / Rejected
 
 h2. Context
 
@@ -39,7 +61,7 @@ What did we choose?
 
 h2. Rationale
 
-Why?
+Why did we choose it?
 
 h2. Consequences
 
@@ -48,9 +70,13 @@ What tradeoffs or follow-up work does this create?
 h2. Related Jira
 
 * DC-AI-###
+
+h2. Related Confluence Pages
+
+* Page links
 {code}
 
-h2. Initial ADR Drafts
+h2. 6. Initial ADR Details
 
 h3. ADR-001: MongoDB remains authoritative source of metadata
 
@@ -58,20 +84,98 @@ h3. ADR-001: MongoDB remains authoritative source of metadata
 
 *Decision:* MongoDB remains the source of truth for Data Compass metadata. Vector indexes and Neo4j are derived projections.
 
-*Rationale:* The Data Compass metadata model already resides in MongoDB and contains the authoritative entity records and relationships.
+*Rationale:* The authoritative Data Compass data model is represented in MongoDB collections. Vector and graph layers are optimized retrieval projections and should remain rebuildable.
+
+*Consequences:*
+
+* Updates must flow from MongoDB/canonical model.
+* Neo4j and vector indexes require sync/reindex controls.
+* Source hydration should use MongoDB.
 
 h3. ADR-002: Vector and graph stores are derived projections
 
 *Status:* Proposed
 
-*Decision:* MongoDB Vector Search and Neo4j are rebuildable projections generated from canonical metadata.
+*Decision:* MongoDB Atlas Vector Search and Neo4j will not own authoritative metadata.
 
-*Rationale:* This avoids conflicting sources of truth and enables deterministic rebuilds.
+*Rationale:* This prevents conflicting sources of truth and simplifies reconciliation.
 
 h3. ADR-003: JRN is the stable relationship identity key
 
 *Status:* Proposed
 
-*Decision:* All AI chunks and graph nodes will include source JRN. Graph node uniqueness should be based on JRN where available.
+*Decision:* jrn will be used as the primary relationship identity across chunks, graph nodes, search results, and citations where available.
 
-*Rationale:* The Data Compass model uses JRN as the cross-entity relationship key.
+*Rationale:* The Data Compass model uses jrn for cross-entity references.
+
+h3. ADR-004: MVP entity scope
+
+*Status:* Proposed
+
+*Decision:* MVP includes Distribution, Dataset, DataModelEntity, DataModelAttribute, DataService, DataFlow, DataProcess, Node, and Report.
+
+*Rationale:* These entities support asset search, column search, service discovery, basic lineage, and report impact.
+
+h3. ADR-005: MongoDB Atlas Vector Search as initial vector store
+
+*Status:* Proposed
+
+*Decision:* Start with MongoDB Atlas Vector Search for MVP semantic retrieval.
+
+*Rationale:* Source metadata is already MongoDB-centered and metadata filtering is critical.
+
+h3. ADR-006: Neo4j as graph projection for lineage and impact analysis
+
+*Status:* Proposed
+
+*Decision:* Use Neo4j for graph traversal and impact analysis.
+
+*Rationale:* The catalog is relationship-heavy and lineage questions are better served by graph traversal than vector similarity alone.
+
+h3. ADR-007: AI chunks use deterministic chunk IDs
+
+*Status:* Proposed
+
+*Decision:* Chunk IDs will be generated deterministically from source jrn, entity type, chunk type, sequence, and schema version.
+
+*Rationale:* Deterministic IDs enable idempotent upsert and reindexing.
+
+h3. ADR-008: Security filters before LLM context assembly
+
+*Status:* Proposed
+
+*Decision:* Access filters must be applied before any metadata is passed to the LLM.
+
+*Rationale:* Prompt instructions are not a security boundary.
+
+h3. ADR-009: Raw event records are summarized before vectorization
+
+*Status:* Proposed
+
+*Decision:* High-volume runtime events will be summarized before embedding.
+
+*Rationale:* Embedding every raw event may create cost, scale, and noise problems.
+
+h3. ADR-010: AI enrichment suggestions require human approval
+
+*Status:* Proposed
+
+*Decision:* AI-generated metadata improvements are suggestions only until approved.
+
+*Rationale:* Authoritative metadata requires governance and accountability.
+
+h3. ADR-011: Search Service is the controlled retrieval boundary
+
+*Status:* Proposed
+
+*Decision:* Agents and UI clients should access metadata retrieval through Search Service APIs.
+
+*Rationale:* This centralizes security, auditing, filtering, ranking, and source hydration.
+
+h3. ADR-012: Historical Q&A cannot override source metadata
+
+*Status:* Proposed
+
+*Decision:* Historical Q&A may support interpretation but must not override authoritative source records.
+
+*Rationale:* Validated answers can become stale; source metadata must govern.

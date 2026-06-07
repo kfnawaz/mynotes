@@ -1,0 +1,156 @@
+# 12. Security and Access Control
+
+## 1. Purpose
+
+This page defines the target security and access-control model for Data Compass AI Modernization. The core goal is to ensure that unauthorized, deprecated, restricted, or sensitive metadata is not retrieved into the LLM context or displayed to users.
+
+## 2. Core Rule
+
+> **Security Principle**
+> Security filtering must happen before context assembly and before any metadata is sent to the LLM.
+>
+>
+> Prompt instructions are not a security boundary. The Search Service and GraphRAG Orchestrator must enforce access controls before answer generation.
+>
+## 3. Access-Control Dimensions
+>
+> || Dimension || Purpose || Example ||
+> | User Role | Determines general capability. | Admin, Data Owner, Consumer, Steward. |
+> | Node Access | Limits assets by nodeId/nodeType. | SEAL node, application node. |
+> | Ownership | Allows owners/stewards to view managed assets. | owners[].sid. |
+> | Business Unit | Limits assets by business unit/domain. | Risk, Finance, CCB. |
+> | Lifecycle Status | Excludes draft/rejected/deprecated records. | PUBLISHED, APPROVED. |
+> | Classification | Controls confidentiality and sensitive metadata. | HIGHLY_CONFIDENTIAL. |
+> | PII/SPI/MNPI Flags | Controls data-protection sensitive metadata. | hasPII, hasSPI, hasMNPI. |
+> | Environment | Prevents cross-environment leakage. | Prod, UAT, Sandbox. |
+> | Source System | Limits by platform when needed. | Databricks, Snowflake. |
+>
+## 4. Lifecycle Security Rules
+>
+> || lifecycleStatus || Default Retrieval Behavior || Notes ||
+> | DRAFT | Excluded | May be visible to limited roles. |
+> | PUBLISHED | Included | Searchable by default when user has access. |
+> | APPROVED | Included | Searchable by default when user has access. |
+> | PENDING_APPROVAL | Restricted | Visible to approvers/owners only. |
+> | REJECTED | Excluded | Not retrievable by default. |
+> | DEPRECATED | Excluded | Available only for historical search mode. |
+>
+## 5. Classification Handling
+>
+> Metadata chunks and graph nodes must carry classification metadata when available:
+>
+- informationConfidentialityClassification
+- isPersonalInformation
+- isSensitivePersonalInformation
+- isClientConfidentialInformation
+- isMaterialNonPublicInformation
+- isDataSubjectAccessRequestIndicator
+- isPurgeIndicator
+>
+## 6. Retrieval Security Flow
+>
+```
+1. User submits question.
+2. User identity and entitlement context are resolved.
+3. Search filters are derived from entitlement context.
+4. Exact/vector/graph searches are executed with filters.
+5. Restricted records are excluded before context assembly.
+6. Context Assembler receives only authorized records.
+7. LLM answer is generated from authorized context.
+8. Audit log records query, filters, and source references.
+```
+>
+## 7. Search Mode Security
+>
+> || Search Mode || Security Requirement ||
+> | Exact Search | Apply role, lifecycle, owner, node, and classification filters. |
+> | Semantic Search | Apply metadata filters inside vector query before returning chunks. |
+> | Graph Search | Apply node/edge filters and prevent hidden intermediate path leakage. |
+> | Hybrid Search | Apply filters at each retrieval step and during deduplication. |
+> | Source Hydration | Re-check authorization before fetching source records. |
+>
+## 8. LLM Context Security
+>
+> The following must not enter LLM context unless explicitly authorized:
+>
+- restricted metadata records
+- rejected/deprecated records outside allowed mode
+- secrets or credentials
+- raw connection strings containing sensitive values
+- unfiltered confidential attributes
+- inaccessible historical Q&A
+- inaccessible user bookmarks
+>
+## 9. Audit Logging
+>
+> Audit records should capture:
+>
+- requestId
+- user identity or service identity
+- timestamp
+- query text
+- retrieval mode
+- filters applied
+- source jrns returned
+- source jrns excluded count, without exposing details if not allowed
+- answer source references
+- latency
+- errors/warnings
+>
+## 10. Sensitive Logging Rules
+>
+- Do not log credentials, secrets, tokens, certificates, or raw connection strings.
+- Avoid logging raw sensitive field values.
+- Log identifiers and decisions rather than sensitive payloads.
+- Apply retention policy to audit logs.
+>
+## 11. Negative Test Scenarios
+>
+> || Scenario || Expected Result ||
+> | User lacks node access | Assets from that node are not returned. |
+> | User asks for deprecated asset | Excluded unless historical mode is enabled. |
+> | User asks broad PII query without entitlement | Restricted assets are excluded. |
+> | Graph path includes restricted intermediate node | Path is hidden or redacted. |
+> | Historical Q&A references inaccessible source | Historical answer is not reused. |
+> | Bookmark points to inaccessible asset | Bookmark is hidden or disabled. |
+>
+## 12. Build Requirements
+>
+> || ID || Requirement || Priority ||
+> | SEC-001 | Define retrieval access-control model | P0 |
+> | SEC-002 | Implement exact search filters | P0 |
+> | SEC-003 | Implement semantic search filters | P0 |
+> | SEC-004 | Implement graph search filters | P0 |
+> | SEC-005 | Prevent restricted context assembly | P0 |
+> | SEC-006 | Implement audit logging | P1 |
+> | SEC-007 | Build access-control test suite | P1 |
+> | SEC-008 | Define sensitive metadata logging rules | P1 |
+>
+## 13. Acceptance Criteria
+>
+- Unauthorized records are not returned by exact, semantic, graph, or hybrid search.
+- Restricted chunks are not passed to the LLM.
+- Deprecated assets are excluded by default.
+- Access filters are visible in audit logs.
+- Negative security tests pass.
+- Source hydration re-validates authorization.
+>
+## 14. Related Jira Stories
+>
+> || Jira || Summary ||
+> | DC-AI-090 | Define Retrieval Access Control Model |
+> | DC-AI-091 | Implement Exact Search Filters |
+> | DC-AI-092 | Implement Semantic Search Filters |
+> | DC-AI-093 | Implement Graph Search Filters |
+> | DC-AI-094 | Prevent Restricted Context Assembly |
+> | DC-AI-095 | Implement Audit Logging |
+> | DC-AI-096 | Build Access-Control Test Suite |
+> | DC-AI-097 | Define Sensitive Metadata Handling |
+>
+## 15. Open Questions
+>
+> || ID || Question || Impact ||
+> | OQ-SEC-001 | What entitlement source determines metadata visibility? | Blocks production security design. |
+> | OQ-SEC-002 | Which roles can see DRAFT/PENDING_APPROVAL metadata? | Lifecycle filtering. |
+> | OQ-SEC-003 | How should restricted graph paths be redacted? | Graph UX and correctness. |
+> | OQ-SEC-004 | What audit retention requirements apply? | Operations and compliance. |

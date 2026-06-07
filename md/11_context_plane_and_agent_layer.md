@@ -1,12 +1,12 @@
-h1. 11. Context Plane and Agent Layer
+# 11. Context Plane and Agent Layer
 
-h2. 1. Purpose
+## 1. Purpose
 
 The Context Plane and Agent Layer improves interpretation, retrieval planning, answer quality, and feedback loops for Data Compass AI search. It provides reusable enterprise context such as acronyms, aliases, historical validated Q&A, user bookmarks, human feedback, and agent orchestration.
 
-h2. 2. Role in Architecture
+## 2. Role in Architecture
 
-{code}
+```
 User Question
    -> Context Plane
       -> Acronyms / Aliases
@@ -16,20 +16,22 @@ User Question
       -> Structured Discovery Agent
       -> Metadata Enrichment Agent
    -> Search Service / GraphRAG
-{code}
+```
 
-h2. 3. Design Principles
+## 3. Design Principles
 
-|| Principle || Description ||
+| Principle | Description |
+| --- | --- |
 | Context assists, source data governs | Context improves interpretation but does not override authoritative metadata. |
 | Agents are orchestrators | Agents route and structure work; they should not bypass controlled search APIs. |
 | Human approval for enrichment | AI suggestions should not automatically update authoritative metadata. |
 | Feedback is auditable | User feedback should be captured with question, answer, sources, and outcome. |
 | User context is scoped | Bookmarks and preferences must be user-scoped and entitlement-aware. |
 
-h2. 4. Context Plane Components
+## 4. Context Plane Components
 
-|| Component || Responsibility || MVP Priority ||
+| Component | Responsibility | MVP Priority |
+| --- | --- | --- |
 | Acronyms Loader | Load enterprise acronyms and expansions. | P1 |
 | Business Alias Manager | Map alternate business/technical names. | P1 |
 | Historical Q&A Store | Store validated previous questions and answers. | P1 |
@@ -39,9 +41,10 @@ h2. 4. Context Plane Components
 | Context MCP Registry | Expose context tools to agents. | P2 |
 | Redis Cache | Cache session and short-lived context. | P1 |
 
-h2. 5. Agents
+## 5. Agents
 
-|| Agent || Responsibility || Notes ||
+| Agent | Responsibility | Notes |
+| --- | --- | --- |
 | Supervisor Agent | Routes user request to correct flow. | First agent to build. |
 | Structured Discovery Agent | Converts vague questions into structured search plans. | Uses acronyms and aliases. |
 | Metadata Enrichment Agent | Suggests improved descriptions, tags, mappings, relationships. | Requires human approval. |
@@ -49,11 +52,11 @@ h2. 5. Agents
 | Governance Agent | Handles classification, ownership, lifecycle, policy questions. | Uses filters and governance metadata. |
 | Answer Evaluation Agent | Checks groundedness, source use, and completeness. | Supports quality loops. |
 
-h2. 6. Acronyms and Alias Handling
+## 6. Acronyms and Alias Handling
 
 Example:
 
-{code:language=json}
+```json
 {
   "term": "CCR",
   "expansions": ["Counterparty Credit Risk", "Customer Contact Record"],
@@ -62,26 +65,26 @@ Example:
   "source": "Enterprise Acronym List",
   "status": "approved"
 }
-{code}
+```
 
 Rules:
 
-* Acronym expansion should be domain-aware.
-* If an acronym has multiple meanings, GraphRAG should ask clarification or search multiple expansions.
-* Acronym source and status should be tracked.
+- Acronym expansion should be domain-aware.
+- If an acronym has multiple meanings, GraphRAG should ask clarification or search multiple expansions.
+- Acronym source and status should be tracked.
 
-h2. 7. Historical Q&A Store
+## 7. Historical Q&A Store
 
 Purpose:
 
-* Reuse validated answers.
-* Improve retrieval examples.
-* Identify recurring questions.
-* Support evaluation and regression testing.
+- Reuse validated answers.
+- Improve retrieval examples.
+- Identify recurring questions.
+- Support evaluation and regression testing.
 
 Schema:
 
-{code:language=json}
+```json
 {
   "question": "",
   "answer": "",
@@ -91,62 +94,62 @@ Schema:
   "validatedAt": "",
   "status": "draft | validated | deprecated"
 }
-{code}
+```
 
-h2. 8. User Bookmarks
+## 8. User Bookmarks
 
 Bookmarks support personalized discovery.
 
 Rules:
 
-* Bookmark must be tied to user identity.
-* Bookmark must reference source jrn.
-* Bookmark cannot bypass entitlements.
-* Bookmarks may influence ranking, but not source truth.
+- Bookmark must be tied to user identity.
+- Bookmark must reference source jrn.
+- Bookmark cannot bypass entitlements.
+- Bookmarks may influence ranking, but not source truth.
 
-h2. 9. Feedback Capture
+## 9. Feedback Capture
 
 Feedback types:
 
-* Helpful / not helpful.
-* Incorrect source.
-* Missing source.
-* Wrong lineage.
-* Wrong entity match.
-* Free-text feedback.
+- Helpful / not helpful.
+- Incorrect source.
+- Missing source.
+- Wrong lineage.
+- Wrong entity match.
+- Free-text feedback.
 
 Feedback should capture:
 
-* user
-* question
-* answer
-* retrieved sources
-* selected feedback
-* timestamp
-* route used
+- user
+- question
+- answer
+- retrieved sources
+- selected feedback
+- timestamp
+- route used
 
-h2. 10. Supervisor Agent
+## 10. Supervisor Agent
 
 Responsibilities:
 
-# Receive user question and context.
-# Determine intent.
-# Select retrieval strategy.
-# Route to Search Service / GraphRAG.
-# Decide whether clarification is needed.
-# Log selected route.
+1. Receive user question and context.
+1. Determine intent.
+1. Select retrieval strategy.
+1. Route to Search Service / GraphRAG.
+1. Decide whether clarification is needed.
+1. Log selected route.
 
-h2. 11. Structured Discovery Agent
+## 11. Structured Discovery Agent
 
 Input:
 
-{code}
+```
 Find important datasets related to customer onboarding risk.
-{code}
+```
 
 Output:
 
-{code:language=json}
+```json
 {
   "searchTerms": ["customer onboarding risk"],
   "entityTypes": ["Dataset", "Distribution", "DataProduct"],
@@ -155,30 +158,31 @@ Output:
   },
   "includeGraphExpansion": true
 }
-{code}
+```
 
-h2. 12. Metadata Enrichment Agent
+## 12. Metadata Enrichment Agent
 
 Enrichment suggestions may include:
 
-* missing descriptions
-* better display names
-* tags
-* glossary mappings
-* owner recommendations
-* relationship suggestions
-* classification review flags
+- missing descriptions
+- better display names
+- tags
+- glossary mappings
+- owner recommendations
+- relationship suggestions
+- classification review flags
 
 Rules:
 
-* Suggestions must include evidence.
-* Suggestions must be reviewable.
-* Suggestions must not directly update authoritative metadata without approval.
-* Approved changes should go through governed Data Compass update workflow.
+- Suggestions must include evidence.
+- Suggestions must be reviewable.
+- Suggestions must not directly update authoritative metadata without approval.
+- Approved changes should go through governed Data Compass update workflow.
 
-h2. 13. Context Plane Storage
+## 13. Context Plane Storage
 
-|| Data Type || Suggested Store || Notes ||
+| Data Type | Suggested Store | Notes |
+| --- | --- | --- |
 | Session cache | Redis | Short-lived context only. |
 | Acronyms | MongoDB / managed config | Versioned and approved. |
 | Aliases | MongoDB / managed config | May be domain-scoped. |
@@ -187,17 +191,18 @@ h2. 13. Context Plane Storage
 | Bookmarks | MongoDB | User-scoped. |
 | Agent logs | Observability store | Do not log sensitive payloads unnecessarily. |
 
-h2. 14. Security Requirements
+## 14. Security Requirements
 
-* Context cannot expand user access.
-* Bookmarks must not reveal inaccessible assets.
-* Historical Q&A must be re-filtered at retrieval time.
-* Feedback logs should avoid sensitive data values.
-* Agent prompts must not include unauthorized metadata.
+- Context cannot expand user access.
+- Bookmarks must not reveal inaccessible assets.
+- Historical Q&A must be re-filtered at retrieval time.
+- Feedback logs should avoid sensitive data values.
+- Agent prompts must not include unauthorized metadata.
 
-h2. 15. Build Requirements
+## 15. Build Requirements
 
-|| ID || Requirement || Priority ||
+| ID | Requirement | Priority |
+| --- | --- | --- |
 | CTX-001 | Build acronyms loader | P1 |
 | CTX-002 | Build business alias manager | P1 |
 | CTX-003 | Build historical Q&A store | P1 |
@@ -208,18 +213,19 @@ h2. 15. Build Requirements
 | CTX-008 | Build Metadata Enrichment Agent | P2 |
 | CTX-009 | Build Answer Evaluation Agent | P2 |
 
-h2. 16. Acceptance Criteria
+## 16. Acceptance Criteria
 
-* Acronyms can be loaded and used to expand search queries.
-* Historical Q&A can be stored with source references.
-* User feedback is captured with question and sources.
-* Supervisor Agent routes exact, semantic, lineage, and governance questions correctly.
-* Metadata Enrichment Agent produces suggestions with evidence and no direct write to authoritative metadata.
-* Context Plane does not bypass access control.
+- Acronyms can be loaded and used to expand search queries.
+- Historical Q&A can be stored with source references.
+- User feedback is captured with question and sources.
+- Supervisor Agent routes exact, semantic, lineage, and governance questions correctly.
+- Metadata Enrichment Agent produces suggestions with evidence and no direct write to authoritative metadata.
+- Context Plane does not bypass access control.
 
-h2. 17. Related Jira Stories
+## 17. Related Jira Stories
 
-|| Jira || Summary ||
+| Jira | Summary |
+| --- | --- |
 | DC-AI-080 | Build Acronyms Loader |
 | DC-AI-081 | Build Business Alias Manager |
 | DC-AI-082 | Build Historical Q&A Store |
@@ -230,9 +236,10 @@ h2. 17. Related Jira Stories
 | DC-AI-087 | Build Metadata Enrichment Agent |
 | DC-AI-088 | Build Answer Evaluation Agent |
 
-h2. 18. Open Questions
+## 18. Open Questions
 
-|| ID || Question || Impact ||
+| ID | Question | Impact |
+| --- | --- | --- |
 | OQ-CTX-001 | What is the authoritative source for enterprise acronyms? | Loader design. |
 | OQ-CTX-002 | Should historical Q&A be globally shared or domain-scoped? | Security and relevance. |
 | OQ-CTX-003 | Who approves metadata enrichment suggestions? | Governance workflow. |

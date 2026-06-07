@@ -1,12 +1,13 @@
-h1. 15. Risks, Pitfalls, and Mitigations
+# 15. Risks, Pitfalls, and Mitigations
 
-h2. 1. Purpose
+## 1. Purpose
 
 This page captures major delivery, architecture, data quality, security, operational, and user-trust risks for Data Compass AI Modernization.
 
-h2. 2. Risk Categories
+## 2. Risk Categories
 
-|| Category || Description ||
+| Category | Description |
+| --- | --- |
 | Identity Risk | Problems with guid, jrn, chunk IDs, or graph identity. |
 | Relationship Risk | Broken or incomplete cross-entity references. |
 | Data Quality Risk | Missing, stale, or incorrect source metadata. |
@@ -18,9 +19,10 @@ h2. 2. Risk Categories
 | User Trust Risk | Answers are not grounded, cited, or reliable. |
 | Delivery Risk | Scope too broad, dependencies unresolved, poor sequencing. |
 
-h2. 3. Risk Register
+## 3. Risk Register
 
-|| Risk ID || Risk || Category || Impact || Likelihood || Mitigation || Owner || Status ||
+| Risk ID | Risk | Category | Impact | Likelihood | Mitigation | Owner | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | R-001 | Unstable jrn breaks traceability and graph relationships. | Identity | High | Medium | Define deterministic jrn rules before indexing. | TBD | Open |
 | R-002 | Missing jrn prevents relationship resolution. | Identity | High | Medium | Quarantine records and create exception report. | TBD | Open |
 | R-003 | Raw JSON embeddings produce poor semantic retrieval. | Search Quality | High | High | Use AI-readable chunk templates. | TBD | Open |
@@ -42,60 +44,61 @@ h2. 3. Risk Register
 | R-019 | Ownership and node mappings are incomplete. | Security/Data Quality | High | Medium | Validate and report missing owner/node metadata. | TBD | Open |
 | R-020 | Teams start building agents before retrieval is reliable. | Delivery | High | High | Sequence delivery: model -> ingestion -> chunks -> vector -> graph -> agents. | TBD | Open |
 
-h2. 4. Pitfalls by Component
+## 4. Pitfalls by Component
 
-h3. Canonical Metadata Model
+### Canonical Metadata Model
 
-* Treating source-specific metadata as canonical without normalization.
-* Not resolving guid vs jrn responsibility.
-* Ignoring lifecycle status.
-* Failing to define required fields.
+- Treating source-specific metadata as canonical without normalization.
+- Not resolving guid vs jrn responsibility.
+- Ignoring lifecycle status.
+- Failing to define required fields.
 
-h3. Metadata Ingestion
+### Metadata Ingestion
 
-* Silently skipping invalid records.
-* Not tracking relationship resolution failures.
-* Not preserving version and updatedTimestamp.
-* Not supporting retries.
+- Silently skipping invalid records.
+- Not tracking relationship resolution failures.
+- Not preserving version and updatedTimestamp.
+- Not supporting retries.
 
-h3. Chunk Builder
+### Chunk Builder
 
-* Embedding raw JSON.
-* Missing source references.
-* No relationship context.
-* Including credentials or sensitive connection details.
+- Embedding raw JSON.
+- Missing source references.
+- No relationship context.
+- Including credentials or sensitive connection details.
 
-h3. Vector Indexing
+### Vector Indexing
 
-* Not using deterministic upsert.
-* Missing metadata filters.
-* Not tracking embedding model version.
-* Keeping deleted/deprecated chunks active.
+- Not using deterministic upsert.
+- Missing metadata filters.
+- Not tracking embedding model version.
+- Keeping deleted/deprecated chunks active.
 
-h3. Graph Projection
+### Graph Projection
 
-* Creating duplicate nodes.
-* Using names instead of jrn as keys.
-* Treating graph as source of truth.
-* No depth limits on traversal.
+- Creating duplicate nodes.
+- Using names instead of jrn as keys.
+- Treating graph as source of truth.
+- No depth limits on traversal.
 
-h3. Search / GraphRAG
+### Search / GraphRAG
 
-* Using vector search for exact lineage questions.
-* Not hydrating authoritative source records.
-* No citation support.
-* Answering despite low confidence or ambiguity.
+- Using vector search for exact lineage questions.
+- Not hydrating authoritative source records.
+- No citation support.
+- Answering despite low confidence or ambiguity.
 
-h3. Security
+### Security
 
-* Filtering after LLM context assembly.
-* Trusting prompt instructions for security.
-* Reusing historical Q&A without entitlement re-check.
-* Leaking hidden graph path nodes.
+- Filtering after LLM context assembly.
+- Trusting prompt instructions for security.
+- Reusing historical Q&A without entitlement re-check.
+- Leaking hidden graph path nodes.
 
-h2. 5. Mitigation Themes
+## 5. Mitigation Themes
 
-|| Theme || Practices ||
+| Theme | Practices |
+| --- | --- |
 | Identity Discipline | Deterministic jrn, chunk IDs, graph constraints. |
 | Source Traceability | guid/jrn on every chunk, node, edge, result, answer. |
 | Retrieval Safety | Security filters before LLM context. |
@@ -103,22 +106,23 @@ h2. 5. Mitigation Themes
 | Operational Control | Reindexing, dashboards, failure queues. |
 | Human Governance | Review AI enrichment suggestions before metadata updates. |
 
-h2. 6. Release Gate Risks
+## 6. Release Gate Risks
 
 Before MVP release, these must be closed or explicitly accepted:
 
-* R-001: JRN rules not finalized.
-* R-003: Chunk quality not reviewed.
-* R-010: Security filters not enforced.
-* R-014: Reindex controls missing.
-* R-015: Source citations missing.
-* R-016: Ambiguity handling missing.
+- R-001: JRN rules not finalized.
+- R-003: Chunk quality not reviewed.
+- R-010: Security filters not enforced.
+- R-014: Reindex controls missing.
+- R-015: Source citations missing.
+- R-016: Ambiguity handling missing.
 
-h2. 7. Related Jira Stories
+## 7. Related Jira Stories
 
 Risks should be linked to relevant Jira stories. Examples:
 
-|| Risk || Jira Stories ||
+| Risk | Jira Stories |
+| --- | --- |
 | R-001 | DC-AI-011, DC-AI-012, DC-AI-014 |
 | R-003 | DC-AI-030 through DC-AI-039 |
 | R-010 | DC-AI-090 through DC-AI-097 |

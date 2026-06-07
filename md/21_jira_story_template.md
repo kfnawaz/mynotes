@@ -1,12 +1,12 @@
-h1. 21. Jira Story Template
+# 21. Jira Story Template
 
-h2. Purpose
+## Purpose
 
 Use this template for all Jira stories in the Data Compass AI Modernization initiative. The goal is to ensure every story has enough context, requirements, pitfalls, dependencies, and acceptance criteria before sprint commitment.
 
-h2. Story Template
+## Story Template
 
-{code}
+```
 h2. Objective
 
 Describe what this story delivers in one or two sentences.
@@ -82,11 +82,11 @@ h2. Related ADRs
 h2. Notes
 
 Additional implementation or review notes.
-{code}
+```
 
-h2. Example Story: Build Distribution Summary Chunk Template
+## Example Story: Build Distribution Summary Chunk Template
 
-{code}
+```
 h2. Objective
 
 Build the chunk template that converts a Distribution source record into an AI-readable asset_summary chunk.
@@ -162,28 +162,28 @@ h2. Test / Evidence
 * Generated chunk output.
 * Unit test for deterministic chunk ID.
 * Review sample attached to Jira.
-{code}
+```
 
-h2. Definition of Ready
+## Definition of Ready
 
 A story is Ready when:
 
-* Objective is clear.
-* Requirements are documented.
-* Dependencies are identified.
-* Acceptance criteria are written.
-* Related Confluence page is linked.
-* Security impact is understood.
-* Test/evidence expectation is defined.
+- Objective is clear.
+- Requirements are documented.
+- Dependencies are identified.
+- Acceptance criteria are written.
+- Related Confluence page is linked.
+- Security impact is understood.
+- Test/evidence expectation is defined.
 
-h2. Definition of Done
+## Definition of Done
 
 A story is Done when:
 
-* Work is completed.
-* Acceptance criteria are met.
-* Unit/integration tests are complete where applicable.
-* Evidence is attached to Jira.
-* Related Confluence page is updated.
-* Demo is completed where required.
-* Operational notes are added if applicable.
+- Work is completed.
+- Acceptance criteria are met.
+- Unit/integration tests are complete where applicable.
+- Evidence is attached to Jira.
+- Related Confluence page is updated.
+- Demo is completed where required.
+- Operational notes are added if applicable.

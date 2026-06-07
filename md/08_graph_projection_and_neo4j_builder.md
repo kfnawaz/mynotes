@@ -1,14 +1,14 @@
-h1. 08. Graph Projection and Neo4j Builder
+# 08. Graph Projection and Neo4j Builder
 
-h2. 1. Purpose
+## 1. Purpose
 
 The Graph Projection and Neo4j Builder converts canonical Data Compass metadata into a Neo4j graph projection that supports lineage traversal, impact analysis, relationship discovery, graph visualization, and GraphRAG.
 
 Neo4j is a derived projection. MongoDB remains the authoritative source of metadata.
 
-h2. 2. Role in Architecture
+## 2. Role in Architecture
 
-{code}
+```
 MongoDB Canonical Metadata
    -> Relationship Resolver
    -> Graph Projection Builder
@@ -16,11 +16,12 @@ MongoDB Canonical Metadata
    -> Neo4j Graph Loaders
    -> Graph Search API
    -> GraphRAG Orchestrator
-{code}
+```
 
-h2. 3. Design Principles
+## 3. Design Principles
 
-|| Principle || Description ||
+| Principle | Description |
+| --- | --- |
 | Rebuildable projection | Neo4j must be rebuildable from MongoDB canonical metadata. |
 | JRN as identity | Graph nodes should use jrn as the stable primary identity where available. |
 | Relationship-first | Graph should emphasize relationship traversal, not duplicate every source field. |
@@ -28,26 +29,27 @@ h2. 3. Design Principles
 | Idempotent loads | Re-running loaders should merge/update, not duplicate. |
 | Traversal-safe | Queries must support depth limits and access filters. |
 
-h2. 4. In Scope
+## 4. In Scope
 
-* Neo4j node label design.
-* Neo4j relationship type design.
-* Constraints and indexes.
-* Graph loaders for MVP entities.
-* Upstream/downstream traversal queries.
-* Graph sync status tracking.
-* Count reconciliation between MongoDB and Neo4j.
+- Neo4j node label design.
+- Neo4j relationship type design.
+- Constraints and indexes.
+- Graph loaders for MVP entities.
+- Upstream/downstream traversal queries.
+- Graph sync status tracking.
+- Count reconciliation between MongoDB and Neo4j.
 
-h2. 5. Out of Scope
+## 5. Out of Scope
 
-* Making Neo4j the source of truth.
-* Manual relationship curation for MVP.
-* Full graph data science use cases in MVP.
-* Full event graph for every runtime event.
+- Making Neo4j the source of truth.
+- Manual relationship curation for MVP.
+- Full graph data science use cases in MVP.
+- Full event graph for every runtime event.
 
-h2. 6. MVP Graph Nodes
+## 6. MVP Graph Nodes
 
-|| Node Label || Source Entity || Key Properties ||
+| Node Label | Source Entity | Key Properties |
+| --- | --- | --- |
 | Node | Node | jrn/guid, nodeId, nodeType, name, lifecycleStatus |
 | Dataset | Dataset | jrn, guid, name, lifecycleStatus, owners |
 | Distribution | Distribution | jrn, guid, name, store, schema, physicalType, lifecycleStatus |
@@ -59,9 +61,10 @@ h2. 6. MVP Graph Nodes
 | Report | Report | jrn, guid, reportIdentificationNumber, productionFrequency |
 | Owner | owners[].sid | sid, role |
 
-h2. 7. MVP Relationship Types
+## 7. MVP Relationship Types
 
-|| Relationship || From || To || Purpose ||
+| Relationship | From | To | Purpose |
+| --- | --- | --- | --- |
 | IMPLEMENTS | Distribution | Dataset | Physical implementation of logical asset. |
 | HAS_ENTITY | DataModel | DataModelEntity | Model contains entity. |
 | CONTAINS_ATTRIBUTE | Distribution/DataModelEntity/Report | DataModelAttribute | Attribute membership. |
@@ -75,62 +78,62 @@ h2. 7. MVP Relationship Types
 | MAPS_TO | DataModelAttribute | DataElement | Business mapping, Phase 2. |
 | CLASSIFIED_AS | Asset/Attribute | Classification | Governance, Phase 2/3. |
 
-h2. 8. Graph Node Key Rules
+## 8. Graph Node Key Rules
 
 Preferred node key:
 
-{code}
+```
 entity_type + jrn
-{code}
+```
 
 Fallback key when jrn is missing:
 
-{code}
+```
 entity_type + guid
-{code}
+```
 
 Fallback nodes must be marked:
 
-{code:language=json}
+```json
 {
   "identityQuality": "FALLBACK_GUID",
   "missingJrn": true
 }
-{code}
+```
 
-h2. 9. Standard Node Properties
+## 9. Standard Node Properties
 
 All graph nodes should include:
 
-* guid
-* jrn
-* entityType
-* name/displayName
-* lifecycleStatus
-* version
-* sourceCollection
-* createdTimestamp
-* updatedTimestamp
-* identityQuality
-* sourcePlatform where available
+- guid
+- jrn
+- entityType
+- name/displayName
+- lifecycleStatus
+- version
+- sourceCollection
+- createdTimestamp
+- updatedTimestamp
+- identityQuality
+- sourcePlatform where available
 
-h2. 10. Standard Relationship Properties
+## 10. Standard Relationship Properties
 
 All relationships should include:
 
-* sourceGuid
-* sourceJrn
-* sourceCollection
-* relationshipType
-* observedTimestamp where applicable
-* confidence/precision where applicable
-* createdAt
-* updatedAt
-* loaderVersion
+- sourceGuid
+- sourceJrn
+- sourceCollection
+- relationshipType
+- observedTimestamp where applicable
+- confidence/precision where applicable
+- createdAt
+- updatedAt
+- loaderVersion
 
-h2. 11. Graph Loader Flow
+## 11. Graph Loader Flow
 
-{code}
+```
 1. Read validated canonical records.
 2. Resolve required jrn relationships.
 3. Build graph node candidates.
@@ -140,138 +143,140 @@ h2. 11. Graph Loader Flow
 7. MERGE relationships by stable from/to/type/source.
 8. Update graph sync status.
 9. Reconcile counts.
-{code}
+```
 
-h2. 12. Cypher Schema Requirements
+## 12. Cypher Schema Requirements
 
 Create uniqueness constraints for:
 
-* Distribution.jrn
-* Dataset.jrn
-* DataModelEntity.jrn
-* DataModelAttribute.jrn
-* DataService.jrn
-* DataFlow.jrn
-* DataProcess.jrn
-* Report.jrn
-* Node.nodeId + Node.nodeType
-* Owner.sid
+- Distribution.jrn
+- Dataset.jrn
+- DataModelEntity.jrn
+- DataModelAttribute.jrn
+- DataService.jrn
+- DataFlow.jrn
+- DataProcess.jrn
+- Report.jrn
+- Node.nodeId + Node.nodeType
+- Owner.sid
 
 Create indexes for:
 
-* entityType
-* lifecycleStatus
-* name
-* store/schema
-* classification flags
-* updatedTimestamp
+- entityType
+- lifecycleStatus
+- name
+- store/schema
+- classification flags
+- updatedTimestamp
 
-h2. 13. Loader Responsibilities by Entity
+## 13. Loader Responsibilities by Entity
 
-h3. Distribution / Dataset Loader
+### Distribution / Dataset Loader
 
-* Create Distribution nodes.
-* Create Dataset nodes.
-* Create IMPLEMENTS relationships.
-* Attach owners.
-* Attach node relationship if present.
+- Create Distribution nodes.
+- Create Dataset nodes.
+- Create IMPLEMENTS relationships.
+- Attach owners.
+- Attach node relationship if present.
 
-h3. Attribute Loader
+### Attribute Loader
 
-* Create DataModelAttribute nodes.
-* Create CONTAINS_ATTRIBUTE relationships.
-* Store key flags and classification flags.
+- Create DataModelAttribute nodes.
+- Create CONTAINS_ATTRIBUTE relationships.
+- Store key flags and classification flags.
 
-h3. DataService Loader
+### DataService Loader
 
-* Create DataService nodes.
-* Create EXPOSES relationships to Distribution.
-* Preserve interfaceType and service type.
+- Create DataService nodes.
+- Create EXPOSES relationships to Distribution.
+- Preserve interfaceType and service type.
 
-h3. DataFlow Loader
+### DataFlow Loader
 
-* Create DataFlow nodes.
-* Resolve provider and consumer.
-* Create UPSTREAM_OF and DOWNSTREAM_OF relationships between assets.
-* Store precision and last observed timestamp.
+- Create DataFlow nodes.
+- Resolve provider and consumer.
+- Create UPSTREAM_OF and DOWNSTREAM_OF relationships between assets.
+- Store precision and last observed timestamp.
 
-h3. DataProcess Loader
+### DataProcess Loader
 
-* Create DataProcess nodes.
-* Create CONSUMES relationships to inbound assets.
-* Create PRODUCES relationships to outbound asset.
-* Optionally create transformation relationships for attribute lineage.
+- Create DataProcess nodes.
+- Create CONSUMES relationships to inbound assets.
+- Create PRODUCES relationships to outbound asset.
+- Optionally create transformation relationships for attribute lineage.
 
-h3. Report Loader
+### Report Loader
 
-* Create Report nodes.
-* Create DEPENDS_ON relationships to assets where available.
-* Create CONTAINS_ATTRIBUTE relationships for report attributes.
+- Create Report nodes.
+- Create DEPENDS_ON relationships to assets where available.
+- Create CONTAINS_ATTRIBUTE relationships for report attributes.
 
-h2. 14. Traversal Queries
+## 14. Traversal Queries
 
-h3. Upstream Traversal
+### Upstream Traversal
 
 Inputs:
 
-* starting jrn
-* max depth
-* entity type filters
-* lifecycle filters
-* access filters
+- starting jrn
+- max depth
+- entity type filters
+- lifecycle filters
+- access filters
 
 Output:
 
-* path
-* source asset
-* target asset
-* relationship types
-* relationship metadata
-* source references
+- path
+- source asset
+- target asset
+- relationship types
+- relationship metadata
+- source references
 
-h3. Downstream Traversal
+### Downstream Traversal
 
 Same as upstream, but follows downstream direction.
 
-h2. 15. GraphRAG Integration
+## 15. GraphRAG Integration
 
 GraphRAG should use Neo4j when:
 
-* User asks upstream/downstream questions.
-* User asks impact analysis questions.
-* User asks dependency questions.
-* Semantic results need relationship expansion.
-* Exact asset resolution needs connected context.
+- User asks upstream/downstream questions.
+- User asks impact analysis questions.
+- User asks dependency questions.
+- Semantic results need relationship expansion.
+- Exact asset resolution needs connected context.
 
-h2. 16. Security Requirements
+## 16. Security Requirements
 
-* Graph traversal must apply lifecycle and access filters.
-* Restricted nodes must not be returned to unauthorized users.
-* Relationship paths must not leak hidden intermediate nodes.
-* Audit logs should capture query, starting node, filters, depth, and returned path IDs.
+- Graph traversal must apply lifecycle and access filters.
+- Restricted nodes must not be returned to unauthorized users.
+- Relationship paths must not leak hidden intermediate nodes.
+- Audit logs should capture query, starting node, filters, depth, and returned path IDs.
 
-h2. 17. Rebuild and Sync Strategy
+## 17. Rebuild and Sync Strategy
 
-|| Mode || Description ||
+| Mode | Description |
+| --- | --- |
 | Full rebuild | Drop/rebuild graph from canonical source. |
 | Entity type sync | Rebuild selected entity type. |
 | Source jrn sync | Rebuild one asset and affected relationships. |
 | Relationship sync | Rebuild edges affected by source relationship change. |
 
-h2. 18. Reconciliation
+## 18. Reconciliation
 
 Track:
 
-* MongoDB source count by entity type.
-* Neo4j node count by label.
-* Neo4j relationship count by type.
-* Failed graph records.
-* Orphan relationship count.
-* Missing jrn count.
+- MongoDB source count by entity type.
+- Neo4j node count by label.
+- Neo4j relationship count by type.
+- Failed graph records.
+- Orphan relationship count.
+- Missing jrn count.
 
-h2. 19. Build Requirements
+## 19. Build Requirements
 
-|| ID || Requirement || Priority ||
+| ID | Requirement | Priority |
+| --- | --- | --- |
 | GRF-001 | Define Neo4j graph schema | P0 |
 | GRF-002 | Build Cypher schema runner | P0 |
 | GRF-003 | Build Distribution/Dataset loader | P0 |
@@ -284,19 +289,20 @@ h2. 19. Build Requirements
 | GRF-010 | Build downstream traversal query | P1 |
 | GRF-011 | Build graph count reconciliation | P1 |
 
-h2. 20. Acceptance Criteria
+## 20. Acceptance Criteria
 
-* Neo4j schema is deployable idempotently.
-* MVP nodes load without duplication.
-* Relationships are created using resolved jrn references.
-* Upstream and downstream traversal work by source jrn.
-* Graph counts can be reconciled against source metadata.
-* Missing relationships are logged, not silently ignored.
-* Graph can be rebuilt from source metadata.
+- Neo4j schema is deployable idempotently.
+- MVP nodes load without duplication.
+- Relationships are created using resolved jrn references.
+- Upstream and downstream traversal work by source jrn.
+- Graph counts can be reconciled against source metadata.
+- Missing relationships are logged, not silently ignored.
+- Graph can be rebuilt from source metadata.
 
-h2. 21. Related Jira Stories
+## 21. Related Jira Stories
 
-|| Jira || Summary ||
+| Jira | Summary |
+| --- | --- |
 | DC-AI-050 | Define Neo4j Graph Schema |
 | DC-AI-051 | Build Cypher Schema Runner |
 | DC-AI-052 | Build Distribution/Dataset Graph Loader |
@@ -308,9 +314,10 @@ h2. 21. Related Jira Stories
 | DC-AI-058 | Build Upstream Traversal Query |
 | DC-AI-059 | Build Downstream Traversal Query |
 
-h2. 22. Open Questions
+## 22. Open Questions
 
-|| ID || Question || Impact ||
+| ID | Question | Impact |
+| --- | --- | --- |
 | OQ-GRF-001 | Is Neo4j SaaS, internal managed, or self-hosted? | Deployment design. |
 | OQ-GRF-002 | What depth limit should be default for lineage traversal? | Performance and UX. |
 | OQ-GRF-003 | Should reverse DOWNSTREAM_OF edges be stored or derived at query time? | Storage vs query simplicity. |
