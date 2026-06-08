@@ -1,17 +1,32 @@
-Recommendation: Do not copy all docs verbatim.
+Recommendation: Do not choose Option B as written. The BFF should not read MongoDB directly.
 
-Use fresh docs tailored to the Data Compass Control Plane, while reusing the relevant patterns from datacompass-ui as source guidance.
+Choose Option B+.
 
-The new repo should have its own focused guardrail docs because the control plane has different responsibilities: workflow administration, crawler/miner run management, configuration versioning, run history, logs, audit, and orchestration adapters.
+The Control Plane should have a dedicated backend Workflow Management API service that owns MongoDB access. That service can read the Harvester’s runSummaries collection and normalize/copy the data into the Control Plane run store for UI, audit, retry, and operational history.
 
-Recommended approach:
+Recommended pattern:
 
-- Generate fresh control-plane-specific docs.
-- Reuse the same UI/BFF/API patterns from datacompass-ui.
-- Reference datacompass-ui docs only where helpful.
-- Copy only the truly shared guardrails, not the full 851k-word doc set.
-- Add clear docs for control-plane architecture, routing, API usage, generated types, UI page patterns, RBAC, audit, and workflow/run concepts.
+Control Plane SPA
+  → Fastify BFF / auth layer
+  → Workflow Management API
+  → MongoDB
+
+For run history:
+
+Metadata Harvester
+  → writes run summary / run events to MongoDB runSummaries or agreed collection
+  → Workflow Management API reads/imports runSummaries
+  → Control Plane stores normalized workflow_runs / workflow_run_steps / audit records
+  → UI reads run history only through Workflow Management API
 
 Final decision:
 
-Choose option 3, or a custom hybrid: generate fresh docs tailored to the control plane and reference datacompass-ui patterns as needed. Avoid copying all docs verbatim because it will bloat the repo and may confuse agents with guidance that belongs to the original app, not the control plane.
+Choose Option B+:
+- BFF remains auth/config/proxy only.
+- No MongoDB driver in the BFF.
+- No MongoDB access from the SPA.
+- Dedicated CP backend API owns MongoDB reads/writes.
+- Harvester runSummaries can be the acquisition source.
+- CP run store becomes the UI-facing operational history.
+
+Option C can remain a fallback for environments where MongoDB runSummary access is not allowed, but it is more orchestration-heavy and should not be the primary pilot path.
