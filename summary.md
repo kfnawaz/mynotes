@@ -1,151 +1,134 @@
-# PCI Workspace Metadata Crawling Discussion Summary
+# Data Compass Crawling / Strategic Browse Access Summary
 
-## Context
+## Overview
 
-The team needs to crawl metadata from the **CCP Risk PCI Databricks workspace** using Data Compass metadata extractors.
-
-Current challenge:
-
-- The metadata extractor runs in a **non-PCI environment**.
-- It requires **read-only access** to a PCI-designated workspace.
-- Such access is currently restricted due to PCI compliance controls.
+The discussion focused on how **Data Compass / Atlan** is currently crawling assets from the **CCB Risk HCD** and **PCI** workspaces, and what needs to happen before enabling the new **strategic crawling / browse-role access** approach. :contentReference[oaicite:0]{index=0}
 
 ---
 
-## Problem Statement
+## Current Setup
 
-The Data Compass extractor needs to access metadata from a PCI workspace, but:
+There are currently two direct crawler connections:
 
-- The extractor is hosted in a non-PCI environment.
-- Cross-boundary access from non-PCI to PCI environments is not automatically permitted.
-- The team is seeking a compliant path to enable metadata extraction.
+| Connection / Workspace | Approx. Database Count | Current Status | Lineage Mining |
+|---|---:|---|---|
+| CBR Prod / HCD | 34 databases | Crawling enabled | Not enabled |
+| CBR Prod PCI | 17 databases | Crawling enabled | Not enabled |
 
----
-
-## Key Findings
-
-### No Technical Workaround
-
-There is currently **no approved technical workaround** to bypass the PCI restrictions.
-
-The recommended approach is to pursue a formal exception process.
-
-### CTC Exception Required
-
-The team should engage the **CTC (Cyber Technology Controls)** team and request an exception approval.
-
-The exception request must demonstrate:
-
-1. The extractor accesses **metadata only**.
-2. The APIs being used **cannot access or expose actual data**.
-3. PCI-sensitive data is never read, copied, or transmitted.
+These connections are already crawling assets into Data Compass / Atlan.
 
 ---
 
-## Evidence Required for Approval
+## Direct Browse Access Assets
 
-The team should prepare documentation proving:
+For assets currently coming directly from the **CBR HCD** and **CBR PCI** connections:
 
-### Metadata-Only Access
+- No rollback is needed.
+- No major impact is expected.
+- The assets remain the same.
+- The catalogs, schemas, and table names remain the same.
+- The connection/channel remains the same.
+- Only the **authorization method** changes.
 
-- Data Compass only extracts metadata.
-- No table contents are read.
-- No row-level data is accessed.
-- No PCI data is retrieved.
-
-### API Behavior
-
-Provide evidence that the APIs used:
-
-- Return metadata only.
-- Do not expose underlying data.
-- Cannot be used to retrieve PCI-sensitive information.
+In other words, the FID will move to the new strategic browse-role access model, but the asset identity should remain stable.
 
 ---
 
-## Existing Precedent
+## Catalog Share Assets
 
-A similar exception was reportedly approved previously for **HCD workspaces**.
+A separate issue exists for assets coming through **catalog sharing via Odessa Gold Prod**.
 
-As a result:
+Some CCB Risk catalogs are currently shared into Odessa Gold. Because of that, Atlan treats those assets as belonging to the **Odessa Gold connection/channel**, even though the original source is CBR Prod.
 
-- Data Compass currently has access to HCD environments.
-- Access was granted through an approved exception process.
-- The PCI request is expected to follow a similar path.
+When the same assets are later discovered directly through **CBR Prod** using the new strategic browse-role access, Atlan may treat them as **different assets**, because the discovery channel changes.
 
 ---
 
-## Current Blocker
+## Main Risk
 
-The team needs:
+The main risk is with **product mappings**.
 
-- Workspace onboarding
-- Warehouse creation
-- **CATS (Cross Account Data Sharing)** access
-
-The inability to obtain the required CATS access is the immediate blocker preventing progress.
+Some assets coming through catalog share may already be mapped to products. If catalog sharing is disabled, those shared assets may disappear from Atlan. Then, when the same assets are rediscovered through the strategic CBR Prod crawler, they may appear as new assets and need to be remapped.
 
 ---
 
-## Recommended Next Steps
+## Impact Assessment
 
-### 1. Initiate CTC Exception Process
-
-- Contact the CTC team.
-- Explain the metadata-only use case.
-- Request an exception for non-PCI to PCI metadata access.
-
-### 2. Prepare Supporting Evidence
-
-Document:
-
-- Metadata extraction architecture.
-- APIs used by the crawler.
-- Proof that data access is not possible.
-- Security controls and limitations.
-
-### 3. Engage Daniel ("Dan")
-
-Dan was identified as the likely point of contact for these approvals.
-
-Actions:
-
-- Obtain an introduction.
-- Share architecture and use case details.
-- Walk through the exception request.
-
-### 4. Schedule Follow-Up Discussion
-
-A follow-up meeting can be arranged with:
-
-- Dan
-- Data Compass representatives
-- Relevant CTC stakeholders
-
-The speaker offered to:
-
-- Provide an introduction.
-- Share historical context.
-- Participate in future discussions if needed.
+| Asset Source | Expected Impact | Reason |
+|---|---|---|
+| Direct CBR HCD crawl | No major impact | Same connection/channel; only authorization changes |
+| Direct CBR PCI crawl | No major impact | Same connection/channel; only authorization changes |
+| Odessa Gold catalog-share assets | Impact expected | Channel changes from Odessa Gold to direct CBR Prod |
+| Product mappings on shared assets | Impact expected | Existing mappings may need to be moved to newly discovered strategic assets |
 
 ---
 
-## Outcome
+## Agreed Understanding
 
-### Agreed Path Forward
+- **CBR HCD and PCI direct crawled assets should not be impacted.**
+- **Assets coming through Odessa Gold catalog share will be impacted.**
+- Catalog sharing will need to be disabled.
+- Once catalog sharing is disabled, shared assets may be removed from Atlan.
+- The new strategic crawler will rediscover those assets directly from CBR Prod.
+- Product mappings will need to be reviewed and remapped to the newly discovered strategic assets.
 
-Pursue a **CTC exception approval** similar to the previously approved HCD exception.
+---
 
-Success depends on demonstrating:
+## Required Coordination
 
-- Metadata-only access.
-- No PCI data exposure.
-- Read-only access patterns.
-- Compliance with existing security controls.
+This change requires coordination across multiple teams because product mappings may be affected.
 
-Once approved, the team should be able to:
+The strategic crawling change should be delayed by **one to two weeks** to allow time for planning, especially because the July 4th holiday week may slow coordination.
 
-- Obtain the required CATS access.
-- Complete PCI workspace onboarding.
-- Create the necessary warehouse resources.
-- Enable Data Compass metadata crawling for the PCI workspace.
+---
+
+## Action Items
+
+### 1. Create a tracking table
+
+Create a table with the following fields:
+
+| Field | Purpose |
+|---|---|
+| Database name | Identify the database being crawled |
+| Workspace/source | Identify whether it belongs to HCD, PCI, CBR Prod, etc. |
+| Connection/channel | Identify whether it comes from CBR, PCI, or Odessa Gold |
+| Discovery method | Direct browse access or catalog share |
+| Product mapping status | Whether the asset is mapped to any products |
+| Expected impact | No impact / remapping required |
+| Remediation action | What needs to be done before or after strategic crawling |
+
+---
+
+### 2. Send an email summary
+
+Send an email covering:
+
+- Current crawling setup
+- Difference between direct crawl and catalog-share crawl
+- Which assets are not expected to be impacted
+- Which assets are expected to be impacted
+- Why catalog-share assets may be duplicated or remapped
+- Required coordination steps
+- Product mapping remediation plan
+- Proposed delay of the strategic crawling change
+
+---
+
+### 3. Include the right stakeholders
+
+The email should include:
+
+- PMs
+- Product technology teams
+- Data Compass / Atlan stakeholders
+- CCB Risk product owners
+- Teams responsible for catalog sharing and product mappings
+
+---
+
+### 4. Continue access onboarding
+
+Proceed with onboarding and provisioning access to the HCD and PCI workspaces.
+
+However, do **not** enable the new strategic crawler until the coordination and remediation plan is agreed.
