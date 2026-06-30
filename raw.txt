@@ -1,361 +1,91 @@
-ChatGPT
+Summarize
 
+00:04
+Uh, can you see my screen now? Yeah, I can see I. I have Stephen also who joined us now. Uh, might be better if we can just repeat the overall thing because he's gonna help me. History will. I was just explaining this to Muhammad that, um, we. That I've already, uh, you know, enabled the access from?
 
+00:30
+Atlant side, and we just need to add these. Roll ions into the trust policy of the roles that were shared earlier. These three rules. Okay, so for the same, I have. We have shaped the errands that we need to put, and this is the trust policy statement that we have.
 
+00:49
+And the, uh, the atlen dock that is there so? This will be the steps that we need to follow. Node instance roll number at. Yeah, this is shared already. Yeah, it's talking about this one. Node instance rules. So, this one is for depth and UV and the plot. So, the example of what gets replaced in that line in the middle of the snippet is check the number or the the whole thing, just this part, um.
 
+01:23
+We can just let me just. Something like this? Just this should do. Okay, and three separate numbers there. Okay, sure, no, actually. So, uh, this needs to be added into the, uh, Dev, one Dev IM role only. Yeah, since this is for depth, right? So, um, this is for death, then uid and the prod.
 
-Pasted text(10).txt
-Document
-summarize : 
+01:53
+Similar to like, uh, for Dev, we need to add trust policy to this role. And.
 
+02:07
+Okay. All right. And then we come back to you. So? Once that is done. The you should be able to configure the connector. And if you face any issues then, uh, we can, you know, sing back. I'll keep the ticket open, and once you're done with the setup, and uh, we're good, then only we'll close it.
 
-Thought for a few seconds
-Summary
-The discussion was about how Data Compass / Atlan is currently crawling CCB Risk HCD and PCI workspaces, and what will happen when the new strategic crawling approach is enabled. 
+02:27
+You can reach out again to the educative. Uh, effacing issues. But what I heard about this was in the? Workflow configuration. There was a. Uh, certain Fields about Secrets. Do we need certain secrets to be set up in kubernetes Secrets? So?
 
+03:03
+Come on! As it stands right now, nawaze, I am able to pull, um. The bear tokens from? Uh, from ID anywhere using GSM. And because of that, um? We can, like, pull together a basic script to do that. They won't be able to schedule. It'll be like a simple script that we can run from Sophia.
 
-Key points
-There are currently two direct crawler connections:
+03:31
+They can update that. Okay, yeah, I know. I mean that that one, we will just prove it out and take it to the implementation fully. Uh, but this one is like needed now yesterday. Okay, so we'll just follow the same pattern if this requires another secret. So my end.
 
-CBR Prod / HCD: about 34 databases
+03:54
+What I mean is in. In this workload, double click, I guess.
 
-CBR Prod PCI: about 17 databases
+04:04
+Come on, buddy.
 
-These are already being crawled, but lineage mining is not enabled yet.
+04:11
+These things they don't open.
 
-For the direct CBR/HCD and PCI connections:
+04:18
+I am double clicking, clicking, and nothing is happening.
 
-No rollback is needed.
+04:48
+Hey! Press chunk. I got my notes written man, um? Basically. Mind has given some score Snippets that need to go in the trust policy of the arns created by that RDI team RDI idea rd18. And then we should be able to run it since, and then I had a question about the requirement for secrets in this workflow setup.
 
-No major impact is expected.
-
-The assets, schemas, catalogs, and connection channels stay the same.
-
-Only the authorization method changes, meaning the FID will get access through the new browse-role strategy.
-
-There is a separate issue with assets coming through catalog sharing via Odessa Gold Prod.
-
-Some CCB Risk catalogs are currently shared into Odessa Gold.
-
-Atlan treats those shared assets as belonging to the Odessa Gold connection/channel.
-
-When the same assets are later discovered directly through CBR Prod using strategic browse access, Atlan may treat them as new/different assets because the connection/channel is different.
-
-Main concern
-Assets coming through catalog share may already be mapped to products. When catalog sharing is disabled, those shared assets may disappear, and the newly discovered strategic assets will need to be remapped to the relevant products.
-
-Decision / Agreement
-Direct CBR HCD and PCI crawled assets should not be impacted.
-
-Catalog-share assets coming through Odessa Gold will be impacted.
-
-Catalog sharing will need to be disabled.
-
-Once disabled, those shared assets may be removed from the catalog.
-
-The new strategic crawler will rediscover those assets directly from CBR Prod.
-
-Product mappings will need to be reviewed and remapped to the new strategic assets.
-
-Action items
-Create a table listing:
-
-Database name
-
-Workspace/source
-
-Connection/channel
-
-Whether it is direct browse access or catalog share
-
-Whether it is mapped to products
-
-Expected impact
-
-Send an email explaining:
-
-Current setup
-
-What changes with strategic crawling
-
-Which assets are not impacted
-
-Which assets are impacted
-
-Required coordination steps
-
-Remapping implications
-
-Include PMs and product technology teams in the coordination.
-
-Push the strategic crawling change by one to two weeks, because this needs coordination and may be affected by the July 4th holiday week.
-
-Meanwhile, proceed with onboarding/provisioning access to the HCD and PCI workspaces, but do not enable the new crawler until coordination is complete.
-
-
-give that in a markdown format 
-
-Thought for a couple of seconds
-# Data Compass Crawling / Strategic Browse Access Summary
-
-## Overview
-
-The discussion focused on how **Data Compass / Atlan** is currently crawling assets from the **CCB Risk HCD** and **PCI** workspaces, and what needs to happen before enabling the new **strategic crawling / browse-role access** approach. :contentReference[oaicite:0]{index=0}
-
----
-
-## Current Setup
-
-There are currently two direct crawler connections:
-
-| Connection / Workspace | Approx. Database Count | Current Status | Lineage Mining |
-|---|---:|---|---|
-| CBR Prod / HCD | 34 databases | Crawling enabled | Not enabled |
-| CBR Prod PCI | 17 databases | Crawling enabled | Not enabled |
-
-These connections are already crawling assets into Data Compass / Atlan.
-
----
-
-## Direct Browse Access Assets
-
-For assets currently coming directly from the **CBR HCD** and **CBR PCI** connections:
-
-- No rollback is needed.
-- No major impact is expected.
-- The assets remain the same.
-- The catalogs, schemas, and table names remain the same.
-- The connection/channel remains the same.
-- Only the **authorization method** changes.
-
-In other words, the FID will move to the new strategic browse-role access model, but the asset identity should remain stable.
-
----
-
-## Catalog Share Assets
-
-A separate issue exists for assets coming through **catalog sharing via Odessa Gold Prod**.
-
-Some CCB Risk catalogs are currently shared into Odessa Gold. Because of that, Atlan treats those assets as belonging to the **Odessa Gold connection/channel**, even though the original source is CBR Prod.
-
-When the same assets are later discovered directly through **CBR Prod** using the new strategic browse-role access, Atlan may treat them as **different assets**, because the discovery channel changes.
-
----
-
-## Main Risk
-
-The main risk is with **product mappings**.
-
-Some assets coming through catalog share may already be mapped to products. If catalog sharing is disabled, those shared assets may disappear from Atlan. Then, when the same assets are rediscovered through the strategic CBR Prod crawler, they may appear as new assets and need to be remapped.
-
----
-
-## Impact Assessment
-
-| Asset Source | Expected Impact | Reason |
-|---|---|---|
-| Direct CBR HCD crawl | No major impact | Same connection/channel; only authorization changes |
-| Direct CBR PCI crawl | No major impact | Same connection/channel; only authorization changes |
-| Odessa Gold catalog-share assets | Impact expected | Channel changes from Odessa Gold to direct CBR Prod |
-| Product mappings on shared assets | Impact expected | Existing mappings may need to be moved to newly discovered strategic assets |
-
----
-
-## Agreed Understanding
-
-- **CBR HCD and PCI direct crawled assets should not be impacted.**
-- **Assets coming through Odessa Gold catalog share will be impacted.**
-- Catalog sharing will need to be disabled.
-- Once catalog sharing is disabled, shared assets may be removed from Atlan.
-- The new strategic crawler will rediscover those assets directly from CBR Prod.
-- Product mappings will need to be reviewed and remapped to the newly discovered strategic assets.
-
----
-
-## Required Coordination
-
-This change requires coordination across multiple teams because product mappings may be affected.
-
-The strategic crawling change should be delayed by **one to two weeks** to allow time for planning, especially because the July 4th holiday week may slow coordination.
-
----
-
-## Action Items
-
-### 1. Create a tracking table
-
-Create a table with the following fields:
-
-| Field | Purpose |
-|---|---|
-| Database name | Identify the database being crawled |
-| Workspace/source | Identify whether it belongs to HCD, PCI, CBR Prod, etc. |
-| Connection/channel | Identify whether it comes from CBR, PCI, or Odessa Gold |
-| Discovery method | Direct browse access or catalog share |
-| Product mapping status | Whether the asset is mapped to any products |
-| Expected impact | No impact / remapping required |
-| Remediation action | What needs to be done before or after strategic crawling |
-
----
-
-### 2. Send an email summary
-
-Send an email covering:
-
-- Current crawling setup
-- Difference between direct crawl and catalog-share crawl
-- Which assets are not expected to be impacted
-- Which assets are expected to be impacted
-- Why catalog-share assets may be duplicated or remapped
-- Required coordination steps
-- Product mapping remediation plan
-- Proposed delay of the strategic crawling change
-
----
-
-### 3. Include the right stakeholders
-
-The email should include:
-
-- PMs
-- Product technology teams
-- Data Compass / Atlan stakeholders
-- CCB Risk product owners
-- Teams responsible for catalog sharing and product mappings
-
----
-
-### 4. Continue access onboarding
-
-Proceed with onboarding and provisioning access to the HCD and PCI workspaces.
-
-However, do **not** enable the new strategic crawler until the coordination and remediation plan is agreed.
-
-00:19
-To data Compass FID to their cat logs on CCB risk hcd and PCI workspace. So, my question is, that's how things are getting cruel. That's what I meant by mixed bag. So, my question is, it's in the same catalog. Everything is same, same schemas and all that, but it is getting crawled via either share or via browser.
-
-00:41
-Access directly from CCB. Does that have to get rolled back? Before you push your changer, there is no need. Okay, that's the question. Okay, does it have to be rolled back or not? Okay, one second, yeah. Whatever the current setup has to be rolled back before you enable your, uh, strategy crawling.
-
-00:58
-Yeah, let's validate those things that they are getting crawled, and I know I have set this up in production. This is the CBR prod and CBR broad PCI. These two connections, correct and correct. Yeah, those two here. FIDs browser access, and then the one scenario is, which you know.
-
-01:18
-You can get details, but one scenario is. Some catalogs are shared from CCB risk to CCB, uh, sorry. What is a goal and it's coming through there because you already have the setup there? Correct? Yeah, so this is the list of databases that is being scrolled. Okay, let's put together a table.
-
-01:42
-This will be material for us to like use also track also. Okay. And before I forget, once you pull right, I need you to send an email with the PMS because I need PMS. I can't coordinate this. I mean, I'll be part of it, but we'll need all product Tech games.
-
-01:58
-So, we're talking about, like multiple teams here.
-
-02:06
-Table of database name and? Yeah, and I have to drop at 10:30. We have time, but just nothing, you know, yeah, no, no. I think this exercise that we are doing right now, puts us on both puts both of us on the same page. I'm confident that you know what I'm talking about, you're confident, you know, I know.
-
-02:28
-Will also be helpful for us to track. So, yeah, and? And this is this PCI, so 34 databases in? Cbr HCD and 17 databases in the? Pci, so we are already crawling this. Ah, but we are not. Mining. This lineage is not there. Only crawler is there. Okay.
-
-03:12
-Okay, so. These two tables, we will have full list. And you guys are actually using this already. Using what? Sorry, this, uh, the assets from these connections? Have you mapped to any products? Yeah, yeah, they are all mad, so that's the reason, right? Because rollback is one, and then, what happens if we disable this and you crawl again through your strategic?
-
-03:39
-What happens to the mapping of assets to DPS and all that. So that's why I ask, like, does this have to be coordinated? How does this work? Yeah, so these two, whatever is coming out of these two connections, the cbr PCI connection, and the CBR connection. Once we get onboarded, we get our browse role access.
-
-03:58
-It's just these are going to stay as is treated in the same exact way. The way the permission using which we are able to discover these assets is changing, but not the assets. The channel is also not changing. The connection is not changing. Uh, the assets are not changing, but the way.
-
-04:20
-We get authenticated to be able to see authorized to be able to see these assets is changing, so these two should ideally not have any impact okay by that switch. Okay, so put this all in an email, and then I'll tell you who to put on that email, so we learn how to do back and forth now.
-
-04:39
-Can we do one more thing, but the second part of two second part that I wanted to also say, okay, these are like, direct, uh, being, you know, without sharing. These are being crawled right directly from the channel right Channel. Yeah, so I don't know which ones, but I think yes, yeah.
-
-04:55
-These two, your FID has browsed access to some catalogs in these two, and they are getting no. Mining is happening, just crawling, just crawling, and then this is through direct, uh, Discovery, not through shared sharing to another Channel and another Discovery. So, the sharing concept is on this Odessa gold prod.
-
-05:13
-Some people some teams have shared their catalogs to this Odessa Gold. Channel. That's why their assets are coming through this. These are the ones that will have to then switch from. So those those teams that are sharing their catalog on the original gold prod. Where are their original catalogs?
+05:21
+Uh, and I am not able to open this workflow thing now. Can you, uh, can you please click on the install and then try?
 
 05:37
-Are they in the CBR and cbr PCI workspaces, they they are on CBI Pro, not on PCI, because if it would build PCI, then we wouldn't be able to do catalog. Share with Odessa gold from PCI. That's fine. Okay, so they are on CBR product. So, those guys who are sharing to Odessa gold prod, they have to shut down.
+Where is it installing?
 
-05:57
-And we will then. Once we get that browse role like platform level, browse rule, we will be able to discover them. On the CBR, prod itself. Okay, okay, so through that new overarching role that we will have the frdc metadata, browse all role okay, right? Okay, so, now, will there be a duplication?
+05:44
+On the Atlanta Hardware on the tenant.
 
-06:20
-Yes, there will be a duplication. Will there be a conflict amongst those duplications? That is what we have to try to answer the conflict I am guessing would be if, uh, or rather, the implication of this would be okay if the shared assets if the assets that that came through sharing to Odessa gold product.
+05:55
+Hmm.
 
-06:46
-They are mapped to certain products if that is true, then. Those products have to be readjusted to map those products backed or rather to the new assets. That are coming through CBR prod. So, let me ask you this why that has to happen, though even though the underlying catalog and schema and the data asset names and nothing is changing.
+06:10
+All right. Oh, this will be, I am rule. And. Yeah, then I think this will. No, I'm not directory, so is, isn't it self-deployed on time, or is it direct? Direct, not Str. I was under the impression that it has to be SDR because everything else is SDR in our workflows.
 
-07:14
-The channel is different, right? So Discovery Channel is different. So, so, because it was shared to Odessa Gold, prod. Atlant doesn't know that it was because the sharing and then the original source is actually a different workspace. Atlanta doesn't know that Atlant is only thinking the shared assets are coming through this channel.
+06:35
+And hence this requirement for the secret store and. I'll show you one of our. Just. There is any misunderstanding here. I'll show you the work data breaks and snowflake. Workflow setup.
 
-07:36
-It doesn't know that they were shared or not. The assets are coming through this channel, so it tags those assets to this channel. Now, when the same kind of channels same kind of assets start coming through the CBR broad, then those will be discovered as okay. This is different from the ones that are being.
+07:44
+That's an SDR. Witness with a secret store.
 
-07:50
-There were previously discovered because the channel is different. So, channel comes into picture irrespective of the workspace catalog schemas and all that. Your thing, push out the date for this thing, or I don't know how you wanna do it, whatever easier for you sure. And then whatever you just said here, right?
+07:52
+Okay.
 
-08:28
-Can you put this in an email that once we you onboard your sale? Where have all those steps these two should not have any impact. Yeah, uh, only the assets that are coming via catalog share will have an impact. The catalog shell has to be disabled, and then your change needs to go in, and all the steps put everything in the email.
+07:56
+Let me let me check this with, uh, a wind, and then I'll get back to you on that ticket as well. For the same and? The same rule. That is something that we we have to do. So we, for now, we can proceed with that, and I'll get back to you on the whether we have to go ahead with the self-deployed runtime or the direct connect.
 
-08:49
-You can address it to me. I'll describe the whole thing in a proper email, uh, so that anybody can understand easily my question, uh. One question I wanted to ask and I did not ask properly the the shared assets. There's assets coming through the shared Channel. Are they already mapped to products?
+08:17
+So, what is the difference here? If you can elaborate a little bit, and why does the director does not require a secret versus deployed Prime runtime requires one? All right. So, uh, directors direct actually works through the public internet, whereas uh, HDR creates a Azure user, you know, container that is running inside, uh, your environment, which, basically, uh, pulse data into Atlant?
 
-09:07
-Yes, they are. Can we identify which ones those are? I think we can or give me a full picture, and I can. I can come up with the remediation solution also. Okay, so, and then going products will confirm which you can depend on the left. If you go in products.
+08:47
+So even here as well, you will have to go ahead with IEM role only on the authentication and for the secure agent configuration. Um. This is something, uh, that I'll confirm with Owen and get back to you all. Okay, so basically, I, you might be meaning that the direct runs without the secure agent it has to run through the secure agent.
 
-09:27
-Products. Okay. And go to RMC. Last one last one. Okay, and consumer and Community Banking the one below. Then, okay, the long one? And go to modal scores and output. Scores and output. Now, we're talking about catalog, share only okay, and look at, let's say, look at acquisition as an example as long as it's not PC.
+09:12
+Great! You have a secure agent installed for all the workflows. All the outline connectors? So, that means we have to go through the SDR. Where is the secret and what is the secret that is being used? Okay, let me check. The event is available right now. Okay. I don't know.
 
-09:56
-Are you saying the model, share, and model scores and output? These are all the ones that are coming through the share. Uh, maybe not all. I'm not sure, but let's look at acquisition. I mean it, I think it's all because sugindi and them were the first one. But the second one, yeah, let's look at acquisition, okay, and we will see the click on assets.
+09:37
+Actually, he's not available right now. Let me, uh, let me check with him and get back to you on the together for the same. Meanwhile, we can, uh, configure the IM roles are the same, because, uh, even with HDR, we would need the roles configured. All right, sounds good.
 
-10:16
-Assets, uh. Now, let me see if we are able to see. I think we can see the cap block as long as. Not BCI. Yeah, if you see here, the catalog is CCB risk model CR and the schema is model acquisition. Scroll down. I just want to see. These are all known.
+09:52
+Waiting for it very, very early. Today is the like. The drop date date for us for the month and a, you know, accomplishment of completing the glue literally. We are cutting it to the last hour. Okay. Sure, we have to make sure that this runs. All right. Thank you.
 
-10:34
-Scroll down. There is no PCI get log here. Okay, let's go on left. Let's look at the account management. I just want to show you one example, so you get an idea. Okay, on the on the left side product paying, click on the first one account management. I just want to highlight one PCI, so you get a picture of what I'm talking about assets, right?
+10:15
+Okay, looking forward. It might be too early for Owen. Actually, he is in California time zone rides. 6 a.m. for him, maybe? Yeah, he's he's over in California, right? Yeah, I think so. Okay. So, try whatever you can. I mean, Mayanda, we are looking forward patients Leslie sure. Okay, so I'll check and I'll get back to you, like as soon as possible.
 
-10:56
-Let's see if we see a PCI catalog. That's what I'm trying to highlight here. Credit risk model CR badge. Keep going down. Or if you search for PCI in here, can we do a control? F PCI, I did. Yeah, it's not there. Okay, let's go to collection and Recovery.
-
-11:11
-One example, I want to show you so. Uh assets, and again look for PCA. There should be some. You know, one product where we see a PCI catalog? Okay, and that is coming via browse access. Yeah, yeah, yeah, see. So, this PCA is not why a capital of share because we can't share a PCI catalog 2 or as a goal, so this is coming via.
-
-11:37
-Browse access to your FID where the other known PCIs are coming via out as a bold. Yeah, so if I pick one of these, right? The one that came from PCI, it is always Associated to a connection. Okay, right? Yeah, so similarly, uh, the other ones which are like the non PCI.
-
-11:57
-Yeah, let's look at one. Yeah, I mean, I think I got what you, you know, sort of. Yeah, I got it, but for example, this one. Yeah, and you, you should see Odessa board. So, this is coming through catalog. Share this is coming through catalog, so that's what I meant by mixed bag.
-
-12:14
-On the last I got. I got what you're saying, but I think the only implication would be the ones that are through the catalog. Share they those products have to be. People have to go there into those products and then switch them out with the ones that are coming from directly.
-
-12:32
-So, so that will be me. Only I do the mapping. So, how will that work? Whatever, is there right now? You will delete them and new ones will come through new connection. Then I do the mapping I will. I can delete them if you want me to. Uh, then your products will have no assets when I do that.
-
-12:50
-If I do that before, you remap to the new products new assets. Um, so how would I? Okay, so let me ask you one more thing. One more thing, or I can selectively exclude them, or you can stop sharing. And then they get deleted in both events. The same effect will be there.
-
-13:11
-Okay, so anyway, from what correct me if I'm wrong? What we discuss, right? We have to disable catalog, share? Anyway, so then, what you are saying is it will automatically get deleted whenever sugandi and team girls that is correct. Yes, I don't have to explicitly exclude them. Okay, okay, all right, so I think we both are on the same page.
-
-13:30
-The CCB risk HCD PCI should not have any impact the caplock share coming by orders ago will have impact. We have to disable the care block share, because now it's going to come through strategy. Once it is disabled, it will get wiped out. Whatever comes through the news strategy crawling, I will have to go back and map.
-
-13:49
-That's what you're saying. The products to the strategic assets? Okay, okay, all right. Can you put all this in the email? Let me give you a few names that I want on the email, then I'll have Chris sorry and set up something internally within our team, and you push out your change for a week or a two, because this will need some coordination.
-
-14:05
-Sounds good. I can do that. Yeah, okay. But what I'm also going to do is, I'm going to get myself onboarded properly. And provisioned with the hardware infrastructure and all. To the piece to the hcd workspace and be ready but not set up a crawler for not set, not get that, you know, permission to bring it.
-
-14:26
-Bring the data from the new strategy Channel. Okay, that's fine anyway. Like I said, I'll have PM schedule something for next week, and it will take time. And it's like a fourth July week next week, so it might be even after. So, just manage your snow. Accordingly, I will do that.
-
-14:39
-Okay, all right, and I'll bring you names that I want on the email. Okay, we'll look forward, all right. Meanwhile, I'll compose the email. Sure, yeah, all right. Thank you, bye.
-
-
-Close
+10:44
+Yeah, thank you, bye. Just, you can please start with the policy configuration, and then we can just test the connector out, right? Yeah, we'll do that immediately. It'll get done. Okay, okay, thank you so much, bye. Thank you for joining me. Thank you. Thank you. I'm sorry. 

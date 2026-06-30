@@ -1,134 +1,129 @@
-# Data Compass Crawling / Strategic Browse Access Summary
+# Meeting Summary: Atlan AWS IAM Role & Connector Configuration
 
-## Overview
+## Objective
 
-The discussion focused on how **Data Compass / Atlan** is currently crawling assets from the **CCB Risk HCD** and **PCI** workspaces, and what needs to happen before enabling the new **strategic crawling / browse-role access** approach. :contentReference[oaicite:0]{index=0}
-
----
-
-## Current Setup
-
-There are currently two direct crawler connections:
-
-| Connection / Workspace | Approx. Database Count | Current Status | Lineage Mining |
-|---|---:|---|---|
-| CBR Prod / HCD | 34 databases | Crawling enabled | Not enabled |
-| CBR Prod PCI | 17 databases | Crawling enabled | Not enabled |
-
-These connections are already crawling assets into Data Compass / Atlan.
+Finalize the AWS IAM configuration required for the Atlan connector and determine whether the connector should use a **Direct Connector** or **Secure Agent (SDR)** deployment before the project deadline.
 
 ---
 
-## Direct Browse Access Assets
+# Key Discussion Points
 
-For assets currently coming directly from the **CBR HCD** and **CBR PCI** connections:
+## 1. IAM Trust Policy Configuration
 
-- No rollback is needed.
-- No major impact is expected.
-- The assets remain the same.
-- The catalogs, schemas, and table names remain the same.
-- The connection/channel remains the same.
-- Only the **authorization method** changes.
-
-In other words, the FID will move to the new strategic browse-role access model, but the asset identity should remain stable.
+- Atlan-side configuration has already been completed.
+- The remaining task is to update the **AWS IAM trust policy** by adding the Atlan-provided IAM role ARNs.
+- Three role ARNs were shared (Dev, UAT, and Prod).
+- Each environment's corresponding IAM role must be updated with the appropriate trust policy.
+- The team agreed to begin this configuration immediately.
 
 ---
 
-## Catalog Share Assets
+## 2. Connector Configuration
 
-A separate issue exists for assets coming through **catalog sharing via Odessa Gold Prod**.
+After the IAM trust policies are updated, the team will:
 
-Some CCB Risk catalogs are currently shared into Odessa Gold. Because of that, Atlan treats those assets as belonging to the **Odessa Gold connection/channel**, even though the original source is CBR Prod.
+- Configure the Atlan connector.
+- Test the connection.
 
-When the same assets are later discovered directly through **CBR Prod** using the new strategic browse-role access, Atlan may treat them as **different assets**, because the discovery channel changes.
-
----
-
-## Main Risk
-
-The main risk is with **product mappings**.
-
-Some assets coming through catalog share may already be mapped to products. If catalog sharing is disabled, those shared assets may disappear from Atlan. Then, when the same assets are rediscovered through the strategic CBR Prod crawler, they may appear as new assets and need to be remapped.
+The support ticket will remain open until the connector is fully configured and verified.
 
 ---
 
-## Impact Assessment
+## 3. Kubernetes Secrets Discussion
 
-| Asset Source | Expected Impact | Reason |
-|---|---|---|
-| Direct CBR HCD crawl | No major impact | Same connection/channel; only authorization changes |
-| Direct CBR PCI crawl | No major impact | Same connection/channel; only authorization changes |
-| Odessa Gold catalog-share assets | Impact expected | Channel changes from Odessa Gold to direct CBR Prod |
-| Product mappings on shared assets | Impact expected | Existing mappings may need to be moved to newly discovered strategic assets |
+A question was raised regarding whether the workflow requires Kubernetes Secrets.
 
----
+### Current Status
 
-## Agreed Understanding
-
-- **CBR HCD and PCI direct crawled assets should not be impacted.**
-- **Assets coming through Odessa Gold catalog share will be impacted.**
-- Catalog sharing will need to be disabled.
-- Once catalog sharing is disabled, shared assets may be removed from Atlan.
-- The new strategic crawler will rediscover those assets directly from CBR Prod.
-- Product mappings will need to be reviewed and remapped to the newly discovered strategic assets.
+- Bearer tokens can already be retrieved from the identity system using GSM.
+- A temporary proof-of-concept script can be created to validate the authentication flow.
+- This script will not support scheduled execution but is sufficient for initial validation.
+- The complete production implementation can be completed afterward.
 
 ---
 
-## Required Coordination
+## 4. Direct Connector vs. Secure Agent (SDR)
 
-This change requires coordination across multiple teams because product mappings may be affected.
+This became the primary technical discussion during the meeting.
 
-The strategic crawling change should be delayed by **one to two weeks** to allow time for planning, especially because the July 4th holiday week may slow coordination.
+### Current Uncertainty
 
----
+Existing Databricks and Snowflake workflows use the **Secure Agent (SDR)** model together with a secret store.
 
-## Action Items
+It is currently unclear whether this connector should instead use a **Direct Connector**.
 
-### 1. Create a tracking table
+### Direct Connector
 
-Create a table with the following fields:
+- Connects over the public internet.
+- Appears not to require the same secret-store configuration.
 
-| Field | Purpose |
-|---|---|
-| Database name | Identify the database being crawled |
-| Workspace/source | Identify whether it belongs to HCD, PCI, CBR Prod, etc. |
-| Connection/channel | Identify whether it comes from CBR, PCI, or Odessa Gold |
-| Discovery method | Direct browse access or catalog share |
-| Product mapping status | Whether the asset is mapped to any products |
-| Expected impact | No impact / remapping required |
-| Remediation action | What needs to be done before or after strategic crawling |
+### Secure Agent (SDR)
 
----
+- Runs inside the customer's Azure environment.
+- Pushes metadata into Atlan.
+- Uses IAM Role authentication.
+- Appears to require additional secret configuration.
 
-### 2. Send an email summary
-
-Send an email covering:
-
-- Current crawling setup
-- Difference between direct crawl and catalog-share crawl
-- Which assets are not expected to be impacted
-- Which assets are expected to be impacted
-- Why catalog-share assets may be duplicated or remapped
-- Required coordination steps
-- Product mapping remediation plan
-- Proposed delay of the strategic crawling change
+The team believes that since all existing connectors currently operate through the Secure Agent, this connector will likely need to follow the same deployment model.
 
 ---
 
-### 3. Include the right stakeholders
+## 5. Outstanding Technical Question
 
-The email should include:
+The exact secret requirements for the Secure Agent deployment remain unclear.
 
-- PMs
-- Product technology teams
-- Data Compass / Atlan stakeholders
-- CCB Risk product owners
-- Teams responsible for catalog sharing and product mappings
+The Atlan team will verify with Owen:
+
+- Whether Secure Agent is mandatory.
+- Which secret(s) are required.
+- Where those secrets should be configured.
 
 ---
 
-### 4. Continue access onboarding
+# Decisions
 
-Proceed with onboarding and provisioning access to the HCD and PCI workspaces.
+- ✅ Proceed immediately with IAM trust policy updates.
+- ✅ Configure and test the connector once IAM configuration is complete.
+- ✅ Keep the support ticket open until end-to-end validation is successful.
+- ⏳ Confirm whether the connector should use **Direct Connector** or **Secure Agent (SDR)**.
+- ⏳ Confirm the required Kubernetes Secret / Secret Store configuration.
 
-However, do **not** enable the new strategic crawler until the coordination and remediation plan is agreed.
+---
+
+# Action Items
+
+| Owner | Action |
+|--------|--------|
+| Infrastructure / RDI Team | Update AWS IAM trust policies with the provided Atlan IAM Role ARNs for Dev, UAT, and Prod environments. |
+| Nawaz's Team | Configure and test the connector after IAM policy updates are completed. |
+| Atlan Team | Confirm whether the connector should use Direct Connector or Secure Agent (SDR). |
+| Atlan Team | Identify the required Kubernetes Secret / Secret Store configuration and communicate the implementation details. |
+| All Teams | Complete validation and close the support ticket only after successful connector testing. |
+
+---
+
+# Open Questions
+
+1. Should this connector use the **Direct Connector** deployment model or the **Secure Agent (SDR)** deployment model?
+2. If Secure Agent is required:
+   - What Kubernetes Secret(s) must be configured?
+   - Where should those secrets be stored?
+   - How are they referenced by the workflow?
+3. Is there any additional configuration required beyond the IAM Role trust policy?
+
+---
+
+# Next Steps
+
+1. Update the IAM trust policies.
+2. Configure the connector.
+3. Test the connector.
+4. Obtain clarification from Owen regarding Secure Agent and secret management.
+5. Complete end-to-end validation.
+6. Close the support ticket after successful verification.
+
+---
+
+# Overall Outcome
+
+The meeting concluded with agreement to immediately proceed with the **IAM trust policy configuration**, as this step is required regardless of the final deployment architecture. The only remaining blocker is confirmation of whether the connector should run through the **Secure Agent (SDR)** or the **Direct Connector**, along with clarification of the associated Kubernetes secret management requirements. The team emphasized the urgency of resolving these remaining items due to the month-end delivery deadline.
