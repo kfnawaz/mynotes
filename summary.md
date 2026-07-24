@@ -1,204 +1,194 @@
-# SDR Adoption Planning Discussion
+# AWS Glue Authentication Discussion Summary
 
-## Overall Migration Strategy
+## Objective
 
-The team plans to adopt **SDR (Secure Data Runtime)** as the new architecture, which will effectively replace the current Secure Agent deployment.
-
-This is **not just an upgrade**, but a completely new deployment model that requires:
-
-- Procurement of new container images for each connector.
-- Deployment of the SDR components, including the **SDR Orchestrator**.
-- Rebuilding the deployment using the new SDR architecture.
+Discuss authentication options for connecting the **Atlan Secure Agent** to **AWS Glue** within the constraints of JPMorgan Chase (JPMC) security policies.
 
 ---
 
-# Image Management & Updates
+# Current Findings
 
-## Initial Image Procurement
+## IAM User Access Keys are Not Supported
 
-All required connector images (Snowflake, Tableau, Databricks, ThoughtSpot, etc.) must be imported into JPMorgan Chase's internal container repository.
-
-## Ongoing Image Updates
-
-Since JPMC uses an **internal image repository** instead of the vendor's registry:
-
-- The SDR Orchestrator cannot automatically pull newly released images.
-- A separate automation should:
-  - Periodically check the vendor image registry.
-  - Detect newly released images.
-  - Pull those images into the internal JPMC repository.
-
-Once images are available internally, the SDR Orchestrator can use them for deployments.
+- JPMC engineering confirmed that **IAM User Access Key / Secret Key authentication is not supported**.
+- A support ticket was created with the JADE engineering team.
+- Their recommendation is to use an **IAM Role + AssumeRole (Trust Relationship)** approach.
 
 ---
 
-# Recommended Deployment Model
+## Role-Based Authentication is Blocked
 
-The recommendation is to deploy SDR using **Docker** rather than Kubernetes.
+The Secure Agent is currently deployed on an **on-premises Unix VM**.
 
-### Reasons
+Because the VM is **outside AWS**, it:
 
-- Reuses the existing VM infrastructure.
-- Simpler operational model.
-- No dependency on Kubernetes administrators.
-- Easier for application teams to manage.
-- Supports:
-  - Local storage
-  - Enterprise secret managers
-  - Existing VM environments
+- Cannot be assigned an AWS IAM Role.
+- Cannot perform an IAM `AssumeRole` operation directly.
 
-Kubernetes remains supported but is not considered necessary for the current deployment.
+AWS role assumption only works from AWS resources such as:
 
----
-
-# Multi-Environment Deployment
-
-Running multiple environments on the same VM is considered feasible.
-
-Examples:
-
-- Production
-- UAT
-- Sandbox
-- Experimental
-
-Each environment can have:
-
-- Separate Docker containers
-- Separate configuration folders
-- Separate registration endpoints
-- Independent connector configuration
-
-This provides isolation similar to Kubernetes namespaces while remaining operationally simpler.
+- EC2
+- EKS
+- ECS
+- AWS Lambda
+- Other AWS-managed compute services
 
 ---
 
-# Recommended Migration Sequence
+# Authentication Options Reviewed
 
-The suggested rollout approach is:
+## Option 1 — IAM User Access Keys
 
-1. Deploy the SDR infrastructure.
-2. Configure enterprise secret management.
-3. Migrate a single connector first (recommended: Tableau).
-4. Validate the deployment.
-5. Add additional connectors one at a time:
-   - Snowflake
-   - Databricks
-   - ThoughtSpot
-   - Others
+### Description
 
-This minimizes migration risk and simplifies troubleshooting.
+Store an AWS Access Key and Secret Key inside the Secure Agent.
 
----
+### Status
 
-# Infrastructure Strategy
+❌ **Rejected**
 
-Rather than continuing to invest in the existing VM-based deployment, the discussion suggested evaluating a **cloud-first deployment**.
+### Reason
 
-Since the organization's long-term direction is AWS:
-
-- Consider deploying SDR directly into AWS.
-- Build the new platform on the target infrastructure instead of the legacy VM.
-
-Potential benefits include:
-
-- Better scalability
-- Cleaner architecture
-- Easier long-term maintenance
-- Alignment with future infrastructure strategy
+- Violates JPMC security policy.
+- Officially not recommended by the JADE engineering team.
 
 ---
 
-# Secrets Management
+## Option 2 — Secure Agent (Self-Hosted Runtime)
 
-SDR requires integration with an enterprise secret management solution.
+### Description
 
-Requirements:
+- Secure Agent runs on an on-premises VM.
+- The VM authenticates to AWS Glue.
+- Metadata is collected locally and uploaded to Atlan.
 
-- Credentials should never be embedded inside Docker images.
-- Docker containers should retrieve secrets securely during runtime.
-- The hosting VM or cloud infrastructure must have permission to access the selected secret manager.
+### Requirement
 
----
+Requires AWS Access Key and Secret Key.
 
-# Networking & Connectivity
+### Status
 
-One of the most important architectural discussions centered around networking.
+❌ **Blocked**
 
-## Current State
+### Reason
 
-Current communication relies on:
+Since the Secure Agent is running outside AWS:
 
-- Enterprise proxy servers
-- Proxy exceptions
-- Annual security approvals
-- Architecture exceptions
-
-These add operational complexity.
-
-## Proposed Future State
-
-Investigate using:
-
-- Private networking
-- Private endpoints
-- AWS PrivateLink (or equivalent private connectivity)
-
-Advantages:
-
-- Removes dependency on enterprise proxies.
-- Eliminates recurring security exceptions.
-- Simplifies connectivity to cloud platforms such as:
-  - Snowflake
-  - Databricks
-- Improves overall architecture.
-
-The recommendation is to validate this with the enterprise networking and security teams before finalizing the architecture.
+- It cannot assume an IAM Role.
+- The only supported AWS authentication mechanism is Access Keys.
+- Access Keys are prohibited by JPMC policy.
 
 ---
 
-# Key Action Items
+## Option 3 — Direct Connectivity
 
-## Architecture
+### Description
 
-- Confirm Docker as the deployment model.
-- Decide whether to deploy on existing VMs or directly in AWS.
+Instead of using the Secure Agent:
 
-## Images
+- Atlan Cloud directly assumes the Glue Read IAM Role.
+- Crawling is performed from Atlan infrastructure.
+- Metadata is collected directly by Atlan.
 
-- Procure all required SDR images.
-- Build automation to synchronize images into the internal repository.
+### Status
 
-## Secrets
+⚠️ **Technically Possible**
 
-- Select the enterprise secret manager.
-- Configure secure runtime access.
+### Limitation
 
-## Migration
+This introduces another architectural concern:
 
-- Begin with the Tableau connector.
-- Validate the platform.
-- Incrementally migrate remaining connectors.
+- Metadata extraction occurs from infrastructure outside JPMC.
+- Requires architectural and security approval.
+- This deployment pattern has not previously been adopted within JPMC.
 
-## Networking
+---
 
-- Investigate replacing proxy-based connectivity with private networking.
-- Engage networking and security teams early.
-- Eliminate annual proxy exception processes where possible.
+# Root Cause
+
+The discussion concluded that the team is facing a **Catch-22**.
+
+| Constraint | Impact |
+|------------|--------|
+| Access Keys are prohibited | Secure Agent cannot authenticate |
+| IAM Roles require AWS compute | On-prem VM cannot assume roles |
+| Secure Agent is hosted on an on-prem VM | Cannot use IAM Roles |
+
+As a result:
+
+> None of the currently available authentication models satisfy all security constraints.
+
+---
+
+# Important Clarifications
+
+The original issue appeared to be related to **IAM Role naming**.
+
+However, during the discussion it became clear that:
+
+- Role naming is **not the blocker**.
+- Trust policies are **not the blocker**.
+- The actual limitation is the **AWS authentication model** itself.
+
+Because the Secure Agent is not running inside AWS, IAM Roles cannot be used.
+
+This is an AWS architectural limitation rather than an Atlan limitation.
+
+---
+
+# Impact on Future SDR Adoption
+
+The team discussed the upcoming migration from **Secure Agent** to **SDR (Self-Deployed Runtime)**.
+
+### Observation
+
+If SDR is also deployed on an on-prem VM:
+
+- The exact same authentication problem will continue to exist.
+
+The issue would only be resolved if SDR is deployed on AWS infrastructure (such as EC2 or EKS), allowing IAM Role assumption.
+
+---
+
+# Proposed Next Steps
+
+## 1. Document the Current Constraints
+
+Prepare a summary of:
+
+- Available authentication options
+- Technical limitations
+- Security policy restrictions
+
+---
+
+## 2. Meet with Internal Teams
+
+Schedule a discussion involving:
+
+- JADE Engineering
+- Infrastructure Engineering
+- Architecture Team
+- Atlan
+
+---
+
+## 3. Determine Whether
+
+- A policy exception can be granted
+- A new supported authentication model exists
+- The runtime should be migrated onto AWS infrastructure
 
 ---
 
 # Overall Conclusion
 
-The migration to SDR should be viewed as a **greenfield architectural implementation**, not simply a replacement of the Secure Agent.
+At present, there is **no technically viable authentication solution** for connecting an **on-premises Secure Agent** to **AWS Glue** while remaining compliant with current JPMC security policies.
 
-Before implementation begins, several foundational architectural decisions should be finalized:
+The issue can only be resolved through one of the following:
 
-- Deployment platform (VM vs AWS)
-- Docker deployment strategy
-- Image lifecycle management
-- Secrets management
-- Private networking architecture
-- Migration sequencing
+1. Deploy the runtime on AWS so IAM Roles can be used.
+2. Obtain a policy exception permitting AWS Access Keys.
+3. Introduce a new authentication pattern approved by both AWS and JPMC engineering.
 
-Addressing these items first will reduce operational complexity and provide a cleaner, more maintainable SDR deployment.
+Until one of these conditions changes, the Glue integration remains blocked.
