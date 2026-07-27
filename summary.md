@@ -1,194 +1,249 @@
-# AWS Glue Authentication Discussion Summary
+# Smart Approvals Integration Meeting Summary
 
-## Objective
+## Integration Approach
 
-Discuss authentication options for connecting the **Atlan Secure Agent** to **AWS Glue** within the constraints of JPMorgan Chase (JPMC) security policies.
+Smart Approvals communicates back to the requesting application through a **postback (listener) endpoint**. Two implementation options were discussed:
 
----
+### Option 1: Apigee Proxy
 
-# Current Findings
+- Create a proxy endpoint in Apigee.
+- Can be reused by multiple applications.
+- Secured using an authentication token in the request header.
+- Centralized API management.
 
-## IAM User Access Keys are Not Supported
+### Option 2: Application-Hosted Endpoint
 
-- JPMC engineering confirmed that **IAM User Access Key / Secret Key authentication is not supported**.
-- A support ticket was created with the JADE engineering team.
-- Their recommendation is to use an **IAM Role + AssumeRole (Trust Relationship)** approach.
+- Expose a listener endpoint directly from the application (e.g., GAAP).
+- Provides greater flexibility and control over implementation.
+- Allows the application team to choose its preferred technology stack and security model.
 
----
-
-## Role-Based Authentication is Blocked
-
-The Secure Agent is currently deployed on an **on-premises Unix VM**.
-
-Because the VM is **outside AWS**, it:
-
-- Cannot be assigned an AWS IAM Role.
-- Cannot perform an IAM `AssumeRole` operation directly.
-
-AWS role assumption only works from AWS resources such as:
-
-- EC2
-- EKS
-- ECS
-- AWS Lambda
-- Other AWS-managed compute services
+**Recommendation:** Since the application is hosted in GAAP, an application-hosted endpoint appears to be the most appropriate approach.
 
 ---
 
-# Authentication Options Reviewed
+# Smart Approvals Postback Flow
 
-## Option 1 — IAM User Access Keys
+After an approval request is submitted:
 
-### Description
+1. Smart Approvals sends a confirmation that the request was received.
+2. It enriches the request with additional information (for example, manager details retrieved from HR).
+3. The application updates its UI or internal state using this information.
+4. Whenever the approval status changes, Smart Approvals sends another notification to the listener endpoint.
 
-Store an AWS Access Key and Secret Key inside the Secure Agent.
+The payload includes:
 
-### Status
+- Smart Approvals request identifier (internal unique ID)
+- Current approval status
+- Approval updates
+- Rejection information
+- Cancellation information (multiple cancellation reasons supported)
 
-❌ **Rejected**
+Supported statuses include:
 
-### Reason
+- Pending
+- Approved
+- Rejected
+- Cancelled
 
-- Violates JPMC security policy.
-- Officially not recommended by the JADE engineering team.
-
----
-
-## Option 2 — Secure Agent (Self-Hosted Runtime)
-
-### Description
-
-- Secure Agent runs on an on-premises VM.
-- The VM authenticates to AWS Glue.
-- Metadata is collected locally and uploaded to Atlan.
-
-### Requirement
-
-Requires AWS Access Key and Secret Key.
-
-### Status
-
-❌ **Blocked**
-
-### Reason
-
-Since the Secure Agent is running outside AWS:
-
-- It cannot assume an IAM Role.
-- The only supported AWS authentication mechanism is Access Keys.
-- Access Keys are prohibited by JPMC policy.
+The application listener must be able to process every supported payload type.
 
 ---
 
-## Option 3 — Direct Connectivity
+# Listener Response Requirements
 
-### Description
+After receiving a callback, the application should return:
 
-Instead of using the Secure Agent:
+## Success Response
 
-- Atlan Cloud directly assumes the Glue Read IAM Role.
-- Crawling is performed from Atlan infrastructure.
-- Metadata is collected directly by Atlan.
+Return a success response when:
 
-### Status
+- The payload was received successfully.
+- The payload was understood.
+- The application can process it.
 
-⚠️ **Technically Possible**
+## Error Response
 
-### Limitation
+Return an error response when:
 
-This introduces another architectural concern:
-
-- Metadata extraction occurs from infrastructure outside JPMC.
-- Requires architectural and security approval.
-- This deployment pattern has not previously been adopted within JPMC.
+- The payload is invalid.
+- Required data is missing.
+- The payload cannot be processed.
 
 ---
 
-# Root Cause
+# Authentication
 
-The discussion concluded that the team is facing a **Catch-22**.
+Authentication depends on how the application secures its APIs.
 
-| Constraint | Impact |
-|------------|--------|
-| Access Keys are prohibited | Secure Agent cannot authenticate |
-| IAM Roles require AWS compute | On-prem VM cannot assume roles |
-| Secure Agent is hosted on an on-prem VM | Cannot use IAM Roles |
+Possible scenarios include:
 
-As a result:
+- ADFS authentication
+- Domain group membership
+- FID-based authorization
+- API entitlements
 
-> None of the currently available authentication models satisfy all security constraints.
+If the application protects its APIs:
 
----
+- Smart Approvals' FID must be added to the required domain group.
+- Appropriate entitlements may need to be created (via MyTechHub).
+- Smart Approvals will then be authorized to invoke the listener endpoint.
 
-# Important Clarifications
-
-The original issue appeared to be related to **IAM Role naming**.
-
-However, during the discussion it became clear that:
-
-- Role naming is **not the blocker**.
-- Trust policies are **not the blocker**.
-- The actual limitation is the **AWS authentication model** itself.
-
-Because the Secure Agent is not running inside AWS, IAM Roles cannot be used.
-
-This is an AWS architectural limitation rather than an Atlan limitation.
+If the endpoint does not require those controls, no additional provisioning is necessary.
 
 ---
 
-# Impact on Future SDR Adoption
+# Ownership of Data Changes
 
-The team discussed the upcoming migration from **Secure Agent** to **SDR (Self-Deployed Runtime)**.
+An important clarification was made:
 
-### Observation
+Smart Approvals **does not modify the application's data**.
 
-If SDR is also deployed on an on-prem VM:
+Instead, Smart Approvals sends notifications such as:
 
-- The exact same authentication problem will continue to exist.
+> "This request has been approved."
 
-The issue would only be resolved if SDR is deployed on AWS infrastructure (such as EC2 or EKS), allowing IAM Role assumption.
+The receiving application is responsible for:
 
----
-
-# Proposed Next Steps
-
-## 1. Document the Current Constraints
-
-Prepare a summary of:
-
-- Available authentication options
-- Technical limitations
-- Security policy restrictions
+- Recording the approval
+- Updating its own database
+- Refreshing the UI
+- Performing any downstream business logic
 
 ---
 
-## 2. Meet with Internal Teams
+# Retry Behavior
 
-Schedule a discussion involving:
+If the listener endpoint is unavailable:
 
-- JADE Engineering
-- Infrastructure Engineering
-- Architecture Team
-- Atlan
+### UAT
+
+- Retry up to **10 times**
+
+### Production
+
+- Retry up to **20 times**
+
+Retry interval:
+
+- Approximately **every 15 minutes**
 
 ---
 
-## 3. Determine Whether
+# Request Status API
 
-- A policy exception can be granted
-- A new supported authentication model exists
-- The runtime should be migrated onto AWS infrastructure
+In addition to postbacks, Smart Approvals exposes a **Request Status API**.
+
+The application can query the latest approval status using the Smart Approvals request ID.
+
+This provides a recovery mechanism if:
+
+- Postbacks are missed
+- Listener failures occur
+- Status synchronization is required
 
 ---
 
-# Overall Conclusion
+# Workflow Capabilities
 
-At present, there is **no technically viable authentication solution** for connecting an **on-premises Secure Agent** to **AWS Glue** while remaining compliant with current JPMC security policies.
+Smart Approvals supports highly configurable workflows.
 
-The issue can only be resolved through one of the following:
+Supported capabilities include:
 
-1. Deploy the runtime on AWS so IAM Roles can be used.
-2. Obtain a policy exception permitting AWS Access Keys.
-3. Introduce a new authentication pattern approved by both AWS and JPMC engineering.
+- Unlimited approval steps
+- Sequential approvals
+- Parallel approvals
+- Individual approvers
+- Group (pool) approvers
+- Multiple approval roles/personas
+- Delegate restrictions
+- Dynamic workflows per request
 
-Until one of these conditions changes, the Glue integration remains blocked.
+Each approval request can define its own workflow.
+
+There is **no requirement** for a fixed workflow template.
+
+---
+
+# Group-Based Approvals
+
+For pooled approvals, the request payload should specify:
+
+- Group name
+- Members (SIDs/FIDs)
+- Approval sequence
+- Whether:
+  - Any one member may approve
+  - All members must approve
+
+---
+
+# Dynamic Approvers
+
+Smart Approvals can determine approvers dynamically.
+
+Example:
+
+If the workflow specifies:
+
+> Requestor's Line Manager
+
+Smart Approvals retrieves the manager information directly from HR and routes the approval accordingly.
+
+---
+
+# Payload Modeling Discussion
+
+Rather than trying to understand every supported payload scenario individually, the team agreed on a simpler approach:
+
+1. Select one real workflow from the application.
+2. Model the Smart Approvals payload for that workflow.
+3. Validate the payload with the Smart Approvals team.
+4. Expand to additional workflow variations later.
+
+This will provide an end-to-end validated example before handling edge cases.
+
+---
+
+# Action Items
+
+## Application Team
+
+- Build the listener (postback) endpoint.
+- Share endpoint details with Smart Approvals.
+- Model one complete approval workflow payload.
+- Include:
+  - Approval steps
+  - Groups
+  - Approvers
+  - Sequence
+  - Approval rules
+- Verify authentication requirements.
+- Confirm any required FID/domain-group entitlements.
+
+## Smart Approvals Team
+
+- Configure communication with the application's listener endpoint.
+- Review the modeled payload.
+- Validate the workflow implementation.
+- Provide development support during testing.
+
+---
+
+# Next Steps
+
+1. Build and expose the listener endpoint.
+2. Share endpoint details with Smart Approvals.
+3. Configure two-way communication.
+4. Create a complete sample payload for one business workflow.
+5. Review the payload jointly with the Smart Approvals team.
+6. Execute end-to-end testing.
+7. Expand support to additional workflow configurations after the initial flow is validated.
+
+---
+
+# Follow-up Meeting
+
+A follow-up session was tentatively scheduled for:
+
+- **Time:** 11:00 AM Eastern
+- Smart Approvals development team members may join to review the payload and provide implementation guidance.
