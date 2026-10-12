@@ -1,390 +1,296 @@
-# Data Compass / Control Plane – Feedback Summary & Next Actions
+Summarize this as an action plan with the steps to go through. 
 
-## Executive Summary
+  Speaker 1 00:00
+Sorry, how does it work? Sorry, what is the proposed solution? So, so you create a saml enabled role right inside an AWS account? Okay, and once you create a family enabled, what happens is that role will have a corresponding ad group created. Okay, so that you can? You can also end on the vsi side.
 
-The feedback was positive about the **Control Plane concept**, but it materially changes how the initiative should be positioned.
+00:20
+You will have an FID trying a functional, functional ID that functional ID gets added to an ad group. Okay. So your vsi application will basically use that function ID to assume. To log into AWS account, it will assume that I am rolled the family animal IM rule, yeah. And that's how you will get inside the AWS account.
 
-The main message is:
+00:43
+On other hand, when you provision the saml animal IEM role, you're going to give it a permission to do the get secret value from secret resource. So, that is, how you will be able to establish the connectivity from your vsi to. Um. To AWS account. Okay. So, here was the description of the ticket that we created, which had proposed solution pretty much parallel to what you are just saying here.
 
-> **The operational Control Plane is important, but it is not by itself the business case.**
+01:13
+For your visibility. I'm gonna copy paste this. Not sure if you're able to see that ticket or not. Details or not, but the the request details are right here. Okay, so this is the ticket you submitted correct, and uh. You're saying somebody provided?
 
-The stronger justification is **better metadata and lineage depth, accuracy, and consistency**, with the Control Plane providing the reliable operational mechanism behind it.
+  Speaker 2 01:32
+Solution solution. Oh yeah, a possible solutions, let's say, right? Yeah, Federated identity.
 
-The proposal should therefore become a **two-part story, roughly 50/50**:
+01:44
+If I have a principal broker? Yeah, I think they will go to the code. Go through the same thing, right? Your associate vsi functional, right? I'm just reading with the roles of the broker assumes. Yeah, it's the same thing I'm I'm describing here and centered. Okay, yes. So, how do I get this done?
 
-### 1. Business / Functional Value – Better Metadata & Lineage
+  Speaker 1 02:03
+Now that we know, okay, this is this proposed one is likely the very similar thing pattern that you are also. Ah, prescribing for your cpmc users. How do I go about getting this tensor? Okay, so I, I don't have. The solution because my, I'll show you how, how you can get this done.
 
-Achieve greater depth, accuracy, and consistency of metadata and lineage than is available today, potentially including:
+02:23
+I'll try to explain best of what I can. Okay, we don't own this Tech primer. We don't know, publish the solution because our team, we are platforming for cigarettes manager, not for a role, but I'll let me share my screen. I'll share couple links and then engines. Sure, an engineer from your team will have to.
 
-- Process-level lineage
-- Column/attribute-level lineage
-- Sub-asset lineage
-- Better representation of Databricks/Spark processes
-- More complete upstream/downstream lineage
-- Platform-specific metadata nuances
-- Standardized representation across platforms
+02:45
+Get their hand sanity and sound run through this plan, right? Yeah, so basically, you will, uh, here. This Tech primary is to set up a secret manager service, right? So how you gonna create a secret? I am assuming you guys probably have your own AWS account where you are provisioning a secret resource and all that.
 
-Establish an **opinionated, standardized crawler interface for Data Compass**, with platform-specific implementations for:
+03:02
+Yes, so this? Okay, so you will be following this as a part of it. We are here. Could you bring this link? I believe we've already followed this same Tech primer, right? Yeah, yeah, this will. This will only get you set up with your secret manager service and a robot, and that role will have a permission to do the get secret value.
 
-- Databricks
-- Snowflake
-- Other platforms in the future
+03:21
+Okay, what you need is when okay here. When you are provisioning the role right now, this saml animal is false. You will have to make this true. You will have to enable you will have to. You'll have to create a saml enabled role. Nice, right, and then there will be no agreement service, because who's gonna assume the Samuel animal role is your F5?
 
-### 2. Operational Value – Control Plane
+03:40
+From the on-prem. From your vsi box, there is no AWS service assuming this role. So, uh, you will cite this to remove this part. And then again, you can reference the role module and I'll ping you all these link. Let me just quickly walk you through what you're gonna do.
 
-Once richer and more accurate metadata can be harvested, ensure it is collected:
+03:55
+So, if you? Uh, if you go to terraform module. There is a terraform module for role, and they will have. But let me bring it up. It's easier that way they will have if you for any terraform registry. If you go to the pay folder. They will have an example of what all they support, so you will basically.
 
-- Reliably
-- Repeatedly
-- On schedule
-- With minimal manual intervention
-- With appropriate monitoring and observability
+04:12
+You can look at this and find. A role module block where that, yeah. So, this is a sample enabled role right where they are setting it to true. So, you know what parameters to pass and whatnot once you create this role? You want to make sure you give it all the permissions to do the get secret value so that you can reference here.
 
-The Control Plane provides:
+04:34
+Basically, this whole policy update or module I'm giving read access equal to true, and this is the role name, which will be your simulator once those things go through. Will go to get at last data log.
 
-- Workflow execution
-- Scheduling
-- Run-state management
-- Monitoring
-- Retry capability
-- Logging
-- Metrics
-- Versioning
-- Auditability
-- Operational visibility
+04:53
+And you will set up manage access to Cloud.
 
----
+05:00
+Um, I'm just gonna. I'm able to find something or not, but basically you will select your AWS account right. Like, for your applications, your AWS account and then? The group to manage this is the Ed group, which would have been created for your saml role. So, for example here, if you see, I have an app custom saml roll.
 
-# What Was Validated
+05:27
+So, whatever saml role you can you create ad group gets ad group gets created. You select the ID group, and here, you're gonna add your, uh, not the Sid. We're gonna add the functional ID, so FID Source application. Basically your vsi application. If it is not on the same seal, then this will.
 
-## Control Plane Concept
+05:47
+This
 
-The Control Plane concept was strongly validated.
+  Speaker 2 05:47
+Will be different, but let's assume it's on the same same application. Okay, so which database account belongs? You're going to select your FID. So
 
-The description of the Control Plane as an:
+  Speaker 1 05:54
+These are
 
-> **Operational Command Center for trusted metadata**
+  Speaker 2 05:54
+The fides I have under my EPV tools application. I'm going to select one of them right, and they will do bunch of validation and whatnot. Here. And yeah, that's sure. So, that provides some justification. Yeah, to create the ticket, I guess the request for onboarding?
 
-was considered accurate and aligned with the desired technical direction.
+  Speaker 1 06:13
+Correct, but can we okay, anything else, like, Beyond this, I wanted? No, I wanted to verify that, uh, the I the IDs, right? Which FID are we talking about the functional frid that we use to log in to the vsi, or it should be another F new FID, or that I I'm not a bit clear on it, it could be it.
 
-The Control Plane would convert disconnected scripts and jobs into a visible and repeatable operating model.
+06:33
+It would probably be a new F5. If you want to create a dedicated FID, which will be able to log, go inside the AWS account and assume. Then, that's where I would start. Yeah, you? Then you can request. Yeah, if you, if you have an FID? I think usually AO.
 
----
+06:53
+Can make a call on that if they want to go ahead and? Could you use the existing s5d? Yeah, I am the application owner, so I wanted to like identify which FID would be the right one to, you know, start with on here. If I can share my screen, I'll show you, which, what environment our environment looks like and what is the?
 
-## Direct Metadata Harvesting Is Technically Feasible
+07:12
+Fids that we have, and so forth. Yeah, uh.
 
-The prototype demonstrated that direct metadata harvesting from enterprise platforms is technically feasible.
+  Speaker 2 07:16
+Yeah, you can. You can do that. I'm not. I'm not sure if I'll be. No, I'm in the right person to answer that. I mean, the better. Your answer will be better than. Hopefully better than what we could think of so. Let me share my screen.
 
-Much of the required metadata already exists in:
+  Speaker 1 07:38
+You can see my screen. Yeah. So?
 
-- System tables
-- Platform repositories
-- APIs
-- Metadata stores
-- Platform-specific system information
+07:49
+And I'll open fids also.
 
-The primary engineering challenge is not necessarily inventing new algorithms.
+08:16
+That, that is our, uh? Account system account. So that using that account is what our application runs, the okay SDR, the orchestrator that we're talking about. That's what it runs as.
 
-Instead, the work involves:
+08:41
+Just a second.
 
-1. Extracting the appropriate information.
-2. Understanding platform-specific metadata and lineage semantics.
-3. Determining how lineage is represented by each platform.
-4. Normalizing the output into a common Data Compass model.
+08:50
+So, Atlant edit? Uh, how do I find what? What should it be the atlan edit or? Uh, go AWS console. Also, I'll go log in there.
 
----
+09:10
+I mean, alternate it right there. All right, Atlanta. And the accounts that we have.
 
-# Emerging Architecture
+09:38
+So, we have this, uh, whole bunch of accounts. But this is our Dev one that we're going to use.
 
-The architecture can be represented as:
+09:52
+I want it to take you to the Secrets manager. What we have done so far?
 
-**Enterprise Platforms**
+  Speaker 2 09:58
+Oh, that's fine. I don't need to know that now. I, the other, will probably run out of time. Oh, you have you have other, uh, yes, also. Yeah, I, I have another call after this, so?
 
-↓  
+  Speaker 1 10:11
+Oh, after this, okay, yeah, sure, yeah. So, these are the secrets that we are talking about one, two, three.
 
-**Platform-Specific Harvesters / Crawlers**
+10:22
+Something is showing the second one, let's say now.
 
-Examples:
+  Speaker 3 10:28
+Woman, let's look. Look like when we have some more enabled secret created place,
 
-- Databricks Harvester
-- Snowflake Harvester
-- Future platform harvesters
+  Speaker 2 10:36
+It will. It will not look any different. See secret is one thing the animal animal you're creating a salmon. That role is gonna have permission to read secrets. Okay, yes, so there's nothing, uh?
 
-↓
+10:54
+Yeah, there's nothing else you are doing different with the secrets. We created the role as well, right, uh, right, right?
 
-**Standardized Metadata & Lineage Model**
+  Speaker 3 11:05
+Which is here. And. As they are this row.
 
-↓
+  Speaker 1 11:25
+In Guru trust relationship.
 
-**Control Plane**
+  Speaker 2 11:29
+Yes, so here, if you see the service, this is a loud is for easy to write. Only ec2 can use it. Now, you want to use it from on-prem, so it's that's why you're going to create a sample enabled role, and then you will have a Federated trust policy as the Ida something, because basically this raw role.
 
-- Workflow management
-- Scheduling
-- Execution
-- Monitoring
-- Retry
-- Logging
-- Metrics
-- Auditability
+11:47
+The authenticated against, uh, idea. I did Idaho identity, so the this section, the principle section will look different when you provision a similar enabled rule basically. Okay, so it has there ever been a scenario like this. Like, somebody is an example that we can see. Yeah, for vsi, yes.
 
-↓
+12:14
+Uh, not for vsi, not on top of my mind. I can. Think there is a team who is trying to connect from vsi to S3 bucket, so they will probably have. Uh, yeah, I, I can connect you to somebody. They are again. They are not a support team. So, yeah, yeah.
 
-**Data Compass**
+  Speaker 1 12:39
+Okay, yeah, they probably have something similar challenges
 
-↓
+  Speaker 2 12:43
+Correct. They are going through this so, but like I said, it will be there is. There might be a documented solution somewhere which my team doesn't know, so I don't know, but the terraform links I gave you. You can. Somebody an engineer will have to spend some time on like there is no template where you'll be able to copy, paste it, and make everything work in one shot.
 
-**Context / Consumer Products**
+13:04
+Where did you ping the links, sir? Uh, I can bring it to you on the same chat where you added me. Yeah, yeah.
 
-The important change is that the **standardized crawler and lineage capability should become a first-class part of the architecture and pitch**, rather than presenting the Control Plane as the primary product.
+  Speaker 1 13:21
+Yes, true trust. Yeah, that chat. Yes, okay.
 
----
+13:29
+But also the the link to?
 
-# Key Gaps Identified
+  Speaker 3 13:35
+Uh, yeah, it's Atlas Casino. I'm not sure the big bucket.
 
-## 1. No Atlan vs. Custom Benchmark Yet
+  Speaker 2 13:42
+Yes, bitbucket. You probably won't have access being an lob team. I'll give you the link where they publish the same.
 
-The largest gap is the absence of an objective comparison between:
+13:53
+Examples for every every any module. You can basically go through the examples, its own terraform registry. You will have access there actually.
 
-- Atlan crawling
-- Custom/Data Compass crawling
+  Speaker 1 14:12
+You won't have access to code where all those things get published into TFE sorry Atlas module registry. You will have access there because you probably have a workspace created for your AWS account so. Yeah. Okay, so there will be some importance. I'll try to connect you to. An engineer from the other team who is, uh?
 
-The prototype proves:
+  Speaker 2 15:01
+Now, what's the other thing? Yeah, we are the team. Okay, yeah, sorry, S3. Other team. They're trying to connect to S3 buckets, it seems. Yeah, from BSN.
 
-> **We can build a crawler.**
+  Speaker 1 15:19
+We are trying to connect to secret manager. So they will require very similar rules, I believe. Permissions.
 
-But it does not yet prove:
+15:33
+Anything else Emmanuel? We can probably learn from month and here. Uh, I'll
 
-> **Our crawler provides better, deeper, or more accurate metadata and lineage than Atlan.**
+  Speaker 3 15:41
+Go through the the the go Engineers link that is and over there and then look at the tech primer for the thermal enabled ro.
 
-That comparison is essential to justify building the capability internally.
+  Speaker 2 15:53
+Yeah, Emmanuel. The best thing is, this is not. This is probably going to take less than a couple hours. We've already provisioned the secret. You just add a semal enabled role, which is like literally four lines in there provision a role and the permissions right and. Just use whatever fight you might have, or to create a new FID anything in lower environment.
 
----
+16:12
+Things should be fast. Nawaz is your area. You'll approve whatever and try to establish that connectivity. You are able to assume the role or not. All I'm saying is. Run through this. Just do it practically nice, and you'll hit our error or a block, and then you. Aske lelema.
 
-## 2. Detailed Crawling Requirements Are Not Yet Defined
+16:31
+Try to figure it out is the best.
 
-The team needs to clearly document what Data Compass requires that Atlan does not currently provide.
+  Speaker 3 16:32
+Yeah, yeah. So before we leave, I have one quick question because let's say I have commissioned the role you went to book Atlas catalog and then you were able to click on feed and then you're able to select a certain role because the role that I created in Native U.S appears when I go to Manchester.
 
-Areas mentioned include:
+16:52
+So, it appears automatically correct. Correct. It will create an ad group, and that's the. That's why you are. So it create gets created in IA AWS account. At the same time, ad group gets created with the same name. Okay, okay, that makes sense, so that's basically like a breed.
 
-- Databricks process representation
-- Spark-specific behavior
-- Process-level lineage
-- Column/attribute-level lineage
-- Sub-asset lineage
-- Transformation relationships
-- Multi-hop lineage
-- Lineage depth
-- Lineage accuracy
-- Metadata freshness
-- Platform-specific nuances
+  Speaker 2 17:12
+Roll between your on-prem and AWS. The only cavities in PSI, because if you have an FID. I, I don't know what type of FID you will need. I think you'll need an Idaho based FID, because if you are in BSI. You can. You can't have a password for that fid because you can't Vault it.
 
-These requirements should become the basis for evaluating all crawler options.
+17:31
+You'll have to watch the FID somewhere otherwise. I think you'll get a break, so that's. There might be some work needed, but I'm sure you guys have app in the vs will be able to figure that out. Uh.
 
----
+  Speaker 1 17:48
+Okay, thank you so much. I appreciate it. Thank you.
 
-## 3. Fusion / Jade Crawler Overlap Must Be Understood
+# Action Plan: VSI Access to AWS Secrets Manager
 
-The Fusion team appears to be considering the existing **Jade crawler** as a foundation for an improved enterprise crawler capability.
+## Objective
 
-Steve McPherson's organization is expected to take the existing Jade crawler and make it "better."
+Enable the VSI-hosted SDR/orchestrator to retrieve secrets from AWS Secrets Manager using a SAML-enabled IAM role and an approved functional ID (FID).
 
-However, what "better" means has not yet been clearly defined.
+The existing secrets remain unchanged. The current IAM role trusts EC2; VSI access requires a federated trust configuration.
 
-Before building an independent crawler, the team needs to understand:
+## Steps
 
-- What Jade currently crawls
-- Which platforms Jade supports
-- How Jade extracts metadata
-- How Jade represents lineage
-- What its target architecture is
-- What improvements Fusion is planning
-- How Fusion intends to consume the crawler output
-- Whether Data Compass requirements overlap with that work
+1. **Gather the documentation**
+   - Obtain the Secrets Manager tech primer.
+   - Review the SAML-enabled IAM role examples in the Atlas/Terraform module registry.
+   - Obtain the Manage Access to Cloud link.
+   - **Owner:** Emmanuel / engineering team.
 
----
+2. **Select the development test scope**
+   - Identify the development AWS account and VSI application.
+   - Select one existing secret for testing.
+   - Record the AWS account ID and secret ARN.
+   - **Owner:** Engineering team.
 
-# Next Action Items
+3. **Confirm the appropriate FID**
+   - Decide whether to reuse the SDR/orchestrator’s existing FID or create a dedicated FID.
+   - Confirm the FID type supports federation and unattended execution from VSI/BSI.
+   - Confirm any approved credential-vaulting requirements.
+   - **Owner:** Nawaz, with identity support.
 
-| Priority | Action | Expected Output |
-|---|---|---|
-| **1** | **Benchmark custom crawling against Atlan** | Select representative Databricks assets and crawl exactly the same objects using both approaches. Compare depth, accuracy, processes, columns, and upstream/downstream lineage. |
-| **2** | **Find known cases where custom crawling outperformed Atlan** | Reconstruct the earlier example where Atlan failed to discover lineage but the custom crawler found it. Capture screenshots and supporting evidence. |
-| **3** | **Define detailed crawling requirements** | Document exactly what Data Compass requires from a crawler, including Databricks/Spark nuances, processes, columns, sub-assets, transformations, lineage depth, accuracy, and freshness. |
-| **4** | **Create the standardized crawler contract** | Define the common metadata/lineage schema that Databricks, Snowflake, and future platform adapters must produce. |
-| **5** | **Investigate the Fusion/Jade crawler initiative** | Meet with the Fusion/Jade team and understand architecture, scope, roadmap, interfaces, supported platforms, and planned improvements. |
-| **6** | **Perform Jade vs. Atlan vs. Custom gap analysis** | Map Data Compass requirements against all three approaches and identify capabilities, overlaps, and gaps. |
-| **7** | **Make a Build / Reuse / Collaborate decision** | Determine whether Data Compass should use Jade/Fusion, extend it, jointly develop it, build independently, or adopt a hybrid model. |
-| **8** | **Rework the Control Plane pitch** | Change the story to approximately 50% metadata/lineage depth and accuracy and 50% operational Control Plane/reliability. |
-| **9** | **Update the demo/video** | Start with the business problem and lineage improvement, then show the Control Plane as the mechanism for operationalizing the solution. |
-| **10** | **Prepare for the Atlan renewal decision** | Determine which Atlan capabilities remain necessary, what can be replaced, whether parallel operation is required, and the potential transition timeline. |
+4. **Provision the SAML-enabled IAM role**
+   - Follow the approved Terraform role-module example.
+   - Set SAML enablement to `true`.
+   - Configure federated trust instead of EC2 service trust.
+   - Deploy the role in the development AWS account.
+   - **Owner:** Emmanuel / engineering team.
 
----
+5. **Grant secret-read permissions**
+   - Grant `secretsmanager:GetSecretValue` access to the required secrets.
+   - Verify the policy references the correct role and secret resources.
+   - **Owner:** Engineering team.
 
-# Most Important Immediate Deliverable
+6. **Onboard the FID to the role’s AD group**
+   - Confirm the corresponding AD group was created during role provisioning.
+   - Open Manage Access to Cloud.
+   - Select the AWS account and the role’s AD group.
+   - Select the application’s FID.
+   - Provide justification and submit the access request.
+   - Complete the required application-owner approval.
+   - **Owner:** Engineering team submits; Nawaz approves where required.
 
-The next concrete piece of work should be the:
+7. **Configure authentication from VSI**
+   - Implement the approved federation/broker authentication flow.
+   - Enable the application to authenticate with the FID and obtain temporary AWS credentials for the role.
+   - Confirm credential handling and renewal for unattended execution.
+   - **Owner:** Engineering team, with identity/federation support.
 
-## Atlan vs. Custom Crawler Benchmark
+8. **Test end-to-end access**
+   - Authenticate from the development VSI.
+   - Assume the SAML-enabled role.
+   - Retrieve the selected test secret.
+   - Repeat the test through the SDR/orchestrator.
+   - Ensure secret values are not exposed in logs.
+   - **Owner:** Engineering team.
 
-Select approximately **5–10 representative Databricks examples** containing increasingly difficult lineage scenarios.
+9. **Resolve blockers and document the implementation**
+   - Capture specific authentication, AD membership, trust-policy, or permission errors.
+   - Engage the appropriate support team.
+   - Follow up on the offered introduction to the team accessing S3 from VSI.
+   - Document the working configuration before extending it to other environments.
+   - **Owner:** Engineering team.
 
-Run the same assets through both approaches and compare the results.
+## Key Open Question
 
-Example comparison:
+Which FID type and authentication mechanism should the VSI application use to obtain its SAML assertion?
 
-| Capability | Atlan | Custom Crawler | Gap / Improvement |
-|---|---|---|---|
-| Table discovery | ✓ | ✓ | Equivalent |
-| Column metadata | ✓ | ✓ | TBD |
-| Table-level lineage | ✓ | ✓ | Compare accuracy |
-| Column-level lineage | TBD | TBD | Benchmark |
-| Process representation | TBD | TBD | Key requirement |
-| Spark-specific lineage | TBD | TBD | Investigate |
-| Multi-hop lineage | TBD | TBD | Compare depth |
-| Missing/broken lineage | Capture examples | Capture examples | Identify custom improvements |
-| Metadata freshness | Measure | Measure | Compare |
-| Standardized Compass schema | Transformation required | Target model | Assess |
+The meeting outlined role provisioning and access onboarding, but did not confirm the application’s authentication flow. Resolve this early with the identity/federation team.
 
-This changes the conversation from:
+## Immediate Next Actions
 
-> **"We proved that we can build a crawler."**
+- **Emmanuel:** Review the Terraform examples and begin provisioning the development SAML role.
+- **Nawaz:** Confirm the FID choice with the identity team and approve the access request when submitted.
+- **Engineering team:** Validate authentication and secret retrieval from VSI.
 
-to:
+## Completion Criteria
 
-> **"Here is measurable evidence showing where controlling our own crawler provides additional metadata depth, accuracy, or capabilities."**
+- The approved FID can authenticate from VSI.
+- The application can assume the SAML-enabled IAM role.
+- The SDR/orchestrator can retrieve the required secrets.
+- Unattended credential renewal works.
+- The implementation is documented and repeatable.
 
----
+## Timing Note
 
-# Three-Way Technology Assessment
-
-The work is effectively heading toward a comparison of three approaches.
-
-## 1. Atlan
-
-Determine:
-
-- What Atlan provides today
-- Where Atlan performs well
-- Where lineage or metadata gaps exist
-- What capabilities still require Atlan
-- What capabilities justify continuing the license
-- How difficult those capabilities would be to replace
-
----
-
-## 2. Jade / Fusion
-
-Determine:
-
-- What crawler capability already exists
-- Which platforms it supports
-- What Fusion plans to enhance
-- What its standardized output looks like
-- Whether Data Compass can consume it
-- Whether Data Compass requirements can influence its roadmap
-- Whether collaboration avoids duplicate engineering
-
----
-
-## 3. Data Compass / Custom
-
-Determine:
-
-- What requirements cannot be satisfied by Atlan
-- What requirements cannot be satisfied by Jade/Fusion
-- What should therefore be built specifically for Data Compass
-- Whether custom platform adapters are necessary
-- What should be owned directly by the Data Compass team
-
----
-
-# Key Architecture Decision
-
-Once the requirements and benchmarks are available, the team should answer:
-
-> **Build, reuse, extend, collaborate, or use a hybrid approach?**
-
-Possible target direction:
-
-**Atlan**
-
-↓  
-
-**Hybrid / Parallel Operation**
-
-↓  
-
-**Jade/Fusion + Data Compass Custom Capabilities**
-
-↓  
-
-**Progressively replace selected Atlan capabilities where justified**
-
-This does **not** necessarily mean Atlan should immediately be replaced.
-
-The evidence should determine:
-
-- What remains in Atlan
-- What moves in-house
-- What can leverage Jade/Fusion
-- What Data Compass needs to build
-- How long parallel operation is required
-
----
-
-# Atlan Renewal as the Decision Milestone
-
-The Atlan renewal timeframe creates an important decision point.
-
-The work completed before the renewal decision should provide enough evidence to answer:
-
-1. What are we renewing Atlan for?
-2. Which capabilities still depend on Atlan?
-3. Which capabilities can already be provided internally?
-4. What can Jade/Fusion provide?
-5. What still needs to be built?
-6. How long do we need Atlan?
-7. Should Atlan and the internal solution run in parallel?
-8. What conditions would allow capabilities to transition away from Atlan?
-
-Therefore, the period leading up to the renewal should be treated as an:
-
-> **Evidence-Gathering and Architecture-Decision Phase**
-
-rather than immediately committing to a full custom implementation.
-
----
-
-# Recommended Revised Pitch
-
-The pitch should change from:
-
-> **"We built a Control Plane to reliably operate metadata pipelines."**
-
-to:
-
-> **"Data Compass needs richer, more accurate, and more standardized metadata and lineage than we can consistently obtain today. By controlling the crawling and normalization layer, we can capture the required level of detail across platforms. The Control Plane then ensures that this trusted metadata is produced reliably, repeatedly, observably, and at enterprise scale."**
-
-The story becomes:
-
-### Part 1 — Why Build It?
-
-**Metadata and lineage depth, accuracy, and standardization**
-
-### Part 2 — How Do We Operate It?
-
-**Control Plane automation, reliability, monitoring, and governance**
-
----
-
-# Bottom Line
-
-The strongest takeaway from the discussion is:
-
-> **Don't make the Control Plane the primary reason to fund the initiative. Make richer, more accurate, standardized metadata and lineage the business reason—and make the Control Plane the mechanism that ensures that capability runs reliably at enterprise scale.**
-
-The immediate focus should therefore be:
-
-**Requirements → Benchmark → Jade/Fusion Assessment → Gap Analysis → Architecture Decision → Atlan Renewal Decision**
-
-rather than moving directly from the prototype into a full custom build.
+The meeting’s “couple of hours” estimate referred to initial role provisioning, not the complete integration.
