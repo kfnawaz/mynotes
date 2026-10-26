@@ -9,7 +9,5 @@ These are genuinely orphaned (no route registers them, superseded by AssetExplor
 Note: this removes the only caller of the GET /assets (non-explorer) list endpoint.
 1 No, leave them
 Keep the orphaned code as-is.
-2 Yes, delete them
-Remove the orphaned components, atoms, tests, and doc references,
-3
-Enter custom answer
+2 Yes, delete them - Remove the orphaned components, atoms, tests, and doc references,
+3 Enter custom answer
