@@ -1,6 +1,6 @@
-**You're right. My intention was NOT to have the specifications written as Java code.**
+**My intention was NOT to have the specifications written as Java code.**
 
-Looking at your screenshots, the agent has implemented part of what I recommended, but it has taken the enforcement framework further than I intended.
+You have implemented part of what I recommended, but you have taken the enforcement framework further than I intended.
 
 The result isn't necessarily wrong, but I would **restructure it before proceeding with P01/P02**.
 
@@ -58,7 +58,7 @@ From your screenshots, the agent reports:
 
 These are useful governance capabilities.
 
-However, it also reports that only **3 of 88 legacy parity items have fixtures**, none of the requirements or ADRs have received the required approvals, and clean-room reconstruction has not been tested.
+However, you also report that only **3 of 88 legacy parity items have fixtures**, none of the requirements or ADRs have received the required approvals, and clean-room reconstruction has not been tested.
 
 Therefore, a successful Maven build does **not** mean the crawler specification is complete or that the Java application is ready to be rebuilt from it.
 
@@ -221,9 +221,9 @@ But enforce these boundaries:
 
 The specification validator is the **quality-control tool**, not the product blueprint.
 
-## **7. What I would tell your current agent**
+## **7. What I would tell you**
 
-You can give the following directly to the agent. This is a correction to the earlier task, not a request to discard its work.
+This is a correction to the earlier task, not a request to discard your work.
 
 # Correct the SDD Architecture — Separate Specifications from Java Tooling
 
@@ -243,7 +243,7 @@ The objective is to reconstruct the complete application from specifications wit
    - Protobuf or another explicitly approved interface definition for interprocess communication.
    - Gherkin or structured fixtures for acceptance scenarios.
 2. **Reclassify `crawler-spec` as specification validation tooling.**
-   - Its Java classes must validate specifications rather than define application behavior.
+   - The Java classes must validate specifications rather than define application behavior.
    - No business requirement or interface contract may exist exclusively inside Java code.
    - Do not delete working validation code unnecessarily.
    - Keep validation tooling logically separate from application modules.
@@ -289,7 +289,7 @@ Provide:
 
 ## **8. My recommendation for your next step**
 
-I would not ask your agent to write more checks right now. You already have 20 validation checks and a sizable Java governance framework.
+You don't need to write more checks right now. You already have 20 validation checks and a sizable Java governance framework.
 
 Instead, prioritize these three outcomes:
 
@@ -297,6 +297,6 @@ Instead, prioritize these three outcomes:
 - **Specification completeness:** Fill the missing legacy parity evidence (only 3 of 88 reported fixtures exist), resolve critical design ambiguities, and obtain the required approvals.
 - **Implementation independence:** Verify that another agent can implement a small vertical slice—such as a crawler lifecycle operation—using only the specification package and its independent test fixtures.
 
-**Bottom line:** Your agent built a potentially useful *specification enforcement engine*. What you actually want, first and foremost, is a **complete, language-neutral, independently rebuildable application specification**.
+**Bottom line:** You built a potentially useful *specification enforcement engine*. What we actually want, first and foremost, is a **complete, language-neutral, independently rebuildable application specification**.
 
 Keep the enforcement engine if it provides value, but make it subordinate to the specification—not the other way around.
