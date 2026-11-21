@@ -1,96 +1,167 @@
-This is a good milestone. Your agent has completed the specification preparation and decision-review phase. **I would now shift from AI-generated documentation to targeted human architecture decisions and approvals.**
+**Yes to both.** I recommend committing the Session A documentation locally and replacing the workstation-specific paths before anything is pushed to the remote repository.
 
-The key is to avoid turning SDD into an endless documentation exercise.
+The agent has also uncovered several important issues that are worth addressing now, before architecture approvals begin.
 
-## **1. My assessment**
+## **1. My assessment of the latest results**
 
-**DataCompass Crawlers — Current status**
+**Session A — Foundational Architecture**
 
-Awaiting approvals
+Awaiting human review
 
-# **85**
+| Session A review package | &#x20;Prepared                  |
+| ------------------------ | ------------------------------- |
+| Specification files      | Unchanged                       |
+| Maven tests              | 85 passed, 1 skipped (reported) |
+| Specification checks     | 18 passed, 1 warning, 1 skipped |
+| Human approvals          | None recorded                   |
+| P01/P02 implementation   | Not started                     |
 
-Tests executed
+The work is progressing in the right direction. I particularly like that the agent performed simulated approval tests without changing actual approval records.
 
-0 failed, 1 skipped
+However, I would address four issues before marking P01a complete.
 
-# **18/20**
+## **2. Four things I would change**
 
-Checks passing
+**A. Remove workstation paths from the entire unpushed Git history**
 
-1 warning, 1 skipped
+The agent found absolute workstation paths containing your user ID in `docs/00-index.md` and eight prompt files.
 
-# **50**
+Replacing them in the latest working tree is not enough if those paths also exist in earlier commits.
 
-Decisions organized
+Have the agent replace absolute paths with repository-relative references, inspect all unpushed commits for sensitive information, and carefully clean the local commit history if necessary.
 
-6 review sessions
+Because these commits have not been pushed, the history can be corrected locally without affecting a shared remote branch.
 
-**What looks right:** The decision review package is committed locally, evidence is linked to the legacy implementations, and corrections and enhancements have separate approval requirements.
+**B. Move REQ-ARCH-004 to P01, provided that is its correct ownership**
 
-**What remains:** Nothing is approved, P01/P02 remain blocked, and the clean-room rebuild readiness check is still warning. These results are based on the agent's report, not my independent execution.
+The requirement to reuse the existing model and core modules belongs more naturally to P01, where the first application modules are introduced.
 
-## **2. I would not review all 50 decisions at once**
+This is a reasonable correction, but it must not be made merely to turn the build green.
 
-Use the six review sessions the agent prepared, but start with only the decisions that unlock the next work order.
+Require the agent to update requirement traceability, work-order dependencies, and acceptance tests together. P01 must actually verify that the modules are reused rather than copied.
 
-| Sequence | Focus                                | Action                                              |
-| -------- | ------------------------------------ | --------------------------------------------------- |
-| 1        | Q-01, ADR-0002, ADR-0003, ADR-0013   | Review foundational architecture and package naming |
-| 2        | P01a's 11 requirements               | Approve or revise, then verify and close P01a       |
-| 3        | P01's 5 requirements                 | Review and authorize scaffolding                    |
-| 4        | Q-38, ADR-0004, P02's 6 requirements | Finalize connector SPI before implementation        |
-| 5        | Run lifecycle and other areas        | Review when their dependent work approaches         |
+**C. Resolve Q-01 before approving ADR-0002**
 
-There is no need to approve all 87 requirements and 117 parity items before beginning independently approved foundational work.
+The agent identified a package-naming inconsistency:
 
-## **3. Three issues deserve special attention**
+- Existing library convention: `com.jpmc.atlan.catalog`
+- Sibling application convention: `com.jpmc.ct.catalog`
 
-**First: the validator may be too restrictive.** The agent reported that a build failed because a specification cited the validator's Java package. A language-neutral specification should be allowed to cite Java source evidence or package names. What it must not do is make Java code the authoritative definition of behavior. I would check that the validation rule doesn't force legitimate provenance evidence to be removed.
+Since this is a new application, I would favor the existing sibling application convention **if the architecture and platform owners confirm that it is the appropriate namespace**.
 
-**Second: Q-06 is a significant architectural change.** Moving the creation of lineage relationships from the crawler to `lineage-app` changes ownership and potentially throughput. The reported capacity of approximately 1,200 processes per hour should be validated against initial-load volume, recovery requirements, and ingestion SLAs before approving that design.
+Do not have the AI automatically choose it. Record the decision first, then update all affected specifications and agent instructions consistently.
 
-**Third: the clean-room rebuild is not ready.** Only 3 of 88 legacy parity items currently have fixtures. This is an evidence gap, not a reason to write more governance code. Proceed with the Wave 1 fixture acquisition plan once its prerequisites are approved.
+**D. Include ADR-0001 and ADR-0011 in the approval review**
 
-## **4. What I would instruct the agent to do next**
+The agent found genuine dependencies:
 
-# Next Phase: Targeted Architecture Approval and Implementation Readiness
+- ADR-0001 is referenced by P01a requirements.
+- ADR-0011 governs prerequisites for capturing golden fixtures.
 
-The Architecture Decision Review Package is complete.
+These should be included in Session A rather than discovered as blockers during implementation.
 
-Do not build additional SDD frameworks or start P01/P02 implementation.
+## **3. One concern about the specification validator**
 
-## Objective
+The agent correctly identified that the validation policy is slightly too restrictive.
 
-Prepare the minimum set of decisions and approvals required to safely begin the first implementation work orders.
+A specification should be allowed to reference Java code as **evidence of observed legacy behavior**.
 
-## Instructions
+For example:
 
-1. Verify that the working tree is clean and the latest local commits contain only intended changes.
-2. Prepare a focused **Session A — Foundational Architecture Approval** package covering Q-01, ADR-0002, ADR-0003, ADR-0013, and P01a's 11 requirements.
-3. For each decision, present the proposed answer, supporting evidence, alternatives, downstream impact, and exact approval required.
-4. Identify which decisions require ARB approval versus domain-owner approval.
-5. Explicitly separate proven legacy behavior from proposed corrections and enhancements.
-6. Verify that the specification validator permits evidence citations to Java source without allowing Java source to become authoritative specification logic.
-7. Prepare approval-ready amendments, but do not change any approval status without recorded human authorization.
-8. Produce a dependency-ordered plan for completing P01a, authorizing P01, and subsequently resolving Q-38 for P02.
-9. Identify which existing golden fixtures can be acquired without DEV access, subject to the required approvals.
-10. Do not start application implementation or silently resolve outstanding decisions.
+```
+evidence:
+  source_repository: legacy-java-app
+  source_commit: "<pinned-commit-sha>"
+  source_file: "src/main/java/.../Crawler.java"
+  purpose: "Evidence of observed legacy behavior"
+```
 
-## Deliverables
+That is different from writing:
 
-- Session A decision table.
-- Proposed approval/rejection checklist.
-- Exact specification changes triggered by each possible decision.
-- Updated P01a/P01/P02 readiness report.
-- Outstanding blockers and owners.
+```
+requirement:
+  behavior: "Whatever Crawler.java implements"
+```
 
-Stop after preparing these deliverables for human review.
+The second is unacceptable because the specification no longer independently defines behavior.
 
-## **5. One operational step**
+I would approve a narrowly scoped validator correction that distinguishes **informative source evidence** from **normative references**, without weakening protection against specifications depending on implementation code.
 
-The changes are committed locally but not pushed. Once reviewed for sensitive information and correctness, they should be pushed to an appropriate feature branch and opened as a draft pull request so the required reviewers can inspect the actual specifications and evidence.
+## **4. Exact instructions to give your agent**
 
-**My recommendation:** Move ahead with the focused Session A approval review. The SDD infrastructure has reached the point where further framework-building will provide diminishing returns. The next meaningful progress will come from approved architectural contracts, independent acceptance evidence, and eventually a controlled implementation of P01.
+Proceed with the Session A documentation changes, subject to the following instructions.
 
-You now have a solid foundation for the specification system you originally wanted. The remaining challenge is making the **application specifications complete and approved**, rather than making the specification validator more elaborate.
+### 1. Sanitize workstation-specific paths
+
+- Replace absolute workstation paths with repository-relative references.
+- Check the current working tree and all unpushed commits for workstation paths, user identifiers, credentials, tokens, and sensitive information.
+- If earlier local commits contain these paths or sensitive information, prepare and perform a safe local history cleanup after preserving a recoverable backup.
+- Do not force-push or modify shared remote history.
+- Confirm that the final unpushed commit history is clean.
+
+### 2. Correct requirement ownership
+
+- Move REQ-ARCH-004 from P01a to P01, provided P01 is the correct work order for implementing and testing this requirement.
+- Update all affected dependencies, traceability mappings, and acceptance-test responsibilities.
+- Do not remove or weaken the requirement to reuse existing models and core components.
+
+### 3. Update the architecture review scope
+
+Include ADR-0001 and ADR-0011 in Session A.
+
+Ensure Q-01 is resolved before ADR-0002 can be approved.
+
+Present the package-naming alternatives and recommend the option consistent with the existing sibling applications, subject to architecture-owner approval.
+
+### 4. Refine the existing validator policy
+
+Allow Java source references when explicitly classified as informative legacy evidence.
+
+Continue to prohibit Java source from serving as the normative definition of application behavior.
+
+Use the existing validation framework. Do not introduce another framework.
+
+### 5. Preserve approval boundaries
+
+- Do not approve requirements or ADRs.
+- Do not mark P00 or P01a complete automatically.
+- Do not start P01 or P02 implementation.
+- Keep all proposed changes clearly identified as proposals.
+- Do not modify unrelated application repositories.
+
+### 6. Validate and commit
+
+Run the full existing Maven build and specification checks.
+
+Commit the intended documentation and approved governance-tooling corrections locally using the ATLAN-1973 prefix.
+
+Report:
+
+- Files changed.
+- Requirement and dependency changes.
+- Test results.
+- Final commit SHA.
+- Unpushed Git-history sanitization results.
+- Remaining human approvals.
+- P00/P01a/P01/P02 readiness.
+
+Do not push the branch yet.
+
+Stop after the local changes and provide the final Session A review package for human approval.
+
+## **5. What should happen after this?**
+
+At that point, I would stop the agent's iterative review-and-document cycle and move Session A to the actual architecture and engineering owners.
+
+You already have the information necessary to start reviewing foundational decisions. Further AI-generated review packages won't replace those approvals.
+
+After Session A is approved, the next milestones should be:
+
+1. Complete or formally waive P00 with recorded human authorization.
+2. Verify and close P01a when its requirements and tests are satisfied.
+3. Begin P01 implementation against the approved language-neutral specifications.
+4. Approve Q-38 and the connector SPI contracts before P02.
+
+**My overall recommendation:** Yes, commit the cleaned-up documentation locally. Don't push until the unpushed history has been checked and sanitized. Then prioritize genuine architecture approvals rather than continuing to build more specification governance infrastructure.
+
+The specification system is now mature enough to support controlled implementation; the major remaining work is decision ownership and verified functional coverage.
