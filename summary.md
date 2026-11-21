@@ -1,302 +1,154 @@
-**My intention was NOT to have the specifications written as Java code.**
+**This is now much closer to the Spec-Driven Development system I intended.** The agent has made the right architectural correction: the specifications are language-independent, and Java is being used only for validation tooling and, eventually, the crawler implementation.
 
-You have implemented part of what I recommended, but you have taken the enforcement framework further than I intended.
+More importantly, the independent agent test has revealed something valuable: **the specifications are not yet complete enough to reconstruct the application reliably.** That is exactly what the process was designed to uncover.
 
-The result isn't necessarily wrong, but I would **restructure it before proceeding with P01/P02**.
+## **1. Assessment of what was completed**
 
-## **1. What the agent built vs. what I intended**
+**SDD implementation review**
 
-The agent appears to have built a Java-based specification validation framework under `crawler-spec`.
+Architecture aligned
 
-For example:
+| Language-neutral `specs/`            | &#x20;Achieved                |
+| ------------------------------------ | ----------------------------- |
+| Java validator separated             | &#x20;Achieved                |
+| Machine-readable contracts           | &#x20;Established, incomplete |
+| Automated specification checks       | &#x20;Operational             |
+| Independent comprehension test       | &#x20;Executed                |
+| Specification completeness           | &#x20;Gaps remain             |
+| Legacy functional parity evidence    | &#x20;Incomplete              |
+| Approvals / implementation readiness | &#x20;Blocked                 |
 
-```
-crawler-spec/
-├── src/main/java/
-│   └── .../spec/
-│       ├── check/
-│       │   ├── ApprovalCheck.java
-│       │   ├── ContractConsistencyCheck.java
-│       │   ├── ReadinessCheck.java
-│       │   ├── TraceabilityCheck.java
-│       │   └── ...
-│       ├── load/
-│       ├── model/
-│       └── report/
-```
+Based on the agent's reported results; I haven't independently executed the repository tests.
 
-These Java classes appear to implement **checks on specifications**, rather than the crawler application's business logic.
+The reported validation results are encouraging:
 
-That distinction matters.
+# **82**
 
-| Component                  | My intended approach                                                  | Assessment                      |
-| -------------------------- | --------------------------------------------------------------------- | ------------------------------- |
-| Functional specifications  | Markdown / YAML                                                       | Correct approach                |
-| Business rules             | Markdown / YAML                                                       | Should be authoritative         |
-| Architecture decisions     | Markdown ADRs                                                         | Correct approach                |
-| API contracts              | OpenAPI                                                               | Correct approach                |
-| Data models                | JSON Schema / language-neutral definitions                            | Correct approach                |
-| Connector SPI              | Language-neutral contract, with Java interfaces during implementation | Should be independently defined |
-| Acceptance criteria        | Gherkin / YAML / fixtures                                             | Correct approach                |
-| Specification validation   | Scripts or Java-based validators                                      | Optional implementation detail  |
-| Regression tests           | Java, Python, or other test frameworks                                | Appropriate                     |
-| Application implementation | Java, with Python for SQLGlot                                         | As planned                      |
+Tests executed
 
-**The problem isn't that Java code exists. The problem would be if Java code becomes the authoritative specification.**
+0 failures, 1 skipped
 
-## **2. What the agent actually accomplished**
+# **18/20**
 
-From your screenshots, the agent reports:
+Checks passed
 
-- 86 requirements and 237 scenarios.
-- 117 parity items.
-- 20 specification validation checks.
-- 74 Maven tests passing, with one skipped.
-- JSON Schema, OpenAPI, and protobuf-related checks.
-- Approval and ADR dependency controls.
-- Golden fixture verification infrastructure.
+1 warning, 1 skipped
 
-These are useful governance capabilities.
+# **3/88**
 
-However, you also report that only **3 of 88 legacy parity items have fixtures**, none of the requirements or ADRs have received the required approvals, and clean-room reconstruction has not been tested.
+Legacy parity fixtures
 
-Therefore, a successful Maven build does **not** mean the crawler specification is complete or that the Java application is ready to be rebuilt from it.
+85 still missing
 
-3. The architecture I actually recommend
+## **2. The biggest discovery: The comprehension probe worked**
 
-**Layer 1 — Authoritative specifications**
+The fresh agent could only design approximately two-thirds of the crawler run lifecycle and identified:
 
-Markdown, YAML, JSON Schema, OpenAPI, protobuf, Gherkin
+- 17 specification gaps, including 9 blocking gaps.
+- 9 contradictions initially reported.
+- Four mistakes that the original agent subsequently corrected.
+- Unresolved design decisions, including Q-23.
 
-Technology-independent description of the entire application
+This is a **successful diagnostic exercise**, even though the specification failed the completeness test.
 
-**Layer 2 — Specification governance**
+It proves that an independent agent can expose omissions the original specification author did not catch.
 
-Validators, traceability, approvals, compliance checks
+However, I noticed one important detail: the report says the fresh agent received both `specs/` and `docs/`.
 
-Java-based tooling is acceptable here, but not authoritative
+Your ultimate goal is **reconstruction from&#x20;**`specs/`**&#x20;alone**. The next probe should explicitly exclude `docs/`, implementation prompts, and original code. Any necessary information currently found only in `docs/` should be moved or referenced as a versioned, included specification dependency.
 
-**Layer 3 — Generated / implemented application**
+## **3. What still needs work**
 
-Java crawler platform + Python SQLGlot integration
+| Priority | Gap                                           | Recommended action                                                                         |
+| -------- | --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Critical | Run lifecycle ambiguity                       | Resolve Q-23, the blocking RL gaps, state transitions, retries, leases, and recovery rules |
+| Critical | SPI contract has undefined types              | Define all eight identified missing SPI types and their expected behavior                  |
+| High     | Only 3 of 88 legacy parity fixtures available | Capture representative DEV evidence and expand coverage                                    |
+| High     | No specifications or ADRs approved            | Establish domain-owner and ARB approval process                                            |
+| High     | Only one vertical slice independently probed  | Repeat for canonical writer, Databricks connector, lineage, and control plane              |
+| Medium   | Actual application not yet rebuilt            | Perform controlled implementation tests after applicable specifications are approved       |
 
-Implementation must conform to Layer 1 contracts
+I would **not build additional specification-validation checks right now**. The validation framework is already extensive enough to support the next phase.
 
-**Layer 1 must remain completely understandable without reading Java code.**
+Focus on filling the missing application knowledge.
 
-You should be able to hand that layer to an AI agent that knows nothing about the existing Java application and ask it to rebuild the system.
+## **4. Recommended next sequence**
 
-## **4. How I would restructure your repository**
+**Step 1 — Commit the current draft baseline**
 
-I would retain the existing specifications and separate the governance tool from them.
+Save the completed restructuring on the working branch. Keep requirements and ADRs explicitly marked Draft or Proposed. Committing does not mean approving.
 
-```
-datacompass-crawlers/
-│
-├── specs/                       # SOURCE OF TRUTH
-│   ├── product/
-│   │   ├── requirements.yaml
-│   │   └── scope.md
-│   │
-│   ├── architecture/
-│   │   ├── system.md
-│   │   ├── connector-spi.md
-│   │   ├── crawler-lifecycle.md
-│   │   ├── lineage-engine.md
-│   │   └── decisions/
-│   │
-│   ├── features/
-│   │   ├── databricks/
-│   │   ├── lineage/
-│   │   ├── canonical-writer/
-│   │   └── control-plane/
-│   │
-│   ├── contracts/
-│   │   ├── connector-spi.yaml
-│   │   ├── canonical-entity.schema.json
-│   │   ├── control-plane.openapi.yaml
-│   │   └── sqlglot-interface.proto
-│   │
-│   ├── acceptance/
-│   │   ├── scenarios.yaml
-│   │   └── fixtures/
-│   │
-│   └── traceability.yaml
-│
-├── docs/                        # DESIGN EXPLANATIONS
-│   ├── 00-index.md
-│   ├── existing-design-docs/
-│   ├── adr/
-│   └── prompts/
-│
-├── tooling/
-│   └── crawler-spec/            # OPTIONAL JAVA VALIDATOR
-│       ├── src/main/java/
-│       └── src/test/java/
-│
-├── crawler-core/                # APPLICATION CODE
-├── crawler-connectors/
-├── crawler-lineage/
-├── crawler-control-plane/
-│
-└── sqlglot-sidecar/             # PYTHON ONLY
-```
+**Step 2 — Produce a decision-ready gap resolution package**
 
-This is a proposed logical layout, not a requirement to move all files immediately. Existing `docs/` files can remain canonical if moving them would create duplicate documentation or unnecessary disruption.
+For Q-23, the RL gaps, contradictions, and SPI gaps, have the agent identify the exact missing rule, source evidence, possible solutions, recommended option, and responsible decision owner. Do not let it approve the answers.
 
-The fundamental requirement is a clear separation between **authoritative specifications**, **validation tooling**, and **application code**.
+**Step 3 — Recover legacy behavioral evidence**
 
-## **5. What a specification should look like**
+Prioritize a representative Atlan-sync DEV pilot and obtain golden fixtures for the capabilities needed by the first implementation work orders.
 
-For example, consider the crawler run lifecycle.
+**Step 4 — Get targeted approvals**
 
-Instead of defining its behavior in a Java class, the primary specification should look something like this:
+Approve requirements and ADRs in work-order dependency order. There is no need to delay every independent workstream until every outstanding decision is resolved.
 
-```
-id: SPEC-CRAWLER-RUN-001
-title: Crawler Run Lifecycle
-status: DRAFT
+**Step 5 — Repeat specification-only probes**
 
-description: >
-  Defines how crawler executions are initiated,
-  tracked, completed, retried, and recovered.
+After resolving the run-lifecycle gaps, test a new agent using `specs/` alone. Apply the same method to the other major vertical slices before their implementation.
 
-states:
-  - PENDING
-  - RUNNING
-  - COMPLETED
-  - FAILED
-  - CANCELLED
+## **5. The next instruction I would give your agent**
 
-transitions:
-  - from: PENDING
-    to: RUNNING
+# Next Phase: Specification Completeness and Decision Resolution
 
-  - from: RUNNING
-    to: COMPLETED
+The SDD architecture restructuring is complete. Do not add more validation frameworks or application code at this stage.
 
-  - from: RUNNING
-    to: FAILED
+## Objective
 
-  - from: RUNNING
-    to: CANCELLED
+Bring the language-neutral specifications closer to complete, independently reconstructable application definitions by resolving documented ambiguities and preparing decision-ready proposals.
 
-requirements:
-  - Every execution has a unique run ID.
-  - Execution status is persisted.
-  - Failures are recorded.
-  - Duplicate execution requests are handled
-    according to the approved idempotency policy.
+## Tasks
 
-acceptance_criteria:
-  - Given a pending run,
-    when execution begins,
-    the state becomes RUNNING.
+1. Review the independent comprehension-probe findings, including RL-GAP-01 through RL-GAP-17, RL-C1 through RL-C4, Q-23, and SPI-GAP-01 through SPI-GAP-08.
+2. For every unresolved item, document:
+   - What is missing or contradictory.
+   - Which requirement, contract, state transition, or API is affected.
+   - Evidence from the existing Python/TypeScript implementations and design materials, where available.
+   - Whether the answer is an observed legacy fact or a proposed new design decision.
+   - Recommended resolution and alternatives.
+   - Required human decision owner.
+   - Affected work orders and tests.
+   - Consequences of leaving the issue unresolved.
+3. Prioritize run-lifecycle decisions, including queuing, leases, retries, cancellation, force-close, failure recovery, and watermark commits.
+4. Identify all undefined connector SPI types and prepare complete language-neutral contract definitions.
+5. Prepare a prioritized legacy-parity fixture acquisition plan, focusing on the capabilities required by the earliest implementation work orders.
+6. Ensure `specs/` is self-contained. Do not rely on Java source code, `docs/`, or agent prompts to explain required application behavior.
+7. Prepare the specification changes necessary to resolve each issue, but keep unresolved decisions in Proposed status until approved.
+8. Identify work orders that can proceed without waiting for unrelated decisions.
 
-  - Given a running execution,
-    when execution completes successfully,
-    the state becomes COMPLETED.
-```
+## Constraints
 
-*This is an illustrative format, not a proposal to approve these exact states or transitions. Your existing lifecycle design must determine those.*
-
-The Java agent then implements this contract. A different agent could implement the same behavior in Go or TypeScript without interpreting Java source files.
-
-That is the reconstructability you're seeking.
-
-## **6. Should you remove the Java specification validator?**
-
-**No, I would not delete it.**
-
-The work already done might be valuable. I would retain it as supporting tooling, subject to review.
-
-But enforce these boundaries:
-
-1. The Java validator cannot introduce business rules that aren't in the specifications.
-2. No requirement should exist only in a Java class.
-3. Validation and traceability must be based on explicit specification files.
-4. Approval must remain human-controlled.
-5. The specifications must be usable without compiling the validator.
-6. The clean-room rebuild agent must not need the validator's Java source to understand application behavior.
-
-The specification validator is the **quality-control tool**, not the product blueprint.
-
-## **7. What I would tell you**
-
-This is a correction to the earlier task, not a request to discard your work.
-
-# Correct the SDD Architecture — Separate Specifications from Java Tooling
-
-Review the SDD enforcement framework you created in `datacompass-crawlers`.
-
-**Important clarification: The intended specification system must be technology-independent. Java must not be the language in which the application specifications are defined.**
-
-The objective is to reconstruct the complete application from specifications without requiring access to the original Java implementation or Java-based specification validator.
-
-## Required Changes
-
-1. **Establish a language-neutral specification source of truth.**
-   - Markdown for functional behavior, workflows, business rules, architecture, and design decisions.
-   - YAML for structured requirements, acceptance criteria, state transitions, and traceability.
-   - JSON Schema for data contracts.
-   - OpenAPI for HTTP APIs.
-   - Protobuf or another explicitly approved interface definition for interprocess communication.
-   - Gherkin or structured fixtures for acceptance scenarios.
-2. **Reclassify `crawler-spec` as specification validation tooling.**
-   - The Java classes must validate specifications rather than define application behavior.
-   - No business requirement or interface contract may exist exclusively inside Java code.
-   - Do not delete working validation code unnecessarily.
-   - Keep validation tooling logically separate from application modules.
-3. **Audit the existing specifications.**
-   - Identify requirements defined only in Java classes or tests.
-   - Extract those requirements into language-neutral specifications.
-   - Identify duplicated or conflicting requirements.
-   - Ensure each approved contract can be understood without reading Java code.
-   - Preserve the current ADRs, work orders, and approved design intent.
-4. **Preserve the Java-first implementation requirement.**
-   - The actual crawler application will be implemented primarily in Java.
-   - Python remains limited to the approved SQLGlot integration boundary.
-   - This implementation choice must not make the specifications Java-dependent.
-5. **Preserve existing enforcement capabilities.**
-   - Requirement traceability.
-   - Approval checks.
-   - Contract validation.
-   - Golden fixture validation.
-   - Independent conformance reporting.
-   - CI compliance checks.
-6. **Establish reconstruction independence.**
-   - A fresh AI agent must be able to rebuild the application using only the specification documents, contracts, fixtures, and approved dependencies.
-   - Java source files from `crawler-spec` must not be required to interpret application requirements.
-   - Tests may use Java, but intended behavior must also be documented in independent specifications and reference fixtures.
-7. **Do not begin crawler application implementation.**
-   - This task is exclusively to correct the specification system's architecture.
-   - Do not approve ADRs or unresolved business requirements.
-   - Do not modify unrelated repositories.
+- Do not implement crawler application functionality.
+- Do not create additional governance frameworks unless an existing check is demonstrably inadequate.
+- Do not invent or auto-approve business or architecture decisions.
+- Do not change legacy behavior without explicit classification and approval.
+- Do not mark P01/P02 ready unless their required approvals are recorded.
 
 ## Deliverables
 
-Provide:
+Produce a decision register, proposed specification amendments, updated dependency mapping, prioritized fixture plan, and a concise readiness assessment for P00, P01, and P02.
 
-- The revised specification directory structure.
-- A clear inventory of authoritative specification files.
-- A classification of existing Java classes as validators, test infrastructure, or inappropriate specification logic.
-- Any requirements extracted from Java into technology-neutral documents.
-- A revised architecture showing the separation between specifications, enforcement tooling, and application implementation.
-- Actual validation results.
-- Remaining specification gaps and approval blockers.
+The objective is to reduce missing application behavior and unresolved decisions, not increase the number of validation checks.
 
-**Success criterion:** An AI agent can understand the complete intended application from the specifications alone, regardless of the language used for implementation.
+## **6. One important adjustment to the ultimate goal**
 
-## **8. My recommendation for your next step**
+You should now measure two things separately:
 
-You don't need to write more checks right now. You already have 20 validation checks and a sizable Java governance framework.
+**Specification enforcement maturity:** Can the system detect invalid specifications, missing approvals, inconsistent contracts, and undocumented changes?
 
-Instead, prioritize these three outcomes:
+Your project appears to have made significant progress here.
 
-- **Specification portability:** Confirm that all 86 requirements, architecture decisions, contracts, and relevant acceptance scenarios are expressed independently of Java.
-- **Specification completeness:** Fill the missing legacy parity evidence (only 3 of 88 reported fixtures exist), resolve critical design ambiguities, and obtain the required approvals.
-- **Implementation independence:** Verify that another agent can implement a small vertical slice—such as a crawler lifecycle operation—using only the specification package and its independent test fixtures.
+**Specification reconstruction readiness:** Can an independent agent build all required behavior from the approved specifications, without asking undocumented questions?
 
-**Bottom line:** You built a potentially useful *specification enforcement engine*. What we actually want, first and foremost, is a **complete, language-neutral, independently rebuildable application specification**.
+Your project is not there yet, as the comprehension probe demonstrated.
 
-Keep the enforcement engine if it provides value, but make it subordinate to the specification—not the other way around.
+These are different achievements. A build with 82 passing tests can demonstrate good enforcement tooling while still leaving the actual application insufficiently specified.
+
+**My recommendation:** Preserve the current architecture, commit the draft baseline, and shift effort toward closing the application-behavior gaps. This is the right time to stop improving the SDD machinery and start improving the completeness of what it governs.
