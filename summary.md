@@ -1,96 +1,86 @@
-This is a good result. **The SDD foundation is now ready to support implementation. The only remaining prerequisite for P01 is the required human approval and closure process.**
+**Yes. At this point, you can stop consulting me and manage the rest of the DataCompass Crawlers project directly through Claude Code and GitHub Copilot.**
 
-I would stop the specification-framework work here and move toward actual Java development.
+You have established the essential foundation:
 
-## **1. What the agent has completed**
+- **Language-neutral specifications** in `specs/`.
+- **SDD enforcement** through automated validation.
+- **Architecture Decision Records (ADRs)** and an approval process.
+- **Implementation work orders** P00–P18.
+- **Acceptance tests and legacy parity fixtures**.
+- **Independent agent review** through P99.
+- **Traceability** between requirements, implementation, and tests.
 
-| Area                            | Status                          |
-| ------------------------------- | ------------------------------- |
-| Language-neutral specifications | Established                     |
-| Java specification validator    | Built and tested                |
-| Requirement traceability        | Established                     |
-| Architecture review package     | Prepared                        |
-| Session A approval package      | Prepared                        |
-| Local Git history sanitization  | Completed, per agent report     |
-| Maven tests                     | 89 tests, 0 failures, 1 skipped |
-| SDD checks                      | 18 passed, 1 warning, 1 skipped |
-| Application implementation      | Not started                     |
-| Architecture approvals          | Pending                         |
+You no longer need me to review every agent response or tell you what prompt to send next.
 
-The clean-room readiness warning is expected at this stage. It should not prevent approved foundational scaffolding.
+### **What I recommend before stepping away**
 
-## **2. What I recommend doing next**
+Give your primary implementation agent one final standing instruction:
 
-There are three milestones between your current position and implementation.
+# Standing Instructions — DataCompass Crawlers Development
 
-**Milestone 1 — Submit the specification baseline**
+You are responsible for managing the Spec-Driven Development lifecycle of DataCompass Crawlers through implementation, testing, and delivery.
 
-Push the sanitized feature branch and open a draft pull request for review. Verify that the rewritten commit history contains only intended changes.
+## Primary Objective
 
-One detail: the agent removed personal repository URLs from the policy file. Make sure the pinned Python/WMA evidence still has stable, nonpersonal repository identifiers so future agents can locate the original sources.
+Rebuild the application in Java, using Python only for the approved SQLGlot integration, while maintaining independently reconstructable, language-neutral specifications.
 
-**Milestone 2 — Complete targeted Session A approvals**
+## Operating Rules
 
-Resolve Q-01, obtain the necessary ARB approvals for ADR-0001, 0002, 0003, 0011 and 0013, and approve the applicable P01a requirements.
+1. Treat `specs/` as the authoritative source of truth.
+2. Follow the existing P00–P18 work orders in dependency order.
+3. Do not begin a work order until its applicable approval and readiness requirements are satisfied.
+4. Never invent or self-approve business rules, requirements, or architecture decisions.
+5. When an approval is required, provide a concise decision summary with the recommended option, alternatives, risks, and exact authorization needed.
+6. Begin implementation immediately once the relevant work-order readiness gate passes.
+7. Write and execute contract, unit, integration, and parity tests.
+8. Keep specifications, code, and tests synchronized.
+9. Run the required SDD validation and Maven checks.
+10. Use a separate agent/session to independently review completed work against the approved specifications.
+11. Do not modify legacy repositories unless explicitly authorized.
+12. Do not create unnecessary documentation, validation frameworks, or repeated review cycles.
+13. Use normal Git branching and pull-request reviews. Do not push, merge, or deploy without the applicable authorization.
 
-P00 must be verified and closed. P01a must pass its completion checks before being marked done.
+## Completion Criteria
 
-**Milestone 3 — Start building P01**
+A work order is complete only when its implementation satisfies the approved requirements, the applicable tests pass, traceability is updated, and the required reviews are complete.
 
-After P01a is closed and P01's applicable requirements are approved, start the actual Java application scaffolding.
+## Escalation Rules
 
-You do not need to resolve Q-38 or the entire crawler lifecycle to begin P01. Those decisions govern later work orders.
+Escalate to me only for:
 
-## **3. P01 and P02 readiness**
+- Decisions requiring human approval.
+- Conflicting or incomplete specifications that cannot be resolved from approved evidence.
+- Significant architectural changes.
+- Security or data-loss risks.
+- Functional deviations from approved legacy parity.
+- Decisions that materially affect scope, cost, or delivery.
 
-Based on the latest report:
+For routine implementation decisions, testing, and debugging, proceed autonomously within the approved specifications.
 
-| Work order | What is still required                                                                |
-| ---------- | ------------------------------------------------------------------------------------- |
-| P00        | Human verification and closure                                                        |
-| P01a       | P00 complete, 10 requirements approved, applicable ADRs accepted, completion verified |
-| P01        | P01a complete and remaining P01 requirements approved                                 |
-| P02        | P01 complete, Q-38 resolved, ADR-0004 accepted, six P02 requirements approved         |
+## Next Action
 
-For P01, the agent specifically identifies REQ-ARCH-002, REQ-ARCH-003, REQ-ARCH-004, and REQ-SEC-002 as remaining requirements.
+Complete the outstanding P00/P01a/P01 readiness process, obtain the required genuine approvals, and then begin P01 Java implementation.
 
-Q-17 (SEAL) and Q-41 (health endpoint) need resolution before P01 is declared complete, according to its current readiness model. They need not block unrelated scaffolding if the approved work order explicitly allows it.
+Continue through subsequent approved work orders without requiring a new prompt for every routine development activity.
 
-## **4. What I would tell the agent**
+### **One thing you should continue doing yourself**
 
-The Session A preparation and SDD framework changes are complete. I want to transition into actual application development.
+**Stay involved in architecture approvals and milestone acceptance.** AI agents can prepare decisions, implement code, and validate behavior, but they should not act as the authorized business owner or ARB.
 
-Do not create additional governance frameworks, architecture review packages, or documentation-only phases unless specifically required by an identified implementation blocker.
+I would review the project at these milestones:
 
-**Next actions:**
+| Milestone            | What you should verify                                                |
+| -------------------- | --------------------------------------------------------------------- |
+| P01                  | Java application skeleton builds correctly                            |
+| P02                  | Connector SPI follows the approved contract                           |
+| Run lifecycle        | Execution, recovery, retries, and persistence work                    |
+| Canonical writer     | Metadata is stored correctly and safely                               |
+| Databricks connector | Required metadata is extracted accurately                             |
+| Lineage              | SQLGlot integration and lineage results pass acceptance tests         |
+| Final delivery       | Legacy parity, integration, performance, and deployment criteria pass |
 
-1. Verify that all sanitized commits, requirements, contracts, and specification checks are consistent.
-2. Confirm that legacy Python and WMA sources remain identifiable through stable repository references and pinned commits.
-3. Prepare the branch for a draft PR. Do not treat submission or merging as architecture approval.
-4. Produce a concise approval checklist for P00, P01a, and P01, identifying the exact approvals required from the authorized owners.
-5. Do not simulate, infer, or automatically grant approvals.
-6. Once genuine approvals are recorded, verify P00 and P01a completion using the existing SDD checks.
-7. Once the P01 readiness gate passes, **begin actual P01 Java application implementation immediately**, following the existing approved P01 work order.
+**One final caution:** The screenshots show that the SDD infrastructure is functioning, but they do not establish that the application specifications are complete or approved. Preserve the approval gates and independent tests as the agents proceed.
 
-For P01 implementation:
+You can return here whenever you want a second opinion on architecture, a difficult technical decision, or an independent review of what the agents have built.
 
-- Use `specs/` as the authoritative specification.
-- Build the Java application modules and Maven structure.
-- Reuse approved existing models and core libraries.
-- Create the appropriate unit, architecture, and acceptance tests.
-- Do not introduce functionality outside P01.
-- Keep the specifications and implementation traceable.
-- Run the Maven build and SDD validation.
-- Submit completed code for independent conformance review.
-
-Do not wait for all future work-order decisions to be approved. Apply approval gates only to their relevant dependencies.
-
-**The next authorized development deliverable should be working Java application code, not another documentation package.**
-
-## **5. One decision you need to make**
-
-The next step is not primarily an AI task. Someone with the appropriate authority must approve the foundational architecture.
-
-If you are the designated architecture owner for some of these decisions, you can review and record those approvals yourself. Decisions reserved for the ARB or other owners still need their actual authorization.
-
-**My recommendation:** Complete the narrow P00/P01a/P01 approval chain, then begin P01. Do not wait for every crawler behavior to be specified and approved before building the foundational Java modules.
+Otherwise, **yes—your agents now have enough structure to carry the project forward directly.**
