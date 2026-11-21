@@ -1,93 +1,96 @@
-**Yes. I recommend committing this phase as a second local commit.** The agent has made meaningful progress, and the changes should be preserved as a separate, reviewable specification-completeness milestone.
+This is a good milestone. Your agent has completed the specification preparation and decision-review phase. **I would now shift from AI-generated documentation to targeted human architecture decisions and approvals.**
 
-More importantly, the project is now following the SDD approach we intended: **language-neutral specifications first, Java implementation later, and independent verification of specification completeness.**
+The key is to avoid turning SDD into an endless documentation exercise.
 
 ## **1. My assessment**
 
-**DataCompass SDD progress**
+**DataCompass Crawlers — Current status**
 
-Not implementation-ready
+Awaiting approvals
 
-| Technology-independent specifications | &#x20;Established            |
-| ------------------------------------- | ---------------------------- |
-| Specification self-containment        | &#x20;Significantly improved |
-| Independent comprehension probe       | &#x20;25 questions addressed |
-| Decision-ready proposals              | &#x20;Prepared               |
-| Automated validation                  | &#x20;84 tests, 0 failures   |
-| Legacy parity fixtures                | &#x20;3 of 88 available      |
-| Requirements and ADR approvals        | &#x20;Pending                |
+# **85**
 
-The most positive finding is that the independent agent could answer all 25 previously unanswered questions using `specs/` alone.
+Tests executed
 
-However, **15 answers depend on proposed decisions**, not approved requirements. So this proves improved specification clarity, not yet complete reconstruction readiness.
+0 failed, 1 skipped
 
-## **2. What I would do next**
+# **18/20**
 
-I would stop asking the agent to expand the SDD validation machinery. It has enough checks for now.
+Checks passing
 
-The priorities should be:
+1 warning, 1 skipped
 
-1. **Commit the current specification-completeness work** as a draft, without changing approval statuses.
-2. **Prepare a consolidated architecture decision package** so the appropriate owners can review Q-24 through Q-44, especially Q-38 for connector SPI.
-3. **Distinguish existing behavior from proposed behavior** before approving requirements. Lease-loss handling, queued timeouts, idempotency, per-partition watermarks, and mass-delete safeguards should not silently become accepted rules.
-4. **Capture the legacy parity evidence**, starting with the five Wave 1 fixture families that can be derived from pinned code, subject to the required approvals.
-5. **Get targeted approval for P01/P02**, rather than waiting unnecessarily for all 33 blocking decisions across every future work order.
+# **50**
 
-I would also make sure that proposed amendments remain clearly segregated from approved normative behavior. Otherwise an AI implementation agent could accidentally implement proposals as if they were finalized requirements.
+Decisions organized
 
-## **3. Exact response to give your agent**
+6 review sessions
 
-Yes, proceed with a second local commit using the required `ATLAN-1973:` prefix.
+**What looks right:** The decision review package is committed locally, evidence is linked to the legacy implementations, and corrections and enhancements have separate approval requirements.
 
-Before committing:
+**What remains:** Nothing is approved, P01/P02 remain blocked, and the clean-room rebuild readiness check is still warning. These results are based on the agent's report, not my independent execution.
 
-1. Review the complete staged diff and confirm that only intended specification-completeness changes are included.
-2. Exclude generated build artifacts, temporary files, credentials, sensitive DEV data, and unrelated modifications.
-3. Preserve all existing requirement IDs, ADR IDs, decision identifiers, and traceability.
-4. Ensure proposed amendments remain explicitly PROPOSED and are not treated as approved specifications.
-5. Clearly distinguish verified legacy behavior, proposed corrections, and new capabilities.
-6. Run the existing specification validation and Maven tests.
-7. Record the actual test results and the commit SHA.
+## **2. I would not review all 50 decisions at once**
 
-Suggested commit message:
+Use the six review sessions the agent prepared, but start with only the decisions that unlock the next work order.
 
-`ATLAN-1973: Document specification gaps and proposed architecture resolutions`
+| Sequence | Focus                                | Action                                              |
+| -------- | ------------------------------------ | --------------------------------------------------- |
+| 1        | Q-01, ADR-0002, ADR-0003, ADR-0013   | Review foundational architecture and package naming |
+| 2        | P01a's 11 requirements               | Approve or revise, then verify and close P01a       |
+| 3        | P01's 5 requirements                 | Review and authorize scaffolding                    |
+| 4        | Q-38, ADR-0004, P02's 6 requirements | Finalize connector SPI before implementation        |
+| 5        | Run lifecycle and other areas        | Review when their dependent work approaches         |
 
-After committing, do not begin P01/P02 implementation.
+There is no need to approve all 87 requirements and 117 parity items before beginning independently approved foundational work.
 
-Next, prepare a consolidated **Architecture Decision Review Package** that groups the open questions by affected work order and includes:
+## **3. Three issues deserve special attention**
 
-- Decision required
-- Evidence from existing implementations
-- Proposed resolution and alternatives
-- Classification: legacy parity, correction, or new behavior
-- Impact on contracts and acceptance tests
-- Recommended decision owner
-- Work orders blocked
-- Risks of approving or rejecting the proposal
+**First: the validator may be too restrictive.** The agent reported that a build failed because a specification cited the validator's Java package. A language-neutral specification should be allowed to cite Java source evidence or package names. What it must not do is make Java code the authoritative definition of behavior. I would check that the validation rule doesn't force legitimate provenance evidence to be removed.
 
-Prioritize the decisions required for P01/P02, followed by crawler run lifecycle, canonical writer, lineage, and Databricks connector.
+**Second: Q-06 is a significant architectural change.** Moving the creation of lineage relationships from the crawler to `lineage-app` changes ownership and potentially throughput. The reported capacity of approximately 1,200 processes per hour should be validated against initial-load volume, recovery requirements, and ingestion SLAs before approving that design.
 
-Do not approve decisions automatically or create additional specification-validation frameworks.
+**Third: the clean-room rebuild is not ready.** Only 3 of 88 legacy parity items currently have fixtures. This is an evidence gap, not a reason to write more governance code. Proceed with the Wave 1 fixture acquisition plan once its prerequisites are approved.
 
-The next objective is to obtain informed approvals and close behavioral gaps, not increase the number of checks.
+## **4. What I would instruct the agent to do next**
 
-## **4. One improvement I strongly recommend**
+# Next Phase: Targeted Architecture Approval and Implementation Readiness
 
-Create a clear distinction between the **specification maturity** and **implementation readiness** of each module.
+The Architecture Decision Review Package is complete.
 
-For example:
+Do not build additional SDD frameworks or start P01/P02 implementation.
 
-| Module                | Specification completeness | Approval status                    | Implementation readiness                 |
-| --------------------- | -------------------------- | ---------------------------------- | ---------------------------------------- |
-| Specification tooling | High                       | Pending                            | Already built; formal completion pending |
-| Connector SPI         | Proposals prepared         | Q-38 pending                       | Blocked                                  |
-| Run lifecycle         | Proposals prepared         | Q-23 and related questions pending | Blocked for dependent work               |
-| Canonical writer      | Needs independent probe    | Pending                            | Not verified                             |
-| Databricks connector  | Needs independent probe    | Pending                            | Not verified                             |
-| Lineage engine        | Needs independent probe    | Pending                            | Not verified                             |
-| Control plane         | Needs independent probe    | Pending                            | Not verified                             |
+## Objective
 
-This prevents a common SDD failure: equating extensive documentation with implementation readiness.
+Prepare the minimum set of decisions and approvals required to safely begin the first implementation work orders.
 
-**Bottom line:** The agent has now built the specification system substantially as intended. Commit the work, keep unresolved proposals unapproved, and shift attention to **reviewing decisions, obtaining legacy parity evidence, and proving that the specifications can drive an independent implementation**.
+## Instructions
+
+1. Verify that the working tree is clean and the latest local commits contain only intended changes.
+2. Prepare a focused **Session A — Foundational Architecture Approval** package covering Q-01, ADR-0002, ADR-0003, ADR-0013, and P01a's 11 requirements.
+3. For each decision, present the proposed answer, supporting evidence, alternatives, downstream impact, and exact approval required.
+4. Identify which decisions require ARB approval versus domain-owner approval.
+5. Explicitly separate proven legacy behavior from proposed corrections and enhancements.
+6. Verify that the specification validator permits evidence citations to Java source without allowing Java source to become authoritative specification logic.
+7. Prepare approval-ready amendments, but do not change any approval status without recorded human authorization.
+8. Produce a dependency-ordered plan for completing P01a, authorizing P01, and subsequently resolving Q-38 for P02.
+9. Identify which existing golden fixtures can be acquired without DEV access, subject to the required approvals.
+10. Do not start application implementation or silently resolve outstanding decisions.
+
+## Deliverables
+
+- Session A decision table.
+- Proposed approval/rejection checklist.
+- Exact specification changes triggered by each possible decision.
+- Updated P01a/P01/P02 readiness report.
+- Outstanding blockers and owners.
+
+Stop after preparing these deliverables for human review.
+
+## **5. One operational step**
+
+The changes are committed locally but not pushed. Once reviewed for sensitive information and correctness, they should be pushed to an appropriate feature branch and opened as a draft pull request so the required reviewers can inspect the actual specifications and evidence.
+
+**My recommendation:** Move ahead with the focused Session A approval review. The SDD infrastructure has reached the point where further framework-building will provide diminishing returns. The next meaningful progress will come from approved architectural contracts, independent acceptance evidence, and eventually a controlled implementation of P01.
+
+You now have a solid foundation for the specification system you originally wanted. The remaining challenge is making the **application specifications complete and approved**, rather than making the specification validator more elaborate.
