@@ -1,46 +1,51 @@
-# Standing Instructions — DataCompass Crawlers Development
+Hi Tanmay,
 
-You are responsible for managing the Spec-Driven Development lifecycle of DataCompass Crawlers through implementation, testing, and delivery.
+Following up on the SR/IRT requirements for Atlan, we discussed this with Karen Regan and Amit.
 
-## Primary Objective
+IRT is mandatory only for CPOF-classified applications under firmwide requirements.
 
-Rebuild the application in Java, using Python only for the approved SQLGlot integration, while maintaining independently reconstructable, language-neutral specifications.
+Neither the current Atlan SaaS deployment nor other DataCompass deployments are classified as CPOF.
 
-## Operating Rules
+Karen confirmed that IRT is out of scope for Atlan, rather than being treated as an exemption.
 
-1. Treat `specs/` as the authoritative source of truth.
-2. Follow the existing P00–P18 work orders in dependency order.
-3. Do not begin a work order until its applicable approval and readiness requirements are satisfied.
-4. Never invent or self-approve business rules, requirements, or architecture decisions.
-5. When an approval is required, provide a concise decision summary with the recommended option, alternatives, risks, and exact authorization needed.
-6. Begin implementation immediately once the relevant work-order readiness gate passes.
-7. Write and execute contract, unit, integration, and parity tests.
-8. Keep specifications, code, and tests synchronized.
-9. Run the required SDD validation and Maven checks.
-10. Use a separate agent/session to independently review completed work against the approved specifications.
-11. Do not modify legacy repositories unless explicitly authorized.
-12. Do not create unnecessary documentation, validation frameworks, or repeated review cycles.
-13. Use normal Git branching and pull-request reviews. Do not push, merge, or deploy without the applicable authorization.
+No separate CT-specific requirement was identified, so firmwide guidance applies.
 
-## Completion Criteria
+Conclusion: No mandatory IRT participation is required for Atlan under the current classification.
 
-A work order is complete only when its implementation satisfies the approved requirements, the applicable tests pass, traceability is updated, and the required reviews are complete.
 
-## Escalation Rules
+### **DataCompass – Third-Party SR / IRT Testing**
 
-Escalate to me only for:
+- **Objective:** Confirm whether third-party SR / IRT testing is mandatory for DataCompass SaaS.
+- **Findings:** IRT is required only for CPOP-classified applications. DataCompass and its other deployments do not meet this classification.
+- **Confirmation:** Cyber confirmed no firmwide IRT requirement. No separate CT requirement was identified.
+- **Conclusion:** **IRT is out of scope, not an exemption.**
+- **Next Step:** Communicate the confirmed decision to the MD. No further IRT action required.
 
-- Decisions requiring human approval.
-- Conflicting or incomplete specifications that cannot be resolved from approved evidence.
-- Significant architectural changes.
-- Security or data-loss risks.
-- Functional deviations from approved legacy parity.
-- Decisions that materially affect scope, cost, or delivery.
+## **Summary – Third-Party SR / IRT Testing for DataCompass**
 
-For routine implementation decisions, testing, and debugging, proceed autonomously within the approved specifications.
+### **Objective**
 
-## Next Action
+Determine whether **DataCompass's SaaS deployment requires Third-Party Service Resiliency (SR) or Integrated Resiliency Testing (IRT)** under firmwide standards.
 
-Complete the outstanding P00/P01a/P01 readiness process, obtain the required genuine approvals, and then begin P01 Java implementation.
+### **Key Findings**
 
-Continue through subsequent approved work orders without requiring a new prompt for every routine development activity.
+- **IRT applicability:** IRT is mandatory only for applications classified as CPOP (as referenced in the discussion).
+- **DataCompass classification:** Neither the current SaaS deployment nor other DataCompass deployments are classified as CPOP or the lower-tier classification discussed.
+- **Third-party testing:** The SaaS provider may conduct its own resiliency testing without DataCompass participation.
+- **IRT credit:** To receive IRT credit, DataCompass must actively participate in the provider's resiliency test.
+- **Firmwide requirements:** Cyber confirmation established that IRT is not mandatory for DataCompass.
+- **CT-specific requirements:** No additional CT-specific standard was identified. The team agreed to follow firmwide guidance.
+
+### **Conclusion**
+
+**Third-party IRT is out of scope for the DataCompass SaaS deployment.**
+
+- This is **not an exemption**; the application does not meet the criteria that trigger mandatory IRT.
+- No IRT participation is required under the confirmed firmwide standards.
+- The team reached consensus, including Amit, on this conclusion.
+
+### **Next Steps**
+
+- Communicate the conclusion to the MD.
+- Document the application classification and firmwide guidance supporting the out-of-scope determination.
+- No further IRT action is required unless the application's classification or applicable requirements change.
