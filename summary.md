@@ -220,23 +220,28 @@ Okay, sure, just reminding yourself. Yes, I have not, but I will okay, sure.
 Sounds good, nice. Thank you, bye.
 
 
-SDR Migration – Status Report
-As of November 24, 2026 | Target: November 30, 2026
-Workstream	Status	Achieved	Pending / Blockers	Next Steps
-Snowflake	Validated	SDR workflow successfully completed.	Production migration.	Migrate existing workflows to production SDR.
-Databricks	Partially validated	Extraction, transmission and publishing proven. Approximately 1.6–1.7M assets published.	Green run pending; workspace-specific warehouse IDs required.	Map warehouse IDs from miner workflows, complete successful run and remove temporary test connection.
-Tableau	Blocked	Preliminary SDR integration and troubleshooting performed.	Connector image procurement and validation.	Procure image, resolve outstanding issues and validate workflow.
-ThoughtSpot	Blocked	Existing proxy-based SAML authentication mechanism identified at a high level.	Image procurement and SDR-compatible authentication.	Explore officially supported authentication mechanisms and confirm prioritization.
-Production infrastructure	In progress	Dedicated PROD/DR VSIs and reusable deployment pipeline available.	Production GSM Lockbox and deployment configuration.	Create Lockbox, adapt UAT scripts and deploy SDR runtime.
-Production migration	Pending	Migration approach discussed and aligned.	Connector readiness and production validation.	Prepare Snowflake and Databricks migration in parallel while resolving remaining connector blockers.
-November 30 deadline	At risk	Deadline confirmed as hard.	All four connectors may not be ready. Limited December change windows.	Confirm deadline flexibility and ThoughtSpot prioritization with management.
+## SDR Migration – Status Report
+**As of November 24, 2026 | Target: November 30, 2026**
 
-Agreed Approach
+| Workstream | Status | Achieved | Pending / Blockers | Next Steps |
+|---|---|---|---|---|
+| Snowflake | Validated | SDR workflow successfully completed. | Production migration. | Migrate existing workflows to production SDR. |
+| Databricks | Partially Validated | Extraction, transmission and publishing proven. Approximately 1.6–1.7M assets published. | Green run pending; workspace-specific warehouse IDs required. | Map warehouse IDs from miner workflows, complete successful run and remove temporary test connection. |
+| Tableau | Blocked | Preliminary SDR integration and troubleshooting performed. | Connector image procurement and validation. | Procure image, resolve outstanding issues and validate workflow. |
+| ThoughtSpot | Blocked | Existing proxy-based SAML authentication mechanism identified at a high level. | Image procurement and SDR-compatible authentication. | Explore officially supported authentication mechanisms and confirm prioritization. |
+| Production Infrastructure | In Progress | Dedicated PROD/DR VSIs and reusable deployment pipeline available. | Production GSM Lockbox and deployment configuration. | Create Lockbox, adapt UAT scripts and deploy SDR runtime. |
+| Production Migration | Pending | Migration approach discussed and aligned. | Connector readiness and production validation. | Prepare Snowflake and Databricks migration in parallel while resolving remaining connector blockers. |
+| November 30 Deadline | At Risk | Deadline confirmed as hard. | All four connectors may not be ready. Limited December change windows. | Confirm deadline flexibility and ThoughtSpot prioritization with management. |
+
+### Agreed Approach
+
 - Parallelize production infrastructure preparation, workflow migration and connector remediation.
 - Prioritize Snowflake, Databricks and Tableau.
 - Avoid a fragmented production deployment with SDR and Secure Agent running concurrently.
 - Continue targeting November 30 without compromising deployment stability.
-Overall status: At risk
- Core SDR capabilities have been demonstrated, but full production readiness remains pending.
 
-ThoughtSpot's secondary prioritization is proposed, not yet formally agreed.
+### Overall Status: At Risk
+
+Core SDR capabilities have been demonstrated, but full production readiness remains pending.
+
+**Note:** ThoughtSpot's secondary prioritization is proposed, not yet formally agreed.
